@@ -1,19 +1,6 @@
-[package]
-name = "multiphysics_example"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-bevy = { version = "0.15", features = ["multi_threaded", "jpeg"] }
-bevy_editor_cam = "0.5.0"
-bevy_rapier3d = "0.28"
-
-[dev-dependencies]
-bevy = { version = "0.15", features = [
-    # Optional for iteration times,
-    # see https://bevyengine.org/learn/quick-start/getting-started/setup/#enable-fast-compiles-optional
-    "dynamic_linking",
-] }
+[workspace]
+members = ["crates/*"]
+resolver = "2"
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

@@ -2,8 +2,6 @@ use bevy::prelude::*;
 use bevy::reflect::Reflect;
 use bevy_rapier3d::{
     na::Vector,
-    plugin::{DefaultRapierContext, WriteDefaultRapierContext},
-    prelude::RapierRigidBodyHandle,
     rapier::{
         control::{DynamicRayCastVehicleController, WheelTuning},
         prelude::{ColliderSet, QueryPipeline, RigidBodyHandle, RigidBodySet},

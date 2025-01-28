@@ -23,4 +23,4 @@ Cargo.lock
 # Custom
 
 # private assets which should not be shared.
-/assets/private
+private
