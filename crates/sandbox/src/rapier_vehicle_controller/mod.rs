@@ -101,11 +101,11 @@ impl VehicleController {
         }
     }
 
-    pub fn integrate_actions(&mut self, events: &Res<ButtonInput<KeyCode>>) {
+    pub fn integrate_actions(&mut self, inputs: &Res<ButtonInput<KeyCode>>) {
         let mut engine_force = 0.0;
         let mut steering_angle = 0.0;
 
-        for key in events.get_pressed() {
+        for key in inputs.get_pressed() {
             match *key {
                 KeyCode::ArrowRight => {
                     steering_angle += -0.7;

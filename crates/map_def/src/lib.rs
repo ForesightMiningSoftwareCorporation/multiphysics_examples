@@ -21,16 +21,30 @@ pub struct MapDef {
     /// Y is scale in height, because parry uses Y-up.
     pub scale: Vec3,
     pub height_map: Vec<f32>,
+    pub rocks: Vec<Isometry3d>,
 }
 
 impl Hash for MapDef {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.vertices_width.hash(state);
-        self.vertices_length.hash(state);
-        self.scale.x.to_bits().hash(state);
-        self.scale.y.to_bits().hash(state);
-        self.scale.z.to_bits().hash(state);
-        for f in &self.height_map {
+        // Destructuring to avoid forgetting to add new fields to the hash if the structure changes.
+        let Self {
+            vertices_width,
+            vertices_length,
+            scale,
+            rocks,
+            height_map,
+        } = self;
+        vertices_width.hash(state);
+        vertices_length.hash(state);
+        scale.x.to_bits().hash(state);
+        scale.y.to_bits().hash(state);
+        scale.z.to_bits().hash(state);
+        for r in rocks.iter() {
+            r.translation.x.to_bits().hash(state);
+            r.translation.y.to_bits().hash(state);
+            r.translation.z.to_bits().hash(state);
+        }
+        for f in height_map {
             f.to_bits().hash(state);
         }
     }

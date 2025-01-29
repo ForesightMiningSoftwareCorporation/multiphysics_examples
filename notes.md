@@ -8,4 +8,7 @@ Notes taken while developing this, which may be useful to improve the ecosystem.
 
 ## TODO
 
-- hot reloading, load map into "sandbox"
+- share an asset folder (use `BEVY_ASSET_ROOT`)
+- integrate the map to the sandbox
+- make better controllable vehicles
+- be able to load rocks into truck with the excavator

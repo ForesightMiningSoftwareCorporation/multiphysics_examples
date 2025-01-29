@@ -64,11 +64,11 @@ pub fn init_vehicle_controller(
 
 /// System to forward controls to [`VehicleController`]
 pub fn update_vehicle_controls(
-    events: Res<ButtonInput<KeyCode>>,
+    inputs: Res<ButtonInput<KeyCode>>,
     mut vehicles: Query<&mut VehicleController>,
 ) {
     for mut vehicle_controller in vehicles.iter_mut() {
-        vehicle_controller.integrate_actions(&events);
+        vehicle_controller.integrate_actions(&inputs);
     }
 }
 
