@@ -1,126 +1,31 @@
-use bevy::{
-    asset::{
-        io::{Reader, Writer},
-        saver::{AssetSaver, SavedAsset},
-        AssetLoader, AsyncWriteExt, LoadContext,
-    },
-    prelude::*,
-};
-use serde::{Deserialize, Serialize};
-use std::hash::{Hash, Hasher};
-use std::{fs::File, io::Write, path::Path};
-use thiserror::Error;
+pub mod global_assets;
+pub mod map_def;
+pub mod rock;
 
-#[derive(Debug, Component, Reflect)]
-pub struct MapDefHandle(pub Handle<MapDef>);
+use bevy::prelude::*;
+use global_assets::{init_global_assets, GlobalAssets};
+use map_def::{MapDef, MapDefLoader};
 
-#[derive(Debug, Asset, Serialize, Deserialize, Reflect)]
-pub struct MapDef {
-    pub vertices_width: usize,
-    pub vertices_length: usize,
-    /// Y is scale in height, because parry uses Y-up.
-    pub scale: Vec3,
-    pub height_map: Vec<f32>,
-    pub rocks: Vec<Isometry3d>,
-}
+/// Registers MapDef as an asset type.
+///
+/// Also adds a default [`GlobalAssets`] during [`Startup`] if not present.
+pub struct MapDefPlugin;
 
-impl Hash for MapDef {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        // Destructuring to avoid forgetting to add new fields to the hash if the structure changes.
-        let Self {
-            vertices_width,
-            vertices_length,
-            scale,
-            rocks,
-            height_map,
-        } = self;
-        vertices_width.hash(state);
-        vertices_length.hash(state);
-        scale.x.to_bits().hash(state);
-        scale.y.to_bits().hash(state);
-        scale.z.to_bits().hash(state);
-        for r in rocks.iter() {
-            r.translation.x.to_bits().hash(state);
-            r.translation.y.to_bits().hash(state);
-            r.translation.z.to_bits().hash(state);
-        }
-        for f in height_map {
-            f.to_bits().hash(state);
-        }
-    }
-}
-
-#[derive(Debug, Error)]
-pub enum MapDefLoaderError {
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
-    #[error(transparent)]
-    RonSpannedError(#[from] ron::error::SpannedError),
-}
-
-#[derive(Default)]
-pub struct MapDefLoader;
-
-/// Implementation mostly https://github.com/bevyengine/bevy/blob/main/examples/asset/processing/asset_processing.rs
-impl AssetLoader for MapDefLoader {
-    type Asset = MapDef;
-    type Settings = ();
-    type Error = MapDefLoaderError;
-
-    async fn load(
-        &self,
-        reader: &mut dyn Reader,
-        _settings: &Self::Settings,
-        _load_context: &mut LoadContext<'_>,
-    ) -> Result<MapDef, Self::Error> {
-        let mut bytes = Vec::new();
-        reader.read_to_end(&mut bytes).await?;
-        let ron: MapDef = ron::de::from_bytes(&bytes)?;
-
-        Ok(ron)
-    }
-
-    fn extensions(&self) -> &[&str] {
-        &["mapdef.ron", "mapdef"]
-    }
-}
-
-impl MapDef {
-    pub fn save<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {
-        let mut f = File::create(path)?;
-        f.write_all(
-            ron::ser::to_string_pretty(self, ron::ser::PrettyConfig::default())
-                .unwrap()
-                .as_bytes(),
-        )
-        .unwrap();
-        Ok(())
-    }
-}
-
-#[derive(Default)]
-pub struct MapDefSaver;
-
-impl AssetSaver for MapDefSaver {
-    type Asset = MapDef;
-    type Settings = ();
-    type OutputLoader = MapDefLoader;
-    type Error = std::io::Error;
-
-    async fn save(
-        &self,
-        writer: &mut Writer,
-        asset: SavedAsset<'_, Self::Asset>,
-        _settings: &Self::Settings,
-    ) -> Result<(), Self::Error> {
-        writer
-            .write_all(
-                ron::ser::to_string_pretty(asset.get(), ron::ser::PrettyConfig::default())
-                    .unwrap()
-                    .as_bytes(),
+impl Plugin for MapDefPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_asset::<MapDef>();
+        app.init_asset_loader::<MapDefLoader>();
+        app.add_systems(
+            Startup,
+            init_global_assets.run_if(|res: Option<Res<GlobalAssets>>| res.is_none()),
+        );
+        app.add_systems(
+            Update,
+            (
+                map_def::on_map_def_changed,
+                map_def::on_map_def_handle_changed,
             )
-            .await
-            .unwrap();
-        Ok(())
+                .chain(),
+        );
     }
 }

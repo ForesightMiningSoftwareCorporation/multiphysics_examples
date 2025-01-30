@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+dotenvy = "0.15"
 bevy = { version = "0.15", features = [
     "multi_threaded",
     "jpeg",
@@ -14,3 +15,4 @@ bevy = { version = "0.15", features = [
 ] }
 bevy_editor_cam = "0.5.0"
 bevy_rapier3d = "0.28"
+map_def = { path = "../map_def" }

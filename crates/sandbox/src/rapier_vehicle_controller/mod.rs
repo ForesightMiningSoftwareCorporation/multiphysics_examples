@@ -13,11 +13,11 @@ pub mod reflect;
 /// Parameters to initialize a [`VehicleController`].
 ///
 /// This can be used as a component to automatically initialize a [`VehicleController`]
-/// when the associated Entity has a [`RapierRigidBodyHandle`].
+/// when the associated Entity has a [`RapierRigidBodyHandle`][bevy_rapier3d::prelude::RapierRigidBodyHandle].
 ///
 /// It is practical because idiomatic bevy_rapier usually does not create the rigidbody instantly.
 ///
-/// See https://github.com/soraxas/rapier/blob/8ef99688f0d83f9c2bc67ced26ac773e2426f7b4/examples3d/vehicle_controller3.rs#L26-L27 for example of "good" configuration.
+/// See <https://github.com/soraxas/rapier/blob/8ef99688f0d83f9c2bc67ced26ac773e2426f7b4/examples3d/vehicle_controller3.rs#L26-L27> for example of "good" configuration.
 #[derive(Component, Clone, Debug, Reflect)]
 pub struct VehicleControllerParameters {
     /// Positions to be passed to [`DynamicRayCastVehicleController::add_wheel`]
@@ -26,6 +26,12 @@ pub struct VehicleControllerParameters {
     pub wheel_tuning: WheelTuning,
     pub suspension_rest_length: f32,
     pub wheel_radius: f32,
+    // if true, wheels do not turn, only engine force is applied to the opposite side of the turn.
+    pub crawler: bool,
+    /// corresponds to [`Wheel`][bevy_rapier3d::rapier::control::Wheel]
+    pub wheel_brake: f32,
+    /// force applied to [`Wheel::engine_force`][bevy_rapier3d::rapier::control::Wheel::engine_force] depending on inputs.
+    pub engine_force: f32,
 }
 
 impl Default for VehicleControllerParameters {
@@ -44,6 +50,9 @@ impl VehicleControllerParameters {
             wheel_tuning: WheelTuning::default(),
             suspension_rest_length: 0.0,
             wheel_radius: 0.0,
+            crawler: false,
+            wheel_brake: 0.1,
+            engine_force: 30.0,
         }
     }
     pub fn with_wheel_positions_for_half_size(
@@ -69,6 +78,10 @@ impl VehicleControllerParameters {
         self.wheel_tuning = wheel_tuning;
         self
     }
+    pub fn with_crawler(mut self, is_crawler: bool) -> Self {
+        self.crawler = is_crawler;
+        self
+    }
 }
 
 #[derive(Component)]
@@ -87,7 +100,7 @@ impl VehicleController {
         let mut vehicle = DynamicRayCastVehicleController::new(body_chassis);
 
         for pos in parameters.wheel_positions {
-            vehicle.add_wheel(
+            let wheel = vehicle.add_wheel(
                 pos.into(),
                 -Vector::z(),
                 Vector::x(),
@@ -95,13 +108,55 @@ impl VehicleController {
                 parameters.wheel_radius,
                 &parameters.wheel_tuning,
             );
+            wheel.brake = 0.25f32;
         }
         VehicleController {
             controller: vehicle,
         }
     }
 
-    pub fn integrate_actions(&mut self, inputs: &Res<ButtonInput<KeyCode>>) {
+    fn integrate_actions_crawler(
+        &mut self,
+        inputs: &ButtonInput<KeyCode>,
+        parameters: &VehicleControllerParameters,
+    ) {
+        let mut engine_force_base = 0f32;
+        let mut engine_force_right = 0f32;
+        let mut engine_force_left = 0f32;
+
+        for key in inputs.get_pressed() {
+            match *key {
+                KeyCode::ArrowRight => {
+                    engine_force_left += parameters.engine_force;
+                }
+                KeyCode::ArrowLeft => {
+                    engine_force_right += parameters.engine_force;
+                }
+                KeyCode::ArrowUp => {
+                    engine_force_base += parameters.engine_force;
+                }
+                KeyCode::ArrowDown => {
+                    engine_force_base -= parameters.engine_force;
+                }
+                _ => {}
+            }
+        }
+
+        let wheels = self.controller.wheels_mut();
+        wheels[0].engine_force = engine_force_base + engine_force_left * engine_force_base.signum();
+        wheels[1].engine_force =
+            engine_force_base + engine_force_right * engine_force_base.signum();
+    }
+
+    pub fn integrate_actions(
+        &mut self,
+        inputs: &Res<ButtonInput<KeyCode>>,
+        parameters: &VehicleControllerParameters,
+    ) {
+        if parameters.crawler {
+            self.integrate_actions_crawler(inputs, parameters);
+            return;
+        }
         let mut engine_force = 0.0;
         let mut steering_angle = 0.0;
 
