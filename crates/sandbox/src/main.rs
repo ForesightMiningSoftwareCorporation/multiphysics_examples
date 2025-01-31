@@ -2,7 +2,11 @@ use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use bevy_editor_cam::prelude::*;
 use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
 use dotenvy::dotenv;
+use map_def::rock::Rock;
+use rand::SeedableRng;
+use rand_chacha::ChaCha8Rng;
 use rapier_vehicle_controller::{VehicleController, VehicleControllerParameters};
+use vehicle_spawner::scoop::ScoopPlugin;
 
 pub mod load_level;
 pub mod rapier_vehicle_controller;
@@ -20,8 +24,12 @@ fn main() {
         RapierDebugRenderPlugin::default(),
         DefaultEditorCamPlugins,
         map_def::MapDefPlugin,
+        ScoopPlugin,
     ));
     app.register_type::<VehicleControllerParameters>();
+
+    let seeded_rng = ChaCha8Rng::seed_from_u64(4);
+    app.insert_resource(RandomSource(seeded_rng));
 
     app.add_systems(PreStartup, init_rapier_context);
     app.add_systems(Startup, load_level::setup);
@@ -31,6 +39,7 @@ fn main() {
         FixedUpdate,
         (update_vehicle_controls, update_vehicle_controller).chain(),
     );
+    app.add_systems(Update, add_scoopable_to_rocks);
 
     app.add_systems(
         Update,
@@ -101,3 +110,18 @@ pub fn update_vehicle_controller(
         );
     }
 }
+
+pub fn add_scoopable_to_rocks(
+    mut commands: Commands,
+    rocks: Query<Entity, (With<Rock>, Without<vehicle_spawner::scoop::Scoopable>)>,
+) {
+    for rock in rocks.iter() {
+        commands
+            .entity(rock)
+            .insert(vehicle_spawner::scoop::Scoopable)
+            .insert(ActiveEvents::COLLISION_EVENTS);
+    }
+}
+
+#[derive(Resource)]
+struct RandomSource(pub ChaCha8Rng);

@@ -9,7 +9,7 @@
 
 - a [sandbox](crates/sandbox/README.md) to help with understanding how to wire things together.
   - [x] A model for a bulldozer to push particles into a wall to make the rock pile steeper.
-  - [ ] A model of a shovel to pick up scoops of rock (for simplicity, once the scoop is picked, the rock particles are just removed and teleported into the truck).
+  - [x] A model of a shovel to pick up scoops of rock (for simplicity, once the scoop is picked, the rock particles are just removed and teleported into the truck).
   - [ ] Once the truck is full, the user drives it to a muck pile and dumps the material.
 TODO: vehicle module
 
@@ -24,7 +24,7 @@ For practicity, These assets are shared for all projects, through `.env`'s `BEVY
 Those can't be checked in because of their licences:
 
 - Bulldozer: https://sketchfab.com/3d-models/bulldozer-b06a715d23a7450babac383b8bb7fb0a (glb 1k)
-- Excavator: undisclosed
+- Excavator: ? https://sketchfab.com/3d-models/komatsu-pc2000-8-excavator-4988cbc9d02c444c8158c04d08de2b11
 - Truck: undisclosed
 
 ## Opinionated decisions

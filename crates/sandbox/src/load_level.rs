@@ -42,28 +42,31 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         suspension_damping: 10.0,
         ..WheelTuning::default()
     };
-    vehicle_spawner::spawn(VehicleType::Bulldozer, &mut commands, &asset_server)
-        .insert(Transform::from_translation(Vec3::Z * 3.0 + Vec3::Y * 5.0))
+
+    // vehicle_spawner::spawn(VehicleType::Bulldozer, &mut commands, &asset_server)
+    //     .insert(Transform::from_translation(Vec3::new(0.0, 3.0, 3.0)))
+    //     .insert(
+    //         VehicleControllerParameters::empty()
+    //             .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4))
+    //             .with_wheel_tuning(wheel_tuning)
+    //             .with_crawler(true),
+    //     );
+
+    vehicle_spawner::spawn(VehicleType::Excavator, &mut commands, &asset_server)
+        .insert(Transform::from_translation(Vec3::new(-4.0, 5.0, 3.0)))
         .insert(
             VehicleControllerParameters::empty()
-                .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4))
+                .with_wheel_positions_for_half_size(Vec3::new(0.5, 0.5, 0.2))
                 .with_wheel_tuning(wheel_tuning)
                 .with_crawler(true),
         );
-    /*
-    vehicle_spawner::spawn(VehicleType::Excavator, &mut commands, &asset_server)
-        .insert(Transform::from_translation(Vec3::new(-4f32, 0f32, 0f32)))
-        .insert(
-            VehicleControllerParameters::empty()
-                .with_wheel_positions_for_half_size(Vec3::new(0.5, 0.5, 0.2))
-                .with_wheel_tuning(wheel_tuning),
-        );
 
     vehicle_spawner::spawn(VehicleType::Truck, &mut commands, &asset_server)
-        .insert(Transform::from_translation(Vec3::new(4f32, 0f32, 0f32)))
-        .insert(
-            VehicleControllerParameters::empty()
-                .with_wheel_positions_for_half_size(Vec3::new(0.5, 0.5, 0.2))
-                .with_wheel_tuning(wheel_tuning),
-        );*/
+    .insert(Transform::from_translation(Vec3::new(4.0, 5.0, 3.0)))
+    // .insert(
+    //     VehicleControllerParameters::empty()
+    //         .with_wheel_positions_for_half_size(Vec3::new(0.5, 0.5, 0.2))
+    //         .with_wheel_tuning(wheel_tuning),
+    // )
+    ;
 }
