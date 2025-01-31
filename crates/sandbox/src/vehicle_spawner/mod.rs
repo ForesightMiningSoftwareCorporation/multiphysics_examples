@@ -2,7 +2,7 @@ pub mod scoop;
 
 use std::f32::consts::TAU;
 
-use bevy::{math::bounding::Aabb3d, prelude::*};
+use bevy::prelude::*;
 use bevy_rapier3d::{prelude::{Collider, ColliderMassProperties, CollisionGroups, Group, MassProperties, RigidBody, Sensor}, rapier};
 use scoop::{ScoopTarget, SensorStartScoop};
 

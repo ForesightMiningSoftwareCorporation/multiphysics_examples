@@ -213,7 +213,7 @@ pub fn heightfield_to_bevy_mesh(height_field: &HeightField) -> Mesh {
         bevy::render::mesh::PrimitiveTopology::TriangleList,
         RenderAssetUsages::default(),
     )
-    .with_inserted_indices(Indices::U32(idx.iter().cloned().flatten().collect()));
+    .with_inserted_indices(Indices::U32(idx.into_iter().flatten().collect()));
     let mesh = mesh.with_inserted_attribute(
         Mesh::ATTRIBUTE_POSITION,
         vtx.iter()

@@ -2,21 +2,14 @@
 //!
 //! This plugin is agnostic to other modules for reuse, but references rocks in comments for context.
 
-use std::{f32::consts::PI, time::Duration};
+use std::f32::consts::PI;
 
-use bevy::{
-    math::{
-        bounding::{Aabb3d, Bounded3d},
-        VectorSpace,
-    },
-    prelude::*,
-};
+use bevy::
+    prelude::*;
 use bevy_rapier3d::{
     prelude::{CollisionEvent, CollisionGroups, ExternalImpulse, Group, RigidBody},
     rapier::prelude::CollisionEventFlags,
 };
-use rand::{distributions::Distribution, SeedableRng};
-use rand_chacha::ChaCha8Rng;
 
 use crate::RandomSource;
 
