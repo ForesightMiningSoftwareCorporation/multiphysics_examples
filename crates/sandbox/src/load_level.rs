@@ -1,3 +1,4 @@
+use crate::controls::CurrentSelection;
 use crate::vehicle_spawner;
 
 use super::rapier_vehicle_controller::VehicleControllerParameters;
@@ -43,14 +44,19 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..WheelTuning::default()
     };
 
-    // vehicle_spawner::spawn(VehicleType::Bulldozer, &mut commands, &asset_server)
-    //     .insert(Transform::from_translation(Vec3::new(0.0, 3.0, 3.0)))
-    //     .insert(
-    //         VehicleControllerParameters::empty()
-    //             .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4))
-    //             .with_wheel_tuning(wheel_tuning)
-    //             .with_crawler(true),
-    //     );
+    let bulldozer_entity =
+        vehicle_spawner::spawn(VehicleType::Bulldozer, &mut commands, &asset_server)
+            .insert(Transform::from_translation(Vec3::new(0.0, 3.0, 3.0)))
+            .insert(
+                VehicleControllerParameters::empty()
+                    .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4))
+                    .with_wheel_tuning(wheel_tuning)
+                    .with_crawler(true),
+            )
+            .id();
+    commands.insert_resource(CurrentSelection {
+        entity: Some(bulldozer_entity),
+    });
 
     vehicle_spawner::spawn(VehicleType::Excavator, &mut commands, &asset_server)
         .insert(Transform::from_translation(Vec3::new(-4.0, 5.0, 3.0)))
@@ -61,12 +67,21 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .with_crawler(true),
         );
 
+    let truck_controller_parameters = VehicleControllerParameters {
+        wheel_tuning,
+        // truck has more mass so more powerful wheels.
+        engine_force: 120f32,
+        wheel_brake: [1f32, 1f32],
+        wheel_positions: [
+            [-1.3, 1.6, 0.3].into(),
+            [1.3, 1.6, 0.3].into(),
+            [-1.3, -1.2, 0.3].into(),
+            [1.3, -1.2, 0.3].into(),
+        ],
+        wheel_radius: 0.7,
+        ..VehicleControllerParameters::empty()
+    };
     vehicle_spawner::spawn(VehicleType::Truck, &mut commands, &asset_server)
-    .insert(Transform::from_translation(Vec3::new(4.0, 5.0, 3.0)))
-    // .insert(
-    //     VehicleControllerParameters::empty()
-    //         .with_wheel_positions_for_half_size(Vec3::new(0.5, 0.5, 0.2))
-    //         .with_wheel_tuning(wheel_tuning),
-    // )
-    ;
+        .insert(Transform::from_translation(Vec3::new(4.0, 5.0, 3.0)))
+        .insert(truck_controller_parameters);
 }

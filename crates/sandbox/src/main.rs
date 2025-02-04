@@ -1,13 +1,16 @@
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use bevy_editor_cam::prelude::*;
+use bevy_egui::EguiPlugin;
 use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
+use controls::ControlsPlugin;
 use dotenvy::dotenv;
 use map_def::rock::Rock;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
-use rapier_vehicle_controller::{VehicleController, VehicleControllerParameters};
+use rapier_vehicle_controller::debug::VehicleControllerDebugPlugin;
 use vehicle_spawner::scoop::ScoopPlugin;
 
+pub mod controls;
 pub mod load_level;
 pub mod rapier_vehicle_controller;
 pub mod vehicle_spawner;
@@ -22,11 +25,13 @@ fn main() {
         RapierPhysicsPlugin::<NoUserData>::default()
             .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
         RapierDebugRenderPlugin::default(),
+        VehicleControllerDebugPlugin,
         DefaultEditorCamPlugins,
         map_def::MapDefPlugin,
+        ControlsPlugin,
         ScoopPlugin,
-    ));
-    app.register_type::<VehicleControllerParameters>();
+    ))
+    .add_plugins(EguiPlugin);
 
     let seeded_rng = ChaCha8Rng::seed_from_u64(4);
     app.insert_resource(RandomSource(seeded_rng));
@@ -34,11 +39,6 @@ fn main() {
     app.add_systems(PreStartup, init_rapier_context);
     app.add_systems(Startup, load_level::setup);
 
-    app.add_systems(Update, init_vehicle_controller);
-    app.add_systems(
-        FixedUpdate,
-        (update_vehicle_controls, update_vehicle_controller).chain(),
-    );
     app.add_systems(Update, add_scoopable_to_rocks);
 
     app.add_systems(
@@ -67,48 +67,6 @@ pub fn init_rapier_context(mut commands: Commands) {
         },
         DefaultRapierContext,
     ));
-}
-
-/// System to initialize and insert a [`VehicleController`] after bevy_rapier initializes the rigidbody.
-pub fn init_vehicle_controller(
-    mut commands: Commands,
-    vehicle: Query<
-        (Entity, &VehicleControllerParameters, &RapierRigidBodyHandle),
-        Added<RapierRigidBodyHandle>,
-    >,
-) {
-    for (entity, vehicle_parameters, body_handle) in vehicle.iter() {
-        let controller = VehicleController::new(body_handle.0, vehicle_parameters);
-        commands.entity(entity).insert(controller);
-    }
-}
-
-/// System to forward controls to [`VehicleController`]
-pub fn update_vehicle_controls(
-    inputs: Res<ButtonInput<KeyCode>>,
-    mut vehicles: Query<(&mut VehicleController, &VehicleControllerParameters)>,
-) {
-    for (mut vehicle_controller, parameters) in vehicles.iter_mut() {
-        vehicle_controller.integrate_actions(&inputs, parameters);
-    }
-}
-
-/// System to initialize and insert a [`VehicleController`] after bevy_rapier initializes the rigidbody.
-///
-pub fn update_vehicle_controller(
-    time: Res<Time>,
-    mut vehicles: Query<&mut VehicleController>,
-    mut context: WriteDefaultRapierContext,
-) {
-    for mut vehicle_controller in vehicles.iter_mut() {
-        let context = &mut *context;
-        vehicle_controller.update_vehicle(
-            time.delta_secs(),
-            &mut context.bodies,
-            &context.colliders,
-            &context.query_pipeline,
-        );
-    }
 }
 
 pub fn add_scoopable_to_rocks(

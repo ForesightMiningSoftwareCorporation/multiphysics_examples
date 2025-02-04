@@ -8,6 +8,7 @@ use bevy_rapier3d::{
     },
 };
 
+pub mod debug;
 pub mod reflect;
 
 /// Parameters to initialize a [`VehicleController`].
@@ -26,10 +27,14 @@ pub struct VehicleControllerParameters {
     pub wheel_tuning: WheelTuning,
     pub suspension_rest_length: f32,
     pub wheel_radius: f32,
-    // if true, wheels do not turn, only engine force is applied to the opposite side of the turn.
+    /// if true, wheels do not turn, only engine force is applied to the opposite side of the turn.
+    ///
+    /// This is useful for vehicles that have continuous tracks.
     pub crawler: bool,
     /// corresponds to [`Wheel`][bevy_rapier3d::rapier::control::Wheel]
-    pub wheel_brake: f32,
+    ///
+    /// \[0\] is front, \[1\] is back
+    pub wheel_brake: [f32; 2],
     /// force applied to [`Wheel::engine_force`][bevy_rapier3d::rapier::control::Wheel::engine_force] depending on inputs.
     pub engine_force: f32,
 }
@@ -49,10 +54,10 @@ impl VehicleControllerParameters {
             wheel_positions: [Vec3::ZERO; 4],
             wheel_tuning: WheelTuning::default(),
             suspension_rest_length: 0.0,
-            wheel_radius: 0.0,
+            wheel_radius: 0.5,
             crawler: false,
-            wheel_brake: 0.1,
-            engine_force: 30.0,
+            wheel_brake: [0.25, 0.25],
+            engine_force: 10.0,
         }
     }
     pub fn with_wheel_positions_for_half_size(
@@ -71,7 +76,7 @@ impl VehicleControllerParameters {
             [width * 1.5, -length, -height].into(),
         ];
         self.suspension_rest_length = height;
-        self.wheel_radius = height / 4.0;
+        self.wheel_radius = height / 2.0;
         self
     }
     pub fn with_wheel_tuning(mut self, wheel_tuning: WheelTuning) -> Self {
@@ -99,16 +104,16 @@ impl VehicleController {
          */
         let mut vehicle = DynamicRayCastVehicleController::new(body_chassis);
 
-        for pos in parameters.wheel_positions {
+        for (i, pos) in parameters.wheel_positions.iter().enumerate() {
             let wheel = vehicle.add_wheel(
-                pos.into(),
+                (*pos).into(),
                 -Vector::z(),
                 Vector::x(),
                 parameters.suspension_rest_length,
                 parameters.wheel_radius,
                 &parameters.wheel_tuning,
             );
-            wheel.brake = 0.25f32;
+            wheel.brake = parameters.wheel_brake[i / 2 as usize];
         }
         VehicleController {
             controller: vehicle,
@@ -143,8 +148,15 @@ impl VehicleController {
         }
 
         let wheels = self.controller.wheels_mut();
+
+        // no steering for the "crawler" mode.
+        // front
         wheels[0].engine_force = engine_force_base + engine_force_left * engine_force_base.signum();
         wheels[1].engine_force =
+            engine_force_base + engine_force_right * engine_force_base.signum();
+        // back
+        wheels[2].engine_force = engine_force_base + engine_force_left * engine_force_base.signum();
+        wheels[3].engine_force =
             engine_force_base + engine_force_right * engine_force_base.signum();
     }
 
@@ -169,20 +181,33 @@ impl VehicleController {
                     steering_angle += 0.7;
                 }
                 KeyCode::ArrowUp => {
-                    engine_force += 30.0;
+                    engine_force += parameters.engine_force;
                 }
                 KeyCode::ArrowDown => {
-                    engine_force += -30.0;
+                    engine_force += -parameters.engine_force;
                 }
                 _ => {}
             }
         }
 
         let wheels = self.controller.wheels_mut();
+        // front wheels are powered and steering.
         wheels[0].engine_force = engine_force;
         wheels[0].steering = steering_angle;
         wheels[1].engine_force = engine_force;
         wheels[1].steering = steering_angle;
+    }
+
+    pub fn stop(&mut self) {
+        let wheels = self.controller.wheels_mut();
+        wheels[0].engine_force = 0f32;
+        wheels[0].steering = 0f32;
+        wheels[1].engine_force = 0f32;
+        wheels[1].steering = 0f32;
+        wheels[2].engine_force = 0f32;
+        wheels[2].steering = 0f32;
+        wheels[3].engine_force = 0f32;
+        wheels[3].steering = 0f32;
     }
 
     pub fn update_vehicle(

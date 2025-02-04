@@ -6,10 +6,17 @@ use bevy::prelude::*;
 use bevy_rapier3d::{prelude::{Collider, ColliderMassProperties, CollisionGroups, Group, MassProperties, RigidBody, Sensor}, rapier};
 use scoop::{ScoopTarget, SensorStartScoop};
 
+#[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VehicleType {
     Bulldozer,
     Excavator,
     Truck,
+}
+
+impl std::fmt::Display for VehicleType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 pub fn spawn<'a>(
@@ -26,6 +33,8 @@ pub fn spawn<'a>(
             let chassis_dimensions = Vec3::new(1f32, 2f32, 0.4f32);
             let chassis_collider = Collider::cuboid(chassis_dimensions.x, chassis_dimensions.y, chassis_dimensions.z);
             let mut entity = commands.spawn((
+                Name::new("bulldozer"),
+                vehicle_type,
                 Visibility::default(),
                 Transform::default(),
                 chassis_collider,
@@ -71,16 +80,17 @@ pub fn spawn<'a>(
             let excavator =
                 assets.load(GltfAssetLabel::Scene(0).from_asset("private/excavator/scene.gltf"));
             let mut entity = commands.spawn((
+                Name::new("excavator"),
+                vehicle_type,
                 Visibility::default(),
                 Transform::default(),
                 chassis_collider,
-                // mass shouldn't impact too much or the vehicle will just fall towards its front.
+                // mass is shifted down to avoid falling on its sides.
                 ColliderMassProperties::MassProperties(MassProperties {
                     local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
                     ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(0.8f32, chassis_dimensions.into()))
                 }),
                 RigidBody::Dynamic,
-                SensorStartScoop,
             ));
             // Sensor to detect rocks, and move them to the truck.
             entity.with_child((
@@ -89,13 +99,8 @@ pub fn spawn<'a>(
                 Collider::cuboid(1f32, 0.4f32, 0.8f32),
                 // no collision with ground
                 CollisionGroups::new(Group::all(), Group::GROUP_1),
-                // mass shouldn't impact too much or the vehicle will just fall towards its front.
-                ColliderMassProperties::MassProperties(MassProperties {
-                    local_center_of_mass: Vec3::new(0.0, -1.0, 0.0),
-                    mass: 0.01,
-                    principal_inertia: Vec3::ONE * 0.01,
-                    ..default()
-                }),
+                // mass shouldn't be impacted as it's a sensor.
+                ColliderMassProperties::Density(0f32),
                 SensorStartScoop
             ));
             // Model
@@ -113,14 +118,25 @@ pub fn spawn<'a>(
         VehicleType::Truck => {
             let truck =
                 assets.load(GltfAssetLabel::Scene(0).from_asset("private/truck/scene.gltf"));
+                let chassis_dimensions = Vec3::new(1.5f32, 2f32, 0.4f32);
             let mut entity = commands.spawn((
+                Name::new("truck"),
+                vehicle_type,
                 Visibility::default(),
                 Transform::from_translation(Vec3::new(2f32, 0f32, 0f32)),
-                Collider::cuboid(1f32, 1f32, 0.4f32),
                 RigidBody::Dynamic,
             ));
             entity.with_children(|child_builder| {
-                // loader to store rocks.
+                // chassis
+                child_builder.spawn((
+                    Transform::from_translation(Vec3::new(0f32, 0f32, 0.5f32)),
+                    Collider::cuboid(chassis_dimensions.x, chassis_dimensions.y, chassis_dimensions.z),
+                    // mass is shifted down to avoid falling on its sides.
+                    ColliderMassProperties::MassProperties(MassProperties {
+                        local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
+                        ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(2f32, chassis_dimensions.into()))
+                    }),
+                ));
 
                 // target for scoops
                 child_builder.spawn((
@@ -129,23 +145,29 @@ pub fn spawn<'a>(
                         possible_offset: Cuboid::new(0.5, 1.0, 0.1),
                     },
                 ));
+
+                // loader to store rocks.
+
                 // right wall
                 child_builder.spawn((
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(1.4f32, -0.7f32, 1.5f32)),
                     Collider::cuboid(0.2f32, 2.1f32, 1f32),
+                    ColliderMassProperties::Density(0.1f32),
                 ));
                 // left wall
                 child_builder.spawn((
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(-1.4f32, -0.7f32, 1.5f32)),
                     Collider::cuboid(0.2f32, 2.1f32, 0.8f32),
+                    ColliderMassProperties::Density(0.1f32),
                 ));
                 // front wall
                 child_builder.spawn((
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(0f32, 2f32, 1.5f32)),
                     Collider::cuboid(1.5f32,0.8f32, 1f32),
+                    ColliderMassProperties::Density(0.1f32),
                 ));
                 // front inclined wall
                 child_builder.spawn((
@@ -153,6 +175,7 @@ pub fn spawn<'a>(
                     Transform::from_translation(Vec3::new(0f32, 1.1f32, 1.55f32))
                     .with_rotation(Quat::from_rotation_x(-20f32.to_radians())),
                     Collider::cuboid(1.5f32,0.2f32, 0.8f32),
+                    ColliderMassProperties::Density(0.1f32),
                 ));
                 // bottom wall
                 child_builder.spawn((
@@ -160,6 +183,14 @@ pub fn spawn<'a>(
                     Transform::from_translation(Vec3::new(0f32, -1f32, 1.3f32))
                     .with_rotation(Quat::from_rotation_x(-10f32.to_radians())),
                     Collider::cuboid(1.5f32, 2f32, 0.1f32),
+                    ColliderMassProperties::Density(0.1f32),
+                ));
+                // cheat invisible wall behind, to avoid rocks falling.
+                child_builder.spawn((
+                    Visibility::default(),
+                    Transform::from_translation(Vec3::new(0f32, -2.8f32, 1.5f32)),
+                    Collider::cuboid(1.5f32,0.2f32, 1f32),
+                    ColliderMassProperties::Density(0.1f32),
                 ));
                 // TODO: truck loader walls
                 // TODO: component doing 1 or more overlap_box query to detect rocks and assess if truck is full.

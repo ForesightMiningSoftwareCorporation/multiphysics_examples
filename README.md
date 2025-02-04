@@ -12,6 +12,11 @@
   - [x] A model of a shovel to pick up scoops of rock (for simplicity, once the scoop is picked, the rock particles are just removed and teleported into the truck).
   - [ ] Once the truck is full, the user drives it to a muck pile and dumps the material.
 TODO: vehicle module
+  - [ ] ui
+    - [ ] switch between vehicles
+    - [ ] see how much scooped rocks
+    - [ ] see how much in freshly blasted muck pile
+    - [ ] see how much in final muck pile
 
 The project is set up with right-handed Z-up, to the extent possible:
 as both parry and bevy sometimes expect Y-Up, comments are here to guide you.

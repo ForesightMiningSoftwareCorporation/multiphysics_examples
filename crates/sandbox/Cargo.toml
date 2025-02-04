@@ -13,6 +13,7 @@ bevy = { version = "0.15", features = [
     "dynamic_linking",
     "serialize",
 ] }
+bevy_egui = "0.32"
 bevy_math = { version = "0.15", features = ["rand"] }
 bevy_editor_cam = "0.5.0"
 bevy_rapier3d = "0.28"

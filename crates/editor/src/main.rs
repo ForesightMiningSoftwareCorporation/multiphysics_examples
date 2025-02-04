@@ -8,12 +8,15 @@ use bevy::{
 };
 use bevy_editor_cam::prelude::*;
 use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
+use dotenvy::dotenv;
 use map_def::{
     map_def::{MapDef, MapDefHandle},
     rock::{Rock, SpawnRockCommand},
 };
 
 fn main() {
+    dotenv().expect(".env file not found");
+
     let mut app = App::new();
     app.add_plugins((
         DefaultPlugins,
