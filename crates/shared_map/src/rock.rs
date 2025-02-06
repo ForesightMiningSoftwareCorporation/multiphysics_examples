@@ -15,6 +15,7 @@ impl Command for SpawnRockCommand {
     fn apply(self, world: &mut World) {
         let assets = world.resource::<GlobalAssets>();
         world.spawn((
+            Name::new("Rock"),
             Mesh3d(assets.rock_mesh.clone_weak()),
             MeshMaterial3d(assets.rock_material.clone_weak()),
             Collider::cuboid(0.1, 0.1, 0.1),

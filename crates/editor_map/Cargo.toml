@@ -1,5 +1,5 @@
 [package]
-name = "sandbox"
+name = "editor_map"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,18 +8,14 @@ dotenvy = "0.15"
 bevy = { version = "0.15", features = [
     "multi_threaded",
     "jpeg",
+    "file_watcher",
     # Optional for iteration times,
     # see https://bevyengine.org/learn/quick-start/getting-started/setup/#enable-fast-compiles-optional
     "dynamic_linking",
-    "serialize",
 ] }
-bevy_egui = "0.32"
-bevy-inspector-egui = "0.29"
-bevy_math = { version = "0.15", features = ["rand"] }
 bevy_editor_cam = "0.5.0"
 bevy_rapier3d = "0.28"
 
 # inner crates
 
 shared_map = { path = "../shared_map" }
-shared_vehicle = { path = "../shared_vehicle" }

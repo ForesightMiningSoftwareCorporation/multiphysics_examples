@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_rapier3d::{plugin::WriteDefaultRapierContext, prelude::RapierRigidBodyHandle};
 
-use crate::{
+use shared_vehicle::{
     rapier_vehicle_controller::{VehicleController, VehicleControllerParameters},
     vehicle_spawner::VehicleType,
 };

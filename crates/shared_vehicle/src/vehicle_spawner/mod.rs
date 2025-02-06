@@ -10,6 +10,7 @@ use scoop::{ScoopTarget, SensorStartScoop};
 pub enum VehicleType {
     Bulldozer,
     Excavator,
+    Excavator2,
     Truck,
 }
 
@@ -47,6 +48,7 @@ pub fn spawn<'a>(
             ));
             // bulldozer front, to push rocks.
             entity.with_child((
+                Name::new("bulldozer front"),
                 Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
                 Collider::cuboid(1f32, 0.4f32, 0.8f32),
                 // no collision with ground
@@ -63,6 +65,7 @@ pub fn spawn<'a>(
             // we can adapt its scale, position, rotation by spawning it as a child.
             // for example, most models are provided with Y-up, but we're using Z-up.
             entity.with_child((
+                Name::new("bulldozer model"),
                 SceneRoot(bulldozer.clone()),
                 Transform::from_translation(Vec3::new(4.4, 0.0, 0.5))
                      .with_rotation(
@@ -94,6 +97,7 @@ pub fn spawn<'a>(
             ));
             // Sensor to detect rocks, and move them to the truck.
             entity.with_child((
+                Name::new("scoop sensor"),
                 Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
                 Sensor,
                 Collider::cuboid(1f32, 0.4f32, 0.8f32),
@@ -105,6 +109,50 @@ pub fn spawn<'a>(
             ));
             // Model
             entity.with_child((
+                Name::new("excavator model"),
+                SceneRoot(excavator.clone()),
+                Transform::from_translation(Vec3::new(0.0, 0.0, 1.2))
+                    .with_scale(Vec3::new(2.0, 2.0, 2.0))
+                    .with_rotation(
+                        // Look up
+                        Quat::from_axis_angle(Vec3::X, TAU / 4.0),
+                    ),
+            ));
+            entity
+        }
+        VehicleType::Excavator2 => {
+            let chassis_dimensions = Vec3::new(1f32, 2f32, 0.4f32);
+            let chassis_collider = Collider::cuboid(chassis_dimensions.x, chassis_dimensions.y, chassis_dimensions.z);
+            let excavator =
+                assets.load(GltfAssetLabel::Scene(0).from_asset("private/excavator2/excavator2.gltf"));
+            let mut entity = commands.spawn((
+                Name::new("excavator2"),
+                vehicle_type,
+                Visibility::default(),
+                Transform::default(),
+                chassis_collider,
+                // mass is shifted down to avoid falling on its sides.
+                ColliderMassProperties::MassProperties(MassProperties {
+                    local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
+                    ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(0.8f32, chassis_dimensions.into()))
+                }),
+                RigidBody::Dynamic,
+            ));
+            // Sensor to detect rocks, and move them to the truck.
+            entity.with_child((
+                Name::new("scoop sensor"),
+                Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
+                Sensor,
+                Collider::cuboid(1f32, 0.4f32, 0.8f32),
+                // no collision with ground
+                CollisionGroups::new(Group::all(), Group::GROUP_1),
+                // mass shouldn't be impacted as it's a sensor.
+                ColliderMassProperties::Density(0f32),
+                SensorStartScoop
+            ));
+            // Model
+            entity.with_child((
+                Name::new("excavator2 model"),
                 SceneRoot(excavator.clone()),
                 Transform::from_translation(Vec3::new(0.0, 0.0, 1.2))
                     .with_scale(Vec3::new(2.0, 2.0, 2.0))
@@ -129,6 +177,7 @@ pub fn spawn<'a>(
             entity.with_children(|child_builder| {
                 // chassis
                 child_builder.spawn((
+                    Name::new("chassis"),
                     Transform::from_translation(Vec3::new(0f32, 0f32, 0.5f32)),
                     Collider::cuboid(chassis_dimensions.x, chassis_dimensions.y, chassis_dimensions.z),
                     // mass is shifted down to avoid falling on its sides.
@@ -140,6 +189,7 @@ pub fn spawn<'a>(
 
                 // target for scoops
                 child_builder.spawn((
+                    Name::new("scoop target"),
                     Transform::from_translation(Vec3::new(0.0, 0.0, 5.0)),
                     ScoopTarget {
                         possible_offset: Cuboid::new(0.5, 1.0, 0.1),
@@ -150,6 +200,7 @@ pub fn spawn<'a>(
 
                 // right wall
                 child_builder.spawn((
+                    Name::new("right wall"),
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(1.4f32, -0.7f32, 1.5f32)),
                     Collider::cuboid(0.2f32, 2.1f32, 1f32),
@@ -157,6 +208,7 @@ pub fn spawn<'a>(
                 ));
                 // left wall
                 child_builder.spawn((
+                    Name::new("left wall"),
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(-1.4f32, -0.7f32, 1.5f32)),
                     Collider::cuboid(0.2f32, 2.1f32, 0.8f32),
@@ -164,6 +216,7 @@ pub fn spawn<'a>(
                 ));
                 // front wall
                 child_builder.spawn((
+                    Name::new("front wall"),
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(0f32, 2f32, 1.5f32)),
                     Collider::cuboid(1.5f32,0.8f32, 1f32),
@@ -171,6 +224,7 @@ pub fn spawn<'a>(
                 ));
                 // front inclined wall
                 child_builder.spawn((
+                    Name::new("front inclined wall"),
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(0f32, 1.1f32, 1.55f32))
                     .with_rotation(Quat::from_rotation_x(-20f32.to_radians())),
@@ -179,6 +233,7 @@ pub fn spawn<'a>(
                 ));
                 // bottom wall
                 child_builder.spawn((
+                    Name::new("bottom wall"),
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(0f32, -1f32, 1.3f32))
                     .with_rotation(Quat::from_rotation_x(-10f32.to_radians())),
@@ -187,6 +242,7 @@ pub fn spawn<'a>(
                 ));
                 // cheat invisible wall behind, to avoid rocks falling.
                 child_builder.spawn((
+                    Name::new("invisible back wall"),
                     Visibility::default(),
                     Transform::from_translation(Vec3::new(0f32, -2.8f32, 1.5f32)),
                     Collider::cuboid(1.5f32,0.2f32, 1f32),
@@ -198,6 +254,7 @@ pub fn spawn<'a>(
             });
             // Model
             entity.with_child((
+                Name::new("truck model"),
                 SceneRoot(truck.clone()),
                 Transform::from_translation(Vec3::new(0f32, 0f32, -0.4f32))
                     .with_scale(Vec3::new(0.005, 0.005, 0.005))

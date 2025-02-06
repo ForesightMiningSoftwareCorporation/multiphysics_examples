@@ -11,8 +11,6 @@ use bevy_rapier3d::{
     rapier::prelude::CollisionEventFlags,
 };
 
-use crate::RandomSource;
-
 pub struct ScoopPlugin;
 
 impl Plugin for ScoopPlugin {
@@ -87,10 +85,10 @@ impl Command for ScoopCommand {
             .get(&world, self.target)
             .unwrap()
             .clone();
-        let mut random = world.get_resource_mut::<RandomSource>().unwrap();
+        let mut random = rand::thread_rng();
         let offset = scoop_target_copy
             .possible_offset
-            .sample_interior(&mut random.0);
+            .sample_interior(&mut random);
         world
             .entity_mut(self.to_scoop)
             .insert(FlyScoopTo {

@@ -1,4 +1,4 @@
-## Editor
+## Map Editor
 
 This crate provides a binary to run experiments on map loading.
 

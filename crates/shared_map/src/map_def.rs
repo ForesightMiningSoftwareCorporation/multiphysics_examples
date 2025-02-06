@@ -101,7 +101,7 @@ impl AssetLoader for MapDefLoader {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["mapdef.ron", "mapdef"]
+        &["mapdef.ron"]
     }
 }
 

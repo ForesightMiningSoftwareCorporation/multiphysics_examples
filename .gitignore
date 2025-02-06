@@ -24,3 +24,5 @@ Cargo.lock
 
 # private assets which should not be shared.
 private
+# .env file contain absolute path.
+.env

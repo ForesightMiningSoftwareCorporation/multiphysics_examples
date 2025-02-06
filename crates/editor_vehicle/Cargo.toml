@@ -1,19 +1,22 @@
 [package]
-name = "map_def"
+name = "editor_vehicle"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.15", features = ["multi_threaded", "jpeg"] }
-bevy_rapier3d = "0.28"
-thiserror = "2.0"
-serde = { version = "1", features = ["derive"] }
-ron = "0.8"
-
-[dev-dependencies]
+dotenvy = "0.15"
 bevy = { version = "0.15", features = [
+    "multi_threaded",
+    "jpeg",
+    "file_watcher",
     # Optional for iteration times,
     # see https://bevyengine.org/learn/quick-start/getting-started/setup/#enable-fast-compiles-optional
     "dynamic_linking",
-    "serialize",
 ] }
+bevy-inspector-egui = "0.29"
+bevy_editor_cam = "0.5.0"
+bevy_rapier3d = "0.28"
+
+# inner crates
+
+shared_vehicle = { path = "../shared_vehicle" }

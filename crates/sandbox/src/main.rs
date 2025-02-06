@@ -1,19 +1,17 @@
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use bevy_editor_cam::prelude::*;
-use bevy_egui::EguiPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
 use controls::ControlsPlugin;
 use dotenvy::dotenv;
-use map_def::rock::Rock;
-use rand::SeedableRng;
-use rand_chacha::ChaCha8Rng;
-use rapier_vehicle_controller::debug::VehicleControllerDebugPlugin;
+use shared_map::rock::Rock;
+use shared_vehicle::{
+    rapier_vehicle_controller::debug::VehicleControllerDebugPlugin, vehicle_spawner,
+};
 use vehicle_spawner::scoop::ScoopPlugin;
 
 pub mod controls;
 pub mod load_level;
-pub mod rapier_vehicle_controller;
-pub mod vehicle_spawner;
 
 fn main() {
     dotenv().expect(".env file not found");
@@ -27,14 +25,11 @@ fn main() {
         RapierDebugRenderPlugin::default(),
         VehicleControllerDebugPlugin,
         DefaultEditorCamPlugins,
-        map_def::MapDefPlugin,
+        shared_map::MapDefPlugin,
         ControlsPlugin,
         ScoopPlugin,
-    ))
-    .add_plugins(EguiPlugin);
-
-    let seeded_rng = ChaCha8Rng::seed_from_u64(4);
-    app.insert_resource(RandomSource(seeded_rng));
+        WorldInspectorPlugin::new(),
+    ));
 
     app.add_systems(PreStartup, init_rapier_context);
     app.add_systems(Startup, load_level::setup);
@@ -80,6 +75,3 @@ pub fn add_scoopable_to_rocks(
             .insert(ActiveEvents::COLLISION_EVENTS);
     }
 }
-
-#[derive(Resource)]
-struct RandomSource(pub ChaCha8Rng);

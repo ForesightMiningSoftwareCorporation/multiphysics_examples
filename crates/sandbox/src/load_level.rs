@@ -1,13 +1,13 @@
 use crate::controls::CurrentSelection;
-use crate::vehicle_spawner;
 
-use super::rapier_vehicle_controller::VehicleControllerParameters;
-use super::vehicle_spawner::VehicleType;
 use bevy::prelude::*;
 use bevy_editor_cam::prelude::*;
-use bevy_rapier3d::prelude::*;
-use bevy_rapier3d::rapier::control::WheelTuning;
-use map_def::map_def::MapDefHandle;
+use bevy_rapier3d::{prelude::*, rapier::control::WheelTuning};
+use shared_map::map_def::MapDefHandle;
+use shared_vehicle::{
+    rapier_vehicle_controller::VehicleControllerParameters,
+    vehicle_spawner::{self, VehicleType},
+};
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
@@ -58,7 +58,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         entity: Some(bulldozer_entity),
     });
 
-    vehicle_spawner::spawn(VehicleType::Excavator, &mut commands, &asset_server)
+    vehicle_spawner::spawn(VehicleType::Excavator2, &mut commands, &asset_server)
         .insert(Transform::from_translation(Vec3::new(-4.0, 5.0, 3.0)))
         .insert(
             VehicleControllerParameters::empty()

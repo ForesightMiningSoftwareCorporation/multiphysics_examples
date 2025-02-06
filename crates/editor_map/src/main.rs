@@ -9,7 +9,7 @@ use bevy::{
 use bevy_editor_cam::prelude::*;
 use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
 use dotenvy::dotenv;
-use map_def::{
+use shared_map::{
     map_def::{MapDef, MapDefHandle},
     rock::{Rock, SpawnRockCommand},
 };
@@ -25,7 +25,7 @@ fn main() {
             .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
         RapierDebugRenderPlugin::default(),
         DefaultEditorCamPlugins,
-        map_def::MapDefPlugin,
+        shared_map::MapDefPlugin,
     ));
 
     app.add_systems(PreStartup, init_rapier_context);
@@ -86,14 +86,13 @@ pub fn setup(
 
     // Ground
 
-    // Create a ground procedurally
-
     /*
+    // Create a ground procedurally
     let width = 50;
     let length = 50;
     let height = 10f32;
     let mut map = commands.spawn(MapDefHandle(
-        map_def.add(MapDef {
+        _map_def.add(MapDef {
             vertices_width: width,
             vertices_length: length,
             scale: Vec3::new(width as f32, height, length as f32),
@@ -142,8 +141,7 @@ pub fn setup(
     );
 }
 
-/// Updates the rocks list then
-/// saves the [`MapDef`]s to a file.
+/// Updates the rocks list then saves the [`MapDef`]s to a file.
 /// If it's not already saved, it will be saved as `procedural_{hash}.mapdef.ron`.
 ///
 /// FIXME: this doesn't support multiple maps, as all rocks will be associated with all maps.
