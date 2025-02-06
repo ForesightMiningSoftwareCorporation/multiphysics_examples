@@ -15,7 +15,7 @@ use shared_vehicle::{
         controls::ExcavatorControls, ExcavatorControlsPlugin, ExcavatorDef, ExcavatorDefHandle,
         RotationControlDef,
     },
-    vehicle_spawner::{self, VehicleType},
+    vehicle_spawner::{self, VehicleSpawnerPlugin, VehicleType},
 };
 
 fn main() {
@@ -30,6 +30,7 @@ fn main() {
         RapierDebugRenderPlugin::default(),
         DefaultEditorCamPlugins,
         ExcavatorControlsPlugin,
+        VehicleSpawnerPlugin,
         WorldInspectorPlugin::new(),
     ));
 
@@ -85,7 +86,7 @@ pub fn setup(
             shadows_enabled: true,
             ..default()
         },
-        Transform::default().looking_to(Vec3::new(1.0, 1.0, -1.0), Vec3::Z),
+        Transform::default().looking_to(Vec3::new(1.0, -1.0, -1.0), Vec3::Z),
     ));
 
     /*

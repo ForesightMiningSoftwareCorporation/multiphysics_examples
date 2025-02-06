@@ -1,10 +1,21 @@
 pub mod scoop;
+pub mod override_mass_on_spawn;
 
 use std::f32::consts::TAU;
 
-use bevy::prelude::*;
-use bevy_rapier3d::{prelude::{Collider, ColliderMassProperties, CollisionGroups, Group, MassProperties, RigidBody, Sensor}, rapier};
+use bevy::{prelude::*, utils::HashMap};
+use bevy_rapier3d::{prelude::{ Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group, MassProperties, RigidBody, Sensor}, rapier};
+use override_mass_on_spawn::{OverrideMassOnSpawn, OverrideMassOnSpawnPlugin};
 use scoop::{ScoopTarget, SensorStartScoop};
+
+pub struct VehicleSpawnerPlugin;
+
+impl Plugin for VehicleSpawnerPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<VehicleType>();
+        app.add_plugins(OverrideMassOnSpawnPlugin);
+    }
+}
 
 #[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VehicleType {
@@ -139,7 +150,7 @@ pub fn spawn<'a>(
                 RigidBody::Dynamic,
             ));
             // Sensor to detect rocks, and move them to the truck.
-            entity.with_child((
+            /*entity.with_child((
                 Name::new("scoop sensor"),
                 Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
                 Sensor,
@@ -149,17 +160,36 @@ pub fn spawn<'a>(
                 // mass shouldn't be impacted as it's a sensor.
                 ColliderMassProperties::Density(0f32),
                 SensorStartScoop
-            ));
+            ));*/
+            let meshes_to_convert_to_collider: HashMap<String, Option<ComputedColliderShape>> = [
+                // Boom
+                ("Mesh.018".to_string(), Some(ComputedColliderShape::default())),
+                // Bucket base
+                ("Mesh.004".to_string(), Some(ComputedColliderShape::default())),
+                // Bucket jaws
+                ("Mesh.003".to_string(), Some(ComputedColliderShape::default())),
+                // Rear chassis ; Consider replacing that with a cube
+                ("Mesh.059".to_string(), Some(ComputedColliderShape::default())),
+                // Stick
+                ("Mesh.007".to_string(), Some(ComputedColliderShape::default())),
+            ].into();
             // Model
             entity.with_child((
                 Name::new("excavator2 model"),
                 SceneRoot(excavator.clone()),
-                Transform::from_translation(Vec3::new(0.0, 0.0, 1.2))
-                    .with_scale(Vec3::new(2.0, 2.0, 2.0))
+                Transform::from_translation(Vec3::new(0.0, 0.0, -0.2))
+                    .with_scale(Vec3::new(0.3, 0.3, 0.3))
                     .with_rotation(
+                        // Look back
+                        Quat::from_axis_angle(Vec3::Z, TAU / 2.0) *
                         // Look up
                         Quat::from_axis_angle(Vec3::X, TAU / 4.0),
                     ),
+                    OverrideMassOnSpawn { names_to_override: meshes_to_convert_to_collider.keys().cloned().collect() },
+                    // NOTE: Compute automatically colliders, we're only selecting a subset of the meshes for better performances.
+                    // bevy_rapier3d::prelude::AsyncSceneCollider { shape: Some(ComputedColliderShape::default()), named_shapes: default() }
+                    bevy_rapier3d::prelude::AsyncSceneCollider { shape: None, named_shapes: 
+                        meshes_to_convert_to_collider },
             ));
             entity
         }

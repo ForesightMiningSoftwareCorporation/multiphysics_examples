@@ -6,7 +6,8 @@ use controls::ControlsPlugin;
 use dotenvy::dotenv;
 use shared_map::rock::Rock;
 use shared_vehicle::{
-    rapier_vehicle_controller::debug::VehicleControllerDebugPlugin, vehicle_spawner,
+    rapier_vehicle_controller::debug::VehicleControllerDebugPlugin,
+    vehicle_spawner::{self, VehicleSpawnerPlugin},
 };
 use vehicle_spawner::scoop::ScoopPlugin;
 
@@ -26,6 +27,7 @@ fn main() {
         VehicleControllerDebugPlugin,
         DefaultEditorCamPlugins,
         shared_map::MapDefPlugin,
+        VehicleSpawnerPlugin,
         ControlsPlugin,
         ScoopPlugin,
         WorldInspectorPlugin::new(),

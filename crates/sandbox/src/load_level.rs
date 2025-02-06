@@ -26,7 +26,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             shadows_enabled: true,
             ..default()
         },
-        Transform::default().looking_to(Vec3::new(1.0, 1.0, -1.0), Vec3::Z),
+        Transform::default().looking_to(Vec3::new(1.0, -1.0, -1.0), Vec3::Z),
     ));
 
     // Ground
