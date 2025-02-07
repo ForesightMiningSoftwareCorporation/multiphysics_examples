@@ -1,11 +1,19 @@
-use bevy::{input::common_conditions::input_just_pressed, prelude::*};
+use bevy::{
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    input::common_conditions::input_just_pressed,
+    prelude::*,
+};
 use bevy_editor_cam::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
+use bevy_rapier3d::{
+    prelude::*,
+    rapier::prelude::{DebugRenderPipeline, IntegrationParameters},
+};
 use controls::ControlsPlugin;
 use dotenvy::dotenv;
 use shared_map::rock::Rock;
 use shared_vehicle::{
+    excavator_controls::ExcavatorControlsPlugin,
     rapier_vehicle_controller::debug::VehicleControllerDebugPlugin,
     vehicle_spawner::{self, VehicleSpawnerPlugin},
 };
@@ -28,10 +36,27 @@ fn main() {
         DefaultEditorCamPlugins,
         shared_map::MapDefPlugin,
         VehicleSpawnerPlugin,
+        ExcavatorControlsPlugin,
         ControlsPlugin,
         ScoopPlugin,
         WorldInspectorPlugin::new(),
+        // Adds frame time diagnostics
+        FrameTimeDiagnosticsPlugin,
+        // Adds a system that prints diagnostics to the console
+        LogDiagnosticsPlugin::default(),
     ));
+    app.insert_resource(TimestepMode::Variable {
+        max_dt: 1.0 / 14.0,
+        time_scale: 1.0,
+        substeps: 2,
+    });
+    let mut debug_render_pipeline = DebugRenderPipeline::default();
+    debug_render_pipeline.mode = DebugRenderMode::default() | DebugRenderMode::SOLVER_CONTACTS;
+    app.insert_resource(DebugRenderContext {
+        enabled: true,
+        default_collider_debug: ColliderDebug::default(),
+        pipeline: debug_render_pipeline,
+    });
 
     app.add_systems(PreStartup, init_rapier_context);
     app.add_systems(Startup, load_level::setup);
@@ -60,6 +85,7 @@ pub fn init_rapier_context(mut commands: Commands) {
         rapier_context,
         RapierConfiguration {
             gravity: -Vec3::Z * 9.81,
+            force_update_from_transform_changes: true,
             ..RapierConfiguration::new(1f32)
         },
         DefaultRapierContext,

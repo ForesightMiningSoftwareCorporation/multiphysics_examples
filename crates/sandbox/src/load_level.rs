@@ -3,8 +3,9 @@ use crate::controls::CurrentSelection;
 use bevy::prelude::*;
 use bevy_editor_cam::prelude::*;
 use bevy_rapier3d::{prelude::*, rapier::control::WheelTuning};
-use shared_map::map_def::MapDefHandle;
+use shared_map::{map_def::MapDefHandle, rock::SpawnRockCommand};
 use shared_vehicle::{
+    excavator_controls::{controls::ExcavatorControls, ExcavatorDefHandle},
     rapier_vehicle_controller::VehicleControllerParameters,
     vehicle_spawner::{self, VehicleType},
 };
@@ -30,11 +31,31 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     // Ground
-    let mut map = commands.spawn(MapDefHandle(asset_server.load("mapdef/final.mapdef.ron")));
+    let mut map = commands.spawn(MapDefHandle(
+        asset_server.load("mapdef/no_cubes.mapdef.ron"),
+    ));
     map.insert((
         Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
         CollisionGroups::new(Group::GROUP_2, Group::ALL),
-    ));
+    ))
+    .observe(
+        |trigger: Trigger<Pointer<Move>>,
+         mut commands: Commands,
+         inputs: Res<ButtonInput<KeyCode>>| {
+            if !inputs.pressed(KeyCode::KeyC) {
+                return;
+            }
+            let Some(position) = trigger.hit.position else {
+                return;
+            };
+            let Some(normal) = trigger.hit.normal else {
+                return;
+            };
+            commands.queue(SpawnRockCommand {
+                isometry: Isometry3d::new(position + normal * 3.0, Quat::default()),
+            });
+        },
+    );
 
     // Vehicles
 
@@ -58,6 +79,9 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         entity: Some(bulldozer_entity),
     });
 
+    let excavator_def =
+        ExcavatorDefHandle(asset_server.load("vehicledef/excavator2.excavatordef.ron"));
+
     vehicle_spawner::spawn(VehicleType::Excavator2, &mut commands, &asset_server)
         .insert(Transform::from_translation(Vec3::new(-4.0, 5.0, 3.0)))
         .insert(
@@ -65,7 +89,9 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .with_wheel_positions_for_half_size(Vec3::new(0.5, 0.5, 0.2))
                 .with_wheel_tuning(wheel_tuning)
                 .with_crawler(true),
-        );
+        )
+        .insert(excavator_def)
+        .insert(ExcavatorControls::default());
 
     let truck_controller_parameters = VehicleControllerParameters {
         wheel_tuning,

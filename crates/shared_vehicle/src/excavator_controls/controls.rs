@@ -7,7 +7,9 @@ use serde::{Deserialize, Serialize};
 use super::{ExcavatorDefHandle, RotationControlDef};
 
 /// Real time knobs to control the excavator.
-#[derive(Debug, Default, Component, Serialize, Deserialize, InspectorOptions, Reflect)]
+#[derive(
+    Debug, PartialEq, Default, Component, Serialize, Deserialize, InspectorOptions, Reflect,
+)]
 #[reflect(InspectorOptions)]
 pub struct ExcavatorControls {
     /// target angle ratio for [`ExcavatorDef::bucket_jaw`]

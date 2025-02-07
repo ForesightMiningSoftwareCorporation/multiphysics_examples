@@ -4,7 +4,6 @@ use bevy::{
         saver::{AssetSaver, SavedAsset},
         AssetLoader, AsyncWriteExt, LoadContext,
     },
-    core_pipeline::deferred::node,
     prelude::*,
 };
 use std::hash::{Hash, Hasher};
@@ -23,6 +22,7 @@ impl Hash for RotationControlDef {
             axis,
             min_max_angle,
             default_angle,
+            sensitivity,
         } = self;
         node_name.hash(state);
         if let Some(min_max_angle) = min_max_angle {
@@ -33,6 +33,7 @@ impl Hash for RotationControlDef {
         axis.y.to_bits().hash(state);
         axis.z.to_bits().hash(state);
         default_angle.to_bits().hash(state);
+        sensitivity.to_bits().hash(state);
     }
 }
 
@@ -142,7 +143,6 @@ pub fn on_excavator_def_changed(
     mut commands: Commands,
     excavatordef_instances: Query<(Entity, &ExcavatorDefHandle)>,
     excavator_defs: Res<Assets<ExcavatorDef>>,
-
     children_query: Query<&Children>,
     name_query: Query<&Name>,
 ) {
@@ -154,7 +154,9 @@ pub fn on_excavator_def_changed(
             boom: Entity::PLACEHOLDER,
             swing: Entity::PLACEHOLDER,
         };
-        let def = excavator_defs.get(&handle.0).unwrap();
+        let Some(def) = excavator_defs.get(&handle.0) else {
+            continue;
+        };
         for e in children_query.iter_descendants(entity) {
             let Ok(name) = name_query.get(e) else {
                 continue;

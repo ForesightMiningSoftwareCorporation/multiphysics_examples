@@ -1,11 +1,13 @@
 pub mod scoop;
-pub mod override_mass_on_spawn;
+pub mod react_on_scene_instance_ready;
+pub mod follow;
 
 use std::f32::consts::TAU;
 
 use bevy::{prelude::*, utils::HashMap};
-use bevy_rapier3d::{prelude::{ Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group, MassProperties, RigidBody, Sensor}, rapier};
-use override_mass_on_spawn::{OverrideMassOnSpawn, OverrideMassOnSpawnPlugin};
+use bevy_rapier3d::{plugin::WriteDefaultRapierContext, prelude::{ CoefficientCombineRule, Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Dominance, Group, MassProperties, Restitution, RigidBody, Sensor}, rapier::{self, prelude::RigidBodyBuilder}};
+use follow::{CopyPosition, FollowPlugin};
+use react_on_scene_instance_ready::{OnSceneReady, ReactOnSceneInstanceReady, ReactOnSceneInstanceReadyPlugin};
 use scoop::{ScoopTarget, SensorStartScoop};
 
 pub struct VehicleSpawnerPlugin;
@@ -13,7 +15,8 @@ pub struct VehicleSpawnerPlugin;
 impl Plugin for VehicleSpawnerPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<VehicleType>();
-        app.add_plugins(OverrideMassOnSpawnPlugin);
+        app.add_plugins(ReactOnSceneInstanceReadyPlugin);
+        app.add_plugins(FollowPlugin);
     }
 }
 
@@ -63,7 +66,7 @@ pub fn spawn<'a>(
                 Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
                 Collider::cuboid(1f32, 0.4f32, 0.8f32),
                 // no collision with ground
-                CollisionGroups::new(Group::all(), Group::GROUP_1),
+                CollisionGroups::new(Group::all(), !Group::GROUP_2),
                 // mass shouldn't impact too much or the vehicle will just fall towards its front.
                 ColliderMassProperties::MassProperties(MassProperties {
                     local_center_of_mass: Vec3::new(0.0, -1.0, 0.0),
@@ -147,7 +150,9 @@ pub fn spawn<'a>(
                     local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
                     ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(0.8f32, chassis_dimensions.into()))
                 }),
+                CollisionGroups::new(Group::GROUP_3, !Group::GROUP_3),
                 RigidBody::Dynamic,
+                //Dominance::group(10)
             ));
             // Sensor to detect rocks, and move them to the truck.
             /*entity.with_child((
@@ -169,28 +174,57 @@ pub fn spawn<'a>(
                 // Bucket jaws
                 ("Mesh.003".to_string(), Some(ComputedColliderShape::default())),
                 // Rear chassis ; Consider replacing that with a cube
-                ("Mesh.059".to_string(), Some(ComputedColliderShape::default())),
+                //("Mesh.059".to_string(), Some(ComputedColliderShape::default())),
                 // Stick
                 ("Mesh.007".to_string(), Some(ComputedColliderShape::default())),
             ].into();
             // Model
-            entity.with_child((
+            entity.with_children(| child_builder| {
+                child_builder.spawn(
+                (
                 Name::new("excavator2 model"),
                 SceneRoot(excavator.clone()),
-                Transform::from_translation(Vec3::new(0.0, 0.0, -0.2))
-                    .with_scale(Vec3::new(0.3, 0.3, 0.3))
+                Transform::from_translation(Vec3::new(0.0, 0.0, -0.5))
+                    .with_scale(Vec3::new(0.4, 0.4, 0.4))
                     .with_rotation(
                         // Look back
                         Quat::from_axis_angle(Vec3::Z, TAU / 2.0) *
                         // Look up
                         Quat::from_axis_angle(Vec3::X, TAU / 4.0),
                     ),
-                    OverrideMassOnSpawn { names_to_override: meshes_to_convert_to_collider.keys().cloned().collect() },
+                    ReactOnSceneInstanceReady,
                     // NOTE: Compute automatically colliders, we're only selecting a subset of the meshes for better performances.
                     // bevy_rapier3d::prelude::AsyncSceneCollider { shape: Some(ComputedColliderShape::default()), named_shapes: default() }
                     bevy_rapier3d::prelude::AsyncSceneCollider { shape: None, named_shapes: 
-                        meshes_to_convert_to_collider },
-            ));
+                        meshes_to_convert_to_collider.clone() },
+            )).observe(move |
+                trigger: Trigger<OnSceneReady>, mut commands: Commands, 
+                q_children: 
+                    Query<&Children>,
+                q_parents: Query<&Parent>,
+                q_names: Query<&Name>,| {
+                    
+                    for entity in q_children.iter_descendants(trigger.entity()) {
+                        let Ok(name) = q_names.get(entity) else {
+                            continue;
+                        };
+                        commands.entity(entity).insert(CollisionGroups::new(Group::GROUP_3, !Group::GROUP_3));
+                        if meshes_to_convert_to_collider.contains_key(&name.to_string()) {
+                            // We found a joint that we want to control,
+                            // we're transforming it to an unparented kinematic rigidbody,
+                            // to avoid mass impacting our vehicle collider.
+                            // We still need that collider to have some mass to push rocks.
+                            commands.entity(entity).insert(CopyPosition(q_parents.get(entity).unwrap().get()));
+                            commands.entity(entity).remove_parent_in_place();
+                            //commands.entity(entity).insert(Dominance::group(10));
+                            commands.entity(entity).insert(RigidBody::KinematicPositionBased);
+                            commands.entity(entity).insert(Restitution{ coefficient: 0.0, combine_rule: CoefficientCombineRule::Min });
+
+                            // no collision with self and others from same group (all excavator parts)
+                        }
+                    }
+            });
+        });
             entity
         }
         VehicleType::Truck => {

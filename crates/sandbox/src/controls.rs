@@ -3,6 +3,7 @@ use bevy_egui::{egui, EguiContexts};
 use bevy_rapier3d::{plugin::WriteDefaultRapierContext, prelude::RapierRigidBodyHandle};
 
 use shared_vehicle::{
+    excavator_controls::{controls::ExcavatorControls, ExcavatorDef, ExcavatorDefHandle},
     rapier_vehicle_controller::{VehicleController, VehicleControllerParameters},
     vehicle_spawner::VehicleType,
 };
@@ -18,9 +19,10 @@ impl Plugin for ControlsPlugin {
 
         app.add_systems(Update, init_vehicle_controller);
         app.add_systems(
-            FixedUpdate,
+            Update,
             (update_vehicle_controls, update_vehicle_controller).chain(),
         );
+        app.add_systems(Update, update_excavator_controls);
         app.add_systems(Update, (ui_cycle_vehicles, ui_controls));
     }
 }
@@ -122,21 +124,6 @@ pub fn init_vehicle_controller(
     }
 }
 
-/// System to forward controls to [`VehicleController`]
-pub fn update_vehicle_controls(
-    current_selection: Res<CurrentSelection>,
-    inputs: Res<ButtonInput<KeyCode>>,
-    mut vehicles: Query<(Entity, &mut VehicleController, &VehicleControllerParameters)>,
-) {
-    for (e, mut vehicle_controller, parameters) in vehicles.iter_mut() {
-        if current_selection.entity != Some(e) {
-            vehicle_controller.stop();
-            continue;
-        }
-        vehicle_controller.integrate_actions(&inputs, parameters);
-    }
-}
-
 /// System to initialize and insert a [`VehicleController`] after bevy_rapier initializes the rigidbody.
 ///
 pub fn update_vehicle_controller(
@@ -152,5 +139,41 @@ pub fn update_vehicle_controller(
             &context.colliders,
             &context.query_pipeline,
         );
+    }
+}
+
+/// System to forward controls to [`VehicleController`]
+pub fn update_vehicle_controls(
+    current_selection: Res<CurrentSelection>,
+    inputs: Res<ButtonInput<KeyCode>>,
+    mut vehicles: Query<(Entity, &mut VehicleController, &VehicleControllerParameters)>,
+) {
+    for (e, mut vehicle_controller, parameters) in vehicles.iter_mut() {
+        if current_selection.entity != Some(e) {
+            vehicle_controller.stop();
+            continue;
+        }
+        vehicle_controller.integrate_actions(&inputs, parameters);
+    }
+}
+
+/// System to forward controls to [`ExcavatorControls`]
+pub fn update_excavator_controls(
+    current_selection: Res<CurrentSelection>,
+
+    time: Res<Time>,
+    inputs: Res<ButtonInput<KeyCode>>,
+    mut q_controls: Query<(Entity, &mut ExcavatorControls)>,
+) {
+    for (entity, mut control) in q_controls.iter_mut() {
+        if current_selection.entity != Some(entity) {
+            continue;
+        }
+        let elapsed = time.delta_secs();
+        let mut control_change = ExcavatorControls::default();
+        control_change.integrate_inputs(elapsed, &inputs);
+        if control_change != ExcavatorControls::default() {
+            control.add(&control_change);
+        }
     }
 }

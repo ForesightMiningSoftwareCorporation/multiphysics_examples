@@ -91,36 +91,41 @@ pub fn setup(
 
     /*
     // Create an excavator def through code
-    let mut excavator_def = commands.spawn(ExcavatorDefHandle(_excavator_def.add(ExcavatorDef {
+    let mut excavator_def = ExcavatorDefHandle(_excavator_def.add(ExcavatorDef {
         bucket_jaw: RotationControlDef {
             node_name: "HMS_bucket_jaws_JNT".to_string(),
             axis: Vec3::X,
             min_max_angle: Some(Vec2::new(0f32, 90f32.to_radians())),
             default_angle: 0.0,
+            sensitivity: 1.0,
         },
         bucket_base: RotationControlDef {
             node_name: "HMS_bucket_bucket_JNT".to_string(),
             axis: Vec3::X,
             min_max_angle: Some(Vec2::new(0f32, 90f32.to_radians())),
             default_angle: 0.0,
+            sensitivity: 1.0,
         },
         stick: RotationControlDef {
             node_name: "HMS_stick_JNT".to_string(),
             axis: Vec3::X,
             min_max_angle: Some(Vec2::new(0f32, 90f32.to_radians())),
             default_angle: 0.0,
+            sensitivity: 1.0,
         },
         boom: RotationControlDef {
             node_name: "HMS_boom_JNT".to_string(),
             axis: Vec3::X,
             min_max_angle: Some(Vec2::new(0f32, 90f32.to_radians())),
             default_angle: 0.0,
+            sensitivity: 1.0,
         },
         swing: RotationControlDef {
             node_name: "HMS_swing_drive".to_string(),
             axis: Vec3::Y,
             min_max_angle: None,
             default_angle: 0.0,
+            sensitivity: 1.0,
         },
     })));
     // */

@@ -86,7 +86,7 @@ pub fn setup(
 
     // Ground
 
-    /*
+    // /*
     // Create a ground procedurally
     let width = 50;
     let length = 50;
@@ -116,7 +116,7 @@ pub fn setup(
     // */
     // /*
     // Alternatively, to load an existing map:
-    let mut map = commands.spawn(MapDefHandle(asset_server.load("mapdef/final.mapdef.ron")));
+    //let mut map = commands.spawn(MapDefHandle(asset_server.load("mapdef/final.mapdef.ron")));
     // */
     map.insert(
         Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),

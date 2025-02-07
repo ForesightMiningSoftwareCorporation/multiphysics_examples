@@ -37,7 +37,7 @@ pub fn show_wheels_gizmos(
                 palettes::basic::RED,
             );
             let raycast_info = w.raycast_info();
-            if (raycast_info.is_in_contact) {
+            if raycast_info.is_in_contact {
                 gizmos.line(
                     global_center_wheel,
                     raycast_info.contact_point_ws.into(),

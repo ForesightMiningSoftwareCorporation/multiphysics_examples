@@ -1,5 +1,6 @@
 pub mod assets;
 pub mod controls;
+pub mod inputs;
 
 use bevy::prelude::*;
 use controls::{ExcavatorControls, ExcavatorControlsMapping};
@@ -33,6 +34,16 @@ pub struct RotationControlDef {
     pub axis: Vec3,
     pub min_max_angle: Option<Vec2>,
     pub default_angle: f32,
+    pub sensitivity: f32,
+}
+
+impl RotationControlDef {
+    pub fn clamp_angle(&self, angle: f32) -> f32 {
+        let Some(min_max_angle) = self.min_max_angle else {
+            return angle;
+        };
+        angle.clamp(min_max_angle.x, min_max_angle.y)
+    }
 }
 
 /// Definition of an excavator, to know which nodes to move and how they can be moved.
