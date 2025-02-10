@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
-use bevy_rapier3d::{plugin::WriteDefaultRapierContext, prelude::RapierRigidBodyHandle};
+use bevy_rapier3d::{
+    plugin::{ReadDefaultRapierContext, TimestepMode, WriteDefaultRapierContext},
+    prelude::RapierRigidBodyHandle,
+};
 
 use shared_vehicle::{
     excavator_controls::{controls::ExcavatorControls, ExcavatorDef, ExcavatorDefHandle},
@@ -160,18 +163,27 @@ pub fn update_vehicle_controls(
 /// System to forward controls to [`ExcavatorControls`]
 pub fn update_excavator_controls(
     current_selection: Res<CurrentSelection>,
-
+    excavator_def: Res<Assets<ExcavatorDef>>,
     time: Res<Time>,
     inputs: Res<ButtonInput<KeyCode>>,
-    mut q_controls: Query<(Entity, &mut ExcavatorControls)>,
+    timestep_mode: Res<TimestepMode>,
+    mut q_controls: Query<(Entity, &mut ExcavatorControls, &mut ExcavatorDefHandle)>,
 ) {
-    for (entity, mut control) in q_controls.iter_mut() {
+    for (entity, mut control, def_handle) in q_controls.iter_mut() {
         if current_selection.entity != Some(entity) {
             continue;
         }
-        let elapsed = time.delta_secs();
+        let Some(def) = excavator_def.get(&def_handle.0) else {
+            continue;
+        };
+        // capping delta time to max_dt, or we'll issue a move command that is too big,
+        // resulting in an excavator difficult to control.
+        let elapsed = match *timestep_mode {
+            TimestepMode::Variable { max_dt, .. } => time.delta_secs().min(max_dt),
+            _ => time.delta_secs(),
+        };
         let mut control_change = ExcavatorControls::default();
-        control_change.integrate_inputs(elapsed, &inputs);
+        control_change.integrate_inputs(elapsed, &inputs, &def);
         if control_change != ExcavatorControls::default() {
             control.add(&control_change);
         }

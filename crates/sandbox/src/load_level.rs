@@ -67,7 +67,10 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let bulldozer_entity =
         vehicle_spawner::spawn(VehicleType::Bulldozer, &mut commands, &asset_server)
-            .insert(Transform::from_translation(Vec3::new(0.0, 3.0, 3.0)))
+            .insert(
+                Transform::from_translation(Vec3::new(-10.0, 15.0, 3.0))
+                    .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
+            )
             .insert(
                 VehicleControllerParameters::empty()
                     .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4))
@@ -83,7 +86,10 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ExcavatorDefHandle(asset_server.load("vehicledef/excavator2.excavatordef.ron"));
 
     vehicle_spawner::spawn(VehicleType::Excavator2, &mut commands, &asset_server)
-        .insert(Transform::from_translation(Vec3::new(-4.0, 5.0, 3.0)))
+        .insert(
+            Transform::from_translation(Vec3::new(0.0, 15.0, 3.0))
+                .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
+        )
         .insert(
             VehicleControllerParameters::empty()
                 .with_wheel_positions_for_half_size(Vec3::new(0.5, 0.5, 0.2))
@@ -108,6 +114,9 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..VehicleControllerParameters::empty()
     };
     vehicle_spawner::spawn(VehicleType::Truck, &mut commands, &asset_server)
-        .insert(Transform::from_translation(Vec3::new(4.0, 5.0, 3.0)))
+        .insert(
+            Transform::from_translation(Vec3::new(10.0, 15.0, 3.0))
+                .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
+        )
         .insert(truck_controller_parameters);
 }

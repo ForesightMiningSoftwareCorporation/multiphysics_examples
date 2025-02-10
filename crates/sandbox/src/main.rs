@@ -17,10 +17,12 @@ use shared_vehicle::{
     rapier_vehicle_controller::debug::VehicleControllerDebugPlugin,
     vehicle_spawner::{self, VehicleSpawnerPlugin},
 };
+use stats_rocks::StatsRocksPlugin;
 use vehicle_spawner::scoop::ScoopPlugin;
 
 pub mod controls;
 pub mod load_level;
+pub mod stats_rocks;
 
 fn main() {
     dotenv().expect(".env file not found");
@@ -44,11 +46,14 @@ fn main() {
         FrameTimeDiagnosticsPlugin,
         // Adds a system that prints diagnostics to the console
         LogDiagnosticsPlugin::default(),
+        StatsRocksPlugin,
     ));
     app.insert_resource(TimestepMode::Variable {
-        max_dt: 1.0 / 14.0,
+        max_dt: 1.0 / 60.0,
         time_scale: 1.0,
-        substeps: 2,
+        // Substep should be 1, to play well with kinematic position based
+        // (bevy_rapier would move the body at the first half step, and not the second, resulting in a too quick movement))
+        substeps: 1,
     });
     let mut debug_render_pipeline = DebugRenderPipeline::default();
     debug_render_pipeline.mode = DebugRenderMode::default() | DebugRenderMode::SOLVER_CONTACTS;

@@ -3,43 +3,48 @@ use bevy::prelude::*;
 use super::{controls::ExcavatorControls, ExcavatorDef};
 
 impl ExcavatorControls {
-    pub fn integrate_inputs(&mut self, elapsed: f32, inputs: &Res<ButtonInput<KeyCode>>) {
+    pub fn integrate_inputs(
+        &mut self,
+        elapsed: f32,
+        inputs: &Res<ButtonInput<KeyCode>>,
+        def: &ExcavatorDef,
+    ) {
         for key in inputs.get_pressed() {
             match *key {
                 // swing
                 KeyCode::KeyT => {
-                    self.swing += 0.1 * elapsed;
+                    self.swing += 0.1 * elapsed * def.swing.sensitivity;
                 }
                 KeyCode::KeyG => {
-                    self.swing -= 0.1 * elapsed;
+                    self.swing -= 0.1 * elapsed * def.swing.sensitivity;
                 }
                 // boom
                 KeyCode::KeyY => {
-                    self.boom += 0.1 * elapsed;
+                    self.boom += 0.1 * elapsed * def.boom.sensitivity;
                 }
                 KeyCode::KeyH => {
-                    self.boom -= 0.1 * elapsed;
+                    self.boom -= 0.1 * elapsed * def.boom.sensitivity;
                 }
                 // stick
                 KeyCode::KeyU => {
-                    self.stick += 0.1 * elapsed;
+                    self.stick += 0.1 * elapsed * def.stick.sensitivity;
                 }
                 KeyCode::KeyJ => {
-                    self.stick -= 0.1 * elapsed;
+                    self.stick -= 0.1 * elapsed * def.stick.sensitivity;
                 }
                 // bucket base
                 KeyCode::KeyI => {
-                    self.bucket_base += 0.1 * elapsed;
+                    self.bucket_base += 0.1 * elapsed * def.bucket_base.sensitivity;
                 }
                 KeyCode::KeyK => {
-                    self.bucket_base -= 0.1 * elapsed;
+                    self.bucket_base -= 0.1 * elapsed * def.bucket_base.sensitivity;
                 }
                 // bucket jaw
                 KeyCode::KeyO => {
-                    self.bucket_jaw += 0.1 * elapsed;
+                    self.bucket_jaw += 0.1 * elapsed * def.bucket_jaw.sensitivity;
                 }
                 KeyCode::KeyL => {
-                    self.bucket_jaw -= 0.1 * elapsed;
+                    self.bucket_jaw -= 0.1 * elapsed * def.bucket_jaw.sensitivity;
                 }
                 _ => {}
             }
