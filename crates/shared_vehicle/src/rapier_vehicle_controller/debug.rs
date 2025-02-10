@@ -18,17 +18,13 @@ pub struct VehicleControllerGizmos {}
 
 pub fn show_wheels_gizmos(
     mut gizmos: Gizmos<VehicleControllerGizmos>,
-    q_vehicles: Query<(
-        &GlobalTransform,
-        &VehicleControllerParameters,
-        &VehicleController,
-    )>,
+    q_vehicles: Query<(&VehicleControllerParameters, &VehicleController)>,
     rapier_debug: Res<DebugRenderContext>,
 ) {
     if rapier_debug.enabled == false {
         return;
     }
-    for (global_transform, parameters, controller) in q_vehicles.iter() {
+    for (parameters, controller) in q_vehicles.iter() {
         for w in controller.controller.wheels() {
             let global_center_wheel = w.center().into();
             gizmos.sphere(

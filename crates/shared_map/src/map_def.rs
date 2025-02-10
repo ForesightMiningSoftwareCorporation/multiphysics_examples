@@ -7,7 +7,7 @@ use bevy::{
     prelude::*,
     render::mesh::Indices,
 };
-use bevy_rapier3d::{prelude::Collider, rapier::prelude::HeightField};
+use bevy_rapier3d::{prelude::Collider, rapier::prelude::HeightField, render::ColliderDebug};
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
 use std::{fs::File, io::Write, path::Path};
@@ -174,6 +174,7 @@ pub fn on_map_def_handle_changed(
         let Some(map_def): Option<&MapDef> = map_defs.get(&map_def_handle.0) else {
             continue;
         };
+        commands.entity(e).despawn_descendants();
         // Clear previous rocks
         for e in existing_rocks.iter() {
             commands.entity(e).despawn();
@@ -182,6 +183,58 @@ pub fn on_map_def_handle_changed(
         for r in map_def.rocks.iter() {
             commands.queue(SpawnRockCommand { isometry: *r });
         }
+        // Create new invisible walls
+        commands.entity(e).with_children(|child_builder| {
+            let wall_depth_half = 10.0 / 2.0;
+            let wall_height_half = (map_def.scale.z + 15.0) / 2.0;
+            let collider_x = Collider::cuboid(
+                map_def.scale.x / 2.0 + wall_depth_half,
+                wall_height_half,
+                wall_depth_half,
+            );
+            child_builder.spawn((
+                Name::new("wall left"),
+                collider_x.clone(),
+                Transform::from_translation(Vec3::new(
+                    0.0,
+                    wall_height_half,
+                    -map_def.scale.x / 2.0 - wall_depth_half,
+                )),
+            ));
+            child_builder.spawn((
+                Name::new("wall left"),
+                collider_x.clone(),
+                Transform::from_translation(Vec3::new(
+                    0.0,
+                    wall_height_half,
+                    map_def.scale.x / 2.0 + wall_depth_half,
+                )),
+            ));
+            let collider_z = Collider::cuboid(
+                wall_depth_half,
+                wall_height_half,
+                map_def.scale.z / 2.0 + wall_depth_half,
+            );
+
+            child_builder.spawn((
+                Name::new("wall back"),
+                collider_z.clone(),
+                Transform::from_translation(Vec3::new(
+                    -map_def.scale.z / 2.0 - wall_depth_half,
+                    wall_height_half,
+                    0.0,
+                )),
+            ));
+            child_builder.spawn((
+                Name::new("wall front"),
+                collider_z.clone(),
+                Transform::from_translation(Vec3::new(
+                    map_def.scale.z / 2.0 + wall_depth_half,
+                    wall_height_half,
+                    0.0,
+                )),
+            ));
+        });
 
         let width = map_def.vertices_width;
         let length = map_def.vertices_length;
@@ -191,7 +244,7 @@ pub fn on_map_def_handle_changed(
             width,
             length,
             // `Collider::heightfield` uses Y-up, we've rotated it.
-            Vec3::new(100.0, height, 100.0),
+            Vec3::new(map_def.scale.x, height, map_def.scale.z),
         );
         let height_field = collider_ground.as_heightfield().unwrap();
         let mut mesh = heightfield_to_bevy_mesh(height_field.raw);

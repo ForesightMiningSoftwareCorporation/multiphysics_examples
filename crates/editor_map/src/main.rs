@@ -7,6 +7,7 @@ use bevy::{
     asset::io::file::FileAssetReader, input::common_conditions::input_just_pressed, prelude::*,
 };
 use bevy_editor_cam::prelude::*;
+use bevy_egui::EguiContexts;
 use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
 use dotenvy::dotenv;
 use shared_map::{
@@ -26,6 +27,7 @@ fn main() {
         RapierDebugRenderPlugin::default(),
         DefaultEditorCamPlugins,
         shared_map::MapDefPlugin,
+        bevy_egui::EguiPlugin,
     ));
 
     app.add_systems(PreStartup, init_rapier_context);
@@ -34,6 +36,7 @@ fn main() {
         Update,
         update_rocks_and_export_map.run_if(input_just_pressed(KeyCode::KeyE)),
     );
+    app.add_systems(Update, ui_controls);
     println!("\n\nInstructions:");
     println!("Press 'E' to export the map.");
     println!("Press 'C' and move your cursor on the ground to spawn rocks.");
@@ -62,7 +65,8 @@ pub fn setup(
     mut commands: Commands,
     // `_map_def` is useful if you want to create an asset procedurally.
     mut _map_def: ResMut<Assets<MapDef>>,
-    asset_server: Res<AssetServer>,
+    // `_asset_server` is useful to load an existing map.
+    _asset_server: Res<AssetServer>,
 ) {
     commands.spawn((
         Camera3d::default(),
@@ -116,7 +120,7 @@ pub fn setup(
     // */
     // /*
     // Alternatively, to load an existing map:
-    //let mut map = commands.spawn(MapDefHandle(asset_server.load("mapdef/final.mapdef.ron")));
+    //let mut map = commands.spawn(MapDefHandle(_asset_server.load("mapdef/final.mapdef.ron")));
     // */
     map.insert(
         Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
@@ -186,4 +190,11 @@ pub fn update_rocks_and_export_map(
 
         println!("Saved the map to {:?}", path);
     }
+}
+
+pub fn ui_controls(mut ctx: EguiContexts) {
+    bevy_egui::egui::Window::new("Control").show(ctx.ctx_mut(), |ui| {
+        ui.label("Press 'E' to export the map");
+        ui.label("Press 'C' and move your cursor on the ground to spawn rocks");
+    });
 }

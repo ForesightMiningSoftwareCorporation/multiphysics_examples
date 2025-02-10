@@ -70,7 +70,7 @@ fn ui_controls(
     q_vehicles: Query<(Entity, &VehicleType, Option<&Name>)>,
 ) {
     egui::Window::new("Control").show(contexts.ctx_mut(), |ui| {
-        ui.label("Press tab to cycle through vehicles");
+        ui.label("Press TAB to cycle through vehicles");
 
         let current_vehicle_type = current_selection.entity.and_then(|e| {
             q_vehicles
@@ -101,15 +101,31 @@ fn ui_controls(
                 ))
             })
             .collect::<Vec<_>>();
-        let current_selection_clone = current_selection.entity.clone();
         egui::ComboBox::from_label("Select vehicle")
             .selected_text(&selected_display)
             .show_ui(ui, |ui| {
-                ui.selectable_label(true, selected_display);
+                _ = ui.selectable_label(true, selected_display);
                 for (e, display_name) in other_vehicles {
                     ui.selectable_value(&mut current_selection.entity, Some(e), display_name);
                 }
             });
+        match current_vehicle_type {
+            Some((vehicle_type, _)) => {
+                ui.group(|ui| {
+                    ui.label("WASD to move.");
+                    match vehicle_type {
+                        VehicleType::Excavator => {
+                            ui.label("T,G to move boom");
+                            ui.label("U,J to move stick");
+                            ui.label("I,K to move bucket base");
+                            ui.label("O,L to move bucket jaw");
+                        }
+                        _ => {}
+                    }
+                });
+            }
+            _ => {}
+        }
     });
 }
 

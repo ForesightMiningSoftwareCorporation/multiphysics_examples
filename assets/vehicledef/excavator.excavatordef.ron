@@ -23,7 +23,7 @@
     boom: (
         node_name: "HMS_boom_JNT",
         axis: (-1.0, 0.0, 0.0),
-        min_max_angle: Some((-0.1, 1.5707964)),
+        min_max_angle: Some((-0.25, 1.5707964)),
         default_angle: 0.0,
         sensitivity: 1.0,
     ),

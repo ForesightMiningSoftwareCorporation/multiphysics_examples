@@ -132,10 +132,10 @@ pub fn setup(
     // /*
     // Alternatively, to load an existing excavator:
     let mut excavator_def =
-        ExcavatorDefHandle(asset_server.load("vehicledef/excavator2.excavatordef.ron"));
+        ExcavatorDefHandle(asset_server.load("vehicledef/excavator.excavatordef.ron"));
     // */
     // spawn a vehicle for reference and testing
-    vehicle_spawner::spawn(VehicleType::Excavator2, &mut commands, &asset_server)
+    vehicle_spawner::spawn(VehicleType::Excavator, &mut commands, &asset_server)
         .insert(excavator_def)
         .insert(ExcavatorControls::default())
         .insert(RigidBody::Fixed);

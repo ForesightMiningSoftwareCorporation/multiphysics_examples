@@ -4,11 +4,11 @@ pub mod follow;
 
 use std::f32::consts::TAU;
 
-use bevy::{prelude::*, utils::HashMap};
-use bevy_rapier3d::{plugin::WriteDefaultRapierContext, prelude::{ CoefficientCombineRule, Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Dominance, Group, MassProperties, Restitution, RigidBody, Sensor}, rapier::{self, prelude::RigidBodyBuilder}};
+use bevy::{prelude::*, scene::SceneInstanceReady, utils::HashMap};
+use bevy_rapier3d::{ prelude::{ CoefficientCombineRule, Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group, MassProperties, Restitution, RigidBody, Sensor}, rapier::{self, prelude::RigidBodyBuilder}};
 use follow::{CopyPosition, FollowPlugin};
 use react_on_scene_instance_ready::{OnSceneReady, ReactOnSceneInstanceReady, ReactOnSceneInstanceReadyPlugin};
-use scoop::{ScoopTarget, SensorStartScoop};
+use scoop::ScoopTarget;
 
 pub struct VehicleSpawnerPlugin;
 
@@ -24,7 +24,6 @@ impl Plugin for VehicleSpawnerPlugin {
 pub enum VehicleType {
     Bulldozer,
     Excavator,
-    Excavator2,
     Truck,
 }
 
@@ -95,7 +94,7 @@ pub fn spawn<'a>(
             let chassis_dimensions = Vec3::new(1f32, 2f32, 0.4f32);
             let chassis_collider = Collider::cuboid(chassis_dimensions.x, chassis_dimensions.y, chassis_dimensions.z);
             let excavator =
-                assets.load(GltfAssetLabel::Scene(0).from_asset("private/excavator/scene.gltf"));
+                assets.load(GltfAssetLabel::Scene(0).from_asset("private/excavator/excavator.gltf"));
             let mut entity = commands.spawn((
                 Name::new("excavator"),
                 vehicle_type,
@@ -107,52 +106,8 @@ pub fn spawn<'a>(
                     local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
                     ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(0.8f32, chassis_dimensions.into()))
                 }),
-                RigidBody::Dynamic,
-            ));
-            // Sensor to detect rocks, and move them to the truck.
-            entity.with_child((
-                Name::new("scoop sensor"),
-                Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
-                Sensor,
-                Collider::cuboid(1f32, 0.4f32, 0.8f32),
-                // no collision with ground
-                CollisionGroups::new(Group::all(), Group::GROUP_1),
-                // mass shouldn't be impacted as it's a sensor.
-                ColliderMassProperties::Density(0f32),
-                SensorStartScoop
-            ));
-            // Model
-            entity.with_child((
-                Name::new("excavator model"),
-                SceneRoot(excavator.clone()),
-                Transform::from_translation(Vec3::new(0.0, 0.0, 1.2))
-                    .with_scale(Vec3::new(2.0, 2.0, 2.0))
-                    .with_rotation(
-                        // Look up
-                        Quat::from_axis_angle(Vec3::X, TAU / 4.0),
-                    ),
-            ));
-            entity
-        }
-        VehicleType::Excavator2 => {
-            let chassis_dimensions = Vec3::new(1f32, 2f32, 0.4f32);
-            let chassis_collider = Collider::cuboid(chassis_dimensions.x, chassis_dimensions.y, chassis_dimensions.z);
-            let excavator =
-                assets.load(GltfAssetLabel::Scene(0).from_asset("private/excavator2/excavator2.gltf"));
-            let mut entity = commands.spawn((
-                Name::new("excavator2"),
-                vehicle_type,
-                Visibility::default(),
-                Transform::default(),
-                chassis_collider,
-                // mass is shifted down to avoid falling on its sides.
-                ColliderMassProperties::MassProperties(MassProperties {
-                    local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
-                    ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(0.8f32, chassis_dimensions.into()))
-                }),
                 CollisionGroups::new(Group::GROUP_3, !Group::GROUP_3),
                 RigidBody::Dynamic,
-                //Dominance::group(10)
             ));
             // Sensor to detect rocks, and move them to the truck.
             /*entity.with_child((
@@ -173,8 +128,6 @@ pub fn spawn<'a>(
                 ("Mesh.004".to_string(), Some(ComputedColliderShape::default())),
                 // Bucket jaws
                 ("Mesh.003".to_string(), Some(ComputedColliderShape::default())),
-                // Rear chassis ; Consider replacing that with a cube
-                //("Mesh.059".to_string(), Some(ComputedColliderShape::default())),
                 // Stick
                 ("Mesh.007".to_string(), Some(ComputedColliderShape::default())),
             ].into();
@@ -182,9 +135,9 @@ pub fn spawn<'a>(
             entity.with_children(| child_builder| {
                 child_builder.spawn(
                 (
-                Name::new("excavator2 model"),
+                Name::new("excavator model"),
                 SceneRoot(excavator.clone()),
-                Transform::from_translation(Vec3::new(0.0, 0.0, -0.5))
+                Transform::from_translation(Vec3::new(0.0, 0.0, -1f32))
                     .with_scale(Vec3::new(0.4, 0.4, 0.4))
                     .with_rotation(
                         // Look back
@@ -203,20 +156,19 @@ pub fn spawn<'a>(
                     Query<&Children>,
                 q_parents: Query<&Parent>,
                 q_names: Query<&Name>,| {
-                    
                     for entity in q_children.iter_descendants(trigger.entity()) {
                         let Ok(name) = q_names.get(entity) else {
                             continue;
                         };
+                        dbg!(&name);
                         commands.entity(entity).insert(CollisionGroups::new(Group::GROUP_3, !Group::GROUP_3));
                         if meshes_to_convert_to_collider.contains_key(&name.to_string()) {
                             // We found a joint that we want to control,
-                            // we're transforming it to an unparented kinematic rigidbody,
+                            // we're transforming it to a parentless kinematic rigidbody,
                             // to avoid mass impacting our vehicle collider.
                             // We still need that collider to have some mass to push rocks.
                             commands.entity(entity).insert(CopyPosition(q_parents.get(entity).unwrap().get()));
                             commands.entity(entity).remove_parent_in_place();
-                            //commands.entity(entity).insert(Dominance::group(10));
                             commands.entity(entity).insert(RigidBody::KinematicPositionBased);
                             commands.entity(entity).insert(Restitution{ coefficient: 0.0, combine_rule: CoefficientCombineRule::Min });
 

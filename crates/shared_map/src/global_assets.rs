@@ -6,6 +6,8 @@ pub struct GlobalAssets {
     pub ground_material: Handle<StandardMaterial>,
     pub rock_material: Handle<StandardMaterial>,
     pub rock_mesh: Handle<Mesh>,
+    pub muck_pile_mesh: Handle<Mesh>,
+    pub muck_pile_material: Handle<StandardMaterial>,
 }
 
 pub fn init_global_assets(
@@ -17,6 +19,8 @@ pub fn init_global_assets(
         ground_material: materials.add(Color::WHITE),
         rock_material: materials.add(Color::from(palettes::css::DARK_GRAY)),
         rock_mesh: meshes.add(Cuboid::new(0.2, 0.2, 0.2)),
+        muck_pile_mesh: meshes.add(Plane3d::new(Vec3::Z, Vec2::ONE / 2f32)),
+        muck_pile_material: materials.add(Color::from(palettes::css::GOLD)),
     };
     commands.insert_resource(global_assets);
 }

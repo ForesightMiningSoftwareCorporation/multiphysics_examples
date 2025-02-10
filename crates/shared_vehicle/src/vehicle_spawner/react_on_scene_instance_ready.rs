@@ -1,16 +1,8 @@
-//! Rapier async collider initialization compute
-//! the rapier colliders mass properties according to their volume,
-//! that makes it difficult to tweak engines forces,
-//! so this module can override mass to make it more predictable.
+//! When a gltf is loading, it is not immediately ready. This plugin allows you to react to when a scene is ready.
+//!
+//! I think The bevy built-in [`bevy::scene::SceneInstanceReady`] triggers too early, so this is a workaround.
 
-use bevy::{
-    ecs::{
-        schedule::SystemConfigs,
-        system::{BoxedSystem, SystemId, SystemState},
-    },
-    prelude::*,
-};
-use bevy_rapier3d::prelude::ColliderMassProperties;
+use bevy::prelude::*;
 
 pub struct ReactOnSceneInstanceReadyPlugin;
 

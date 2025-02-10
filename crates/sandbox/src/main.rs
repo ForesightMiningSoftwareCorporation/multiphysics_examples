@@ -4,7 +4,6 @@ use bevy::{
     prelude::*,
 };
 use bevy_editor_cam::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier3d::{
     prelude::*,
     rapier::prelude::{DebugRenderPipeline, IntegrationParameters},
@@ -22,6 +21,7 @@ use vehicle_spawner::scoop::ScoopPlugin;
 
 pub mod controls;
 pub mod load_level;
+pub mod muck_pile;
 pub mod stats_rocks;
 
 fn main() {
@@ -41,7 +41,7 @@ fn main() {
         ExcavatorControlsPlugin,
         ControlsPlugin,
         ScoopPlugin,
-        WorldInspectorPlugin::new(),
+        bevy_egui::EguiPlugin,
         // Adds frame time diagnostics
         FrameTimeDiagnosticsPlugin,
         // Adds a system that prints diagnostics to the console

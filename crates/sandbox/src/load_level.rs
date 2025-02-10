@@ -1,7 +1,8 @@
-use crate::controls::CurrentSelection;
+use crate::{controls::CurrentSelection, muck_pile::SpawnMuckPileCommand};
 
 use bevy::prelude::*;
 use bevy_editor_cam::prelude::*;
+use bevy_math::Vec3A;
 use bevy_rapier3d::{prelude::*, rapier::control::WheelTuning};
 use shared_map::{map_def::MapDefHandle, rock::SpawnRockCommand};
 use shared_vehicle::{
@@ -57,6 +58,14 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     );
 
+    // Muck pile
+    commands.queue(SpawnMuckPileCommand {
+        aabb: bevy::render::primitives::Aabb {
+            center: Vec3A::new(40.0, 40.0, 0.0),
+            half_extents: Vec3A::new(5.0, 5.0, 5.0),
+        },
+    });
+
     // Vehicles
 
     let wheel_tuning = WheelTuning {
@@ -83,17 +92,22 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     let excavator_def =
-        ExcavatorDefHandle(asset_server.load("vehicledef/excavator2.excavatordef.ron"));
+        ExcavatorDefHandle(asset_server.load("vehicledef/excavator.excavatordef.ron"));
 
-    vehicle_spawner::spawn(VehicleType::Excavator2, &mut commands, &asset_server)
+    vehicle_spawner::spawn(VehicleType::Excavator, &mut commands, &asset_server)
         .insert(
             Transform::from_translation(Vec3::new(0.0, 15.0, 3.0))
                 .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
         )
         .insert(
             VehicleControllerParameters::empty()
-                .with_wheel_positions_for_half_size(Vec3::new(0.5, 0.5, 0.2))
-                .with_wheel_tuning(wheel_tuning)
+                .with_wheel_positions_for_half_size(Vec3::new(0.7, 1.0, 0.4))
+                .with_wheel_tuning(WheelTuning {
+                    suspension_stiffness: 100.0,
+                    suspension_damping: 10.0,
+                    side_friction_stiffness: 0.8,
+                    ..WheelTuning::default()
+                })
                 .with_crawler(true),
         )
         .insert(excavator_def)
