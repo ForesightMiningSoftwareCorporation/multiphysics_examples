@@ -10,7 +10,7 @@
         node_name: "HMS_bucket_bucket_JNT",
         axis: (-1.0, 0.0, 0.0),
         min_max_angle: Some((-1.5707964, 0.0)),
-        default_angle: 0.0,
+        default_angle: -1.2,
         sensitivity: 1.0,
     ),
     stick: (
@@ -18,12 +18,12 @@
         axis: (-1.0, 0.0, 0.0),
         min_max_angle: Some((-0.3, 1.5707964)),
         default_angle: 0.0,
-        sensitivity: 1.0,
+        sensitivity: 0.9,
     ),
     boom: (
         node_name: "HMS_boom_JNT",
         axis: (-1.0, 0.0, 0.0),
-        min_max_angle: Some((-0.25, 1.5707964)),
+        min_max_angle: Some((-0.4, 1.2707964)),
         default_angle: 0.0,
         sensitivity: 1.0,
     ),
@@ -34,4 +34,59 @@
         default_angle: 0.0,
         sensitivity: 0.9,
     ),
+    look_ats: [
+        // boom to stick
+        (
+            looker: "HMS_L_stick_piston",
+            target: "HMS_L_stick_cylinder",
+            both_ways: true,
+        ),
+         (
+            looker: "HMS_R_stick_piston",
+            target: "HMS_R_stick_cylinder",
+            both_ways: true,
+         ),
+        // rocker
+         (
+            looker: "HMS_L_rocker",
+            target: "HMS_L_rocker_L_lower_piston",
+            both_ways: true,
+         ),
+         (
+            looker: "HMS_R_rocker",
+            target: "HMS_R_rocker_R_lower_piston",
+            both_ways: false,
+         ),
+        // attached to rocker
+         (
+            looker: "HMS_L_rocker_L_rear_piston",
+            target: "HMS_L_rocker_L_rear_cylinder",
+            both_ways: true,
+         ),
+         (
+            target: "HMS_R_rocker_R_rear_piston",
+            looker: "HMS_R_rocker_R_rear_cylinder",
+            both_ways: true,
+         ),
+         (
+            looker: "HMS_L_rocker_L_lower_piston",
+            target: "HMS_L_rocker_L_lower_cylinder",
+            both_ways: true,
+         ),
+         (
+            target: "HMS_R_rocker_R_lower_piston",
+            looker: "HMS_R_rocker_R_lower_cylinder",
+            both_ways: true,
+         ),
+         (
+            looker: "HMS_L_rocker_L_forward_piston",
+            target: "HMS_bucket_L_cylinder",
+            both_ways: true,
+         ),
+         (
+            target: "HMS_R_rocker_R_forward_piston",
+            looker: "HMS_bucket_R_cylinder",
+            both_ways: true,
+         ),
+    ]
 )

@@ -1,11 +1,12 @@
 use bevy::prelude::*;
-use bevy_rapier3d::plugin::{PhysicsSet, RapierTransformPropagateSet};
+use bevy_rapier3d::plugin::PhysicsSet;
 
 pub struct FollowPlugin;
 
 impl Plugin for FollowPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<CopyPosition>();
+        app.register_type::<PropagateGlobalToTransform>();
         app.add_systems(
             PostUpdate,
             (follow, global_transform_to_transform)
@@ -17,11 +18,15 @@ impl Plugin for FollowPlugin {
     }
 }
 
+#[derive(Default, Component, Clone, Reflect, PartialEq)]
+pub struct PropagateGlobalToTransform;
+
 /// After the transform propagation,
 /// this sets the transform so that its global position is the same(ish) as given entity.
 ///
 /// Note that the 2 global transforms may not be exactly equal due to float imprecisions.
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Reflect)]
+#[require(PropagateGlobalToTransform)]
 pub struct CopyPosition(pub Entity);
 
 /// Follows the position of a target entity, this only sets the [`GlobalTransform`].
@@ -45,12 +50,10 @@ pub fn follow(
 pub fn global_transform_to_transform(
     global_transform: Query<&GlobalTransform>,
     parents: Query<&Parent>,
-    mut local_transform: Query<(Entity, &mut Transform, &CopyPosition)>,
+    mut local_transform: Query<(Entity, &mut Transform), With<PropagateGlobalToTransform>>,
 ) {
-    for (entity_to_adapt, mut local_transform_to_adapt, CopyPosition(to_copy)) in
-        local_transform.iter_mut()
-    {
-        let global_transform_to_copy = global_transform.get(*to_copy).unwrap();
+    for (entity_to_adapt, mut local_transform_to_adapt) in local_transform.iter_mut() {
+        let global_transform_to_copy = global_transform.get(entity_to_adapt).unwrap();
 
         let parent_global_transform = parents.get(entity_to_adapt).map_or_else(
             |_| GlobalTransform::default(),

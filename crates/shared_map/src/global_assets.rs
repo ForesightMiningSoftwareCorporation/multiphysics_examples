@@ -1,7 +1,7 @@
 use bevy::{color::palettes, prelude::*};
 
 /// Practical agglomeration of assets to get a similar visual in different modules.
-#[derive(Debug, Default, Resource, Reflect)]
+#[derive(Debug, Default, Clone, Resource, Reflect)]
 pub struct GlobalAssets {
     pub ground_material: Handle<StandardMaterial>,
     pub rock_material: Handle<StandardMaterial>,

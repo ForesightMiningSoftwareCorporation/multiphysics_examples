@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_rapier3d::{
-    plugin::{ReadDefaultRapierContext, TimestepMode, WriteDefaultRapierContext},
+    plugin::{TimestepMode, WriteDefaultRapierContext},
     prelude::RapierRigidBodyHandle,
 };
 
@@ -126,6 +126,10 @@ fn ui_controls(
             }
             _ => {}
         }
+        ui.collapsing("Debug", |ui| {
+            ui.label("Press ESC to show inspector egui");
+            ui.label("Press D to show Debug renderer");
+        });
     });
 }
 

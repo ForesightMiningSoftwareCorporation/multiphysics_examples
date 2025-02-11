@@ -81,7 +81,7 @@ pub enum MapDefLoaderError {
 #[derive(Default)]
 pub struct MapDefLoader;
 
-/// Implementation mostly <https://github.com/bevyengine/bevy/blob/main/examples/asset/processing/asset_processing.rs>
+/// Implementation mostly from <https://github.com/bevyengine/bevy/blob/main/examples/asset/processing/asset_processing.rs>
 impl AssetLoader for MapDefLoader {
     type Asset = MapDef;
     type Settings = ();

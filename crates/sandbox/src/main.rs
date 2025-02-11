@@ -1,15 +1,17 @@
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
-    input::common_conditions::input_just_pressed,
+    input::common_conditions::{input_just_pressed, input_toggle_active},
     prelude::*,
 };
 use bevy_editor_cam::prelude::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier3d::{
     prelude::*,
     rapier::prelude::{DebugRenderPipeline, IntegrationParameters},
 };
 use controls::ControlsPlugin;
 use dotenvy::dotenv;
+use load_level::add_muck_pile_for_excavator;
 use shared_map::rock::Rock;
 use shared_vehicle::{
     excavator_controls::ExcavatorControlsPlugin,
@@ -31,42 +33,46 @@ fn main() {
     app.add_plugins((
         DefaultPlugins,
         MeshPickingPlugin,
-        RapierPhysicsPlugin::<NoUserData>::default()
-            .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
-        RapierDebugRenderPlugin::default(),
-        VehicleControllerDebugPlugin,
         DefaultEditorCamPlugins,
-        shared_map::MapDefPlugin,
-        VehicleSpawnerPlugin,
-        ExcavatorControlsPlugin,
-        ControlsPlugin,
-        ScoopPlugin,
-        bevy_egui::EguiPlugin,
         // Adds frame time diagnostics
         FrameTimeDiagnosticsPlugin,
         // Adds a system that prints diagnostics to the console
         LogDiagnosticsPlugin::default(),
-        StatsRocksPlugin,
+        RapierPhysicsPlugin::<NoUserData>::default()
+            .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
+        RapierDebugRenderPlugin::default(),
+        (
+            VehicleControllerDebugPlugin,
+            shared_map::MapDefPlugin,
+            VehicleSpawnerPlugin,
+            ExcavatorControlsPlugin,
+            ControlsPlugin,
+            ScoopPlugin,
+            StatsRocksPlugin,
+        ),
+        bevy_egui::EguiPlugin,
+        WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Escape)),
     ));
     app.insert_resource(TimestepMode::Variable {
         max_dt: 1.0 / 60.0,
         time_scale: 1.0,
         // Substep should be 1, to play well with kinematic position based
-        // (bevy_rapier would move the body at the first half step, and not the second, resulting in a too quick movement))
+        // (otherwise, bevy_rapier would move the body at the first half step, and not the second, resulting in a too quick movement)
         substeps: 1,
     });
     let mut debug_render_pipeline = DebugRenderPipeline::default();
-    debug_render_pipeline.mode = DebugRenderMode::default() | DebugRenderMode::SOLVER_CONTACTS;
+    debug_render_pipeline.mode = DebugRenderMode::default();
     app.insert_resource(DebugRenderContext {
-        enabled: true,
+        enabled: false,
         default_collider_debug: ColliderDebug::default(),
         pipeline: debug_render_pipeline,
     });
 
     app.add_systems(PreStartup, init_rapier_context);
-    app.add_systems(Startup, load_level::setup);
+    app.add_systems(Startup, load_level::spawn_level);
 
     app.add_systems(Update, add_scoopable_to_rocks);
+    app.add_systems(Update, add_muck_pile_for_excavator);
 
     app.add_systems(
         Update,

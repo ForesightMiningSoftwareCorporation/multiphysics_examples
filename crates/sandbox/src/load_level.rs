@@ -1,17 +1,20 @@
 use crate::{controls::CurrentSelection, muck_pile::SpawnMuckPileCommand};
 
-use bevy::prelude::*;
+use bevy::{prelude::*, render::view::NoFrustumCulling};
 use bevy_editor_cam::prelude::*;
 use bevy_math::Vec3A;
 use bevy_rapier3d::{prelude::*, rapier::control::WheelTuning};
 use shared_map::{map_def::MapDefHandle, rock::SpawnRockCommand};
 use shared_vehicle::{
-    excavator_controls::{controls::ExcavatorControls, ExcavatorDefHandle},
+    excavator_controls::{
+        controls::{ExcavatorControls, ExcavatorControlsMapping},
+        ExcavatorDefHandle,
+    },
     rapier_vehicle_controller::VehicleControllerParameters,
     vehicle_spawner::{self, VehicleType},
 };
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Camera3d::default(),
         EditorCam {
@@ -60,10 +63,20 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Muck pile
     commands.queue(SpawnMuckPileCommand {
-        aabb: bevy::render::primitives::Aabb {
-            center: Vec3A::new(40.0, 40.0, 0.0),
+        position: Isometry3d::from_translation(Vec3::new(-40.0, 40.0, 0.01)),
+        local_aabb: bevy::render::primitives::Aabb {
+            center: Vec3A::new(0.0, 0.0, 0.5),
             half_extents: Vec3A::new(5.0, 5.0, 5.0),
         },
+        name: "Waste pile".to_string(),
+    });
+    commands.queue(SpawnMuckPileCommand {
+        local_aabb: bevy::render::primitives::Aabb {
+            center: Vec3A::new(0.0, 0.0, 0.5),
+            half_extents: Vec3A::new(5.0, 5.0, 5.0),
+        },
+        name: "Good pile".to_string(),
+        position: Isometry3d::from_translation(Vec3::new(40.0, 40.0, 0.01)),
     });
 
     // Vehicles
@@ -132,5 +145,42 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             Transform::from_translation(Vec3::new(10.0, 15.0, 3.0))
                 .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
         )
-        .insert(truck_controller_parameters);
+        .insert(truck_controller_parameters)
+        .with_children(|child_builder| {
+            // muck pile in the truck
+            child_builder.spawn(
+                SpawnMuckPileCommand {
+                    local_aabb: bevy::render::primitives::Aabb {
+                        center: Vec3A::new(0.0, 0.0, 1.5),
+                        half_extents: Vec3A::new(3.0, 3.0, 2.0),
+                    },
+                    name: "Truck pile".to_string(),
+                    position: Isometry3d::default(),
+                }
+                .to_bundle_minimal(),
+            );
+        });
+}
+
+pub fn add_muck_pile_for_excavator(
+    mut commands: Commands,
+    excavator_mapping: Query<(&Name, &ExcavatorControlsMapping), Added<ExcavatorControlsMapping>>,
+) {
+    for (name, mapping) in excavator_mapping.iter() {
+        commands
+            .spawn((
+                SpawnMuckPileCommand {
+                    local_aabb: bevy::render::primitives::Aabb {
+                        // 300 because excavator has been rescaled..
+                        center: Vec3A::new(0.0, 0.0, 300.0),
+                        half_extents: Vec3A::new(0.75, 0.75, 0.75),
+                    },
+                    name: format!("{} pile", name.as_str()),
+                    position: Isometry3d::default(),
+                }
+                .to_bundle_minimal(),
+                NoFrustumCulling,
+            ))
+            .set_parent(mapping.bucket_base);
+    }
 }

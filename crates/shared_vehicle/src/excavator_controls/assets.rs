@@ -10,8 +10,11 @@ use std::hash::{Hash, Hasher};
 use std::{fs::File, io::Write, path::Path};
 use thiserror::Error;
 
+use crate::vehicle_spawner::react_on_scene_instance_ready::OnSceneReady;
+
 use super::{
-    controls::ExcavatorControlsMapping, ExcavatorDef, ExcavatorDefHandle, RotationControlDef,
+    controls::{ExcavatorControls, ExcavatorControlsMapping},
+    ExcavatorDef, ExcavatorDefHandle, RotationControlDef,
 };
 
 impl Hash for RotationControlDef {
@@ -61,7 +64,7 @@ pub enum ExcavatorDefLoaderError {
 #[derive(Default)]
 pub struct ExcavatorDefLoader;
 
-/// Implementation mostly <https://github.com/bevyengine/bevy/blob/main/examples/asset/processing/asset_processing.rs>
+/// Implementation mostly from <https://github.com/bevyengine/bevy/blob/main/examples/asset/processing/asset_processing.rs>
 impl AssetLoader for ExcavatorDefLoader {
     type Asset = ExcavatorDef;
     type Settings = ();
@@ -113,13 +116,13 @@ impl AssetSaver for ExcavatorDefSaver {
 }
 
 /// If an asset has been added or modified, notifies [`ExcavatorDefHandle`] change detection to call [`on_excavator_def_changed`].
-pub fn on_map_def_changed(
+pub fn on_def_changed(
     mut event_reader: EventReader<AssetEvent<ExcavatorDef>>,
     mut excavatordef_instances: Query<&mut ExcavatorDefHandle>,
 ) {
     let mut excavator_def_to_update = vec![];
     for event in event_reader.read() {
-        match dbg!(event) {
+        match event {
             AssetEvent::Added { id } => {
                 excavator_def_to_update.push(*id);
             }
@@ -139,14 +142,17 @@ pub fn on_map_def_changed(
 }
 
 /// Inserts the [`ExcavatorControlsMapping`] to entities with [`ExcavatorDefHandle`].
-pub fn on_excavator_def_changed(
+pub fn update_excavator_control_mapping(
+    trigger: Trigger<OnSceneReady>,
     mut commands: Commands,
-    excavatordef_instances: Query<(Entity, &ExcavatorDefHandle)>,
+    excavatordef_instances: Query<&ExcavatorDefHandle>,
     excavator_defs: Res<Assets<ExcavatorDef>>,
     children_query: Query<&Children>,
     name_query: Query<&Name>,
 ) {
-    for (entity, handle) in excavatordef_instances.iter() {
+    let entity = trigger.entity();
+    //for (entity, handle) in excavatordef_instances.iter() {
+    if let Ok(handle) = excavatordef_instances.get(entity) {
         let mut mapping = ExcavatorControlsMapping {
             bucket_jaw: Entity::PLACEHOLDER,
             bucket_base: Entity::PLACEHOLDER,
@@ -155,7 +161,7 @@ pub fn on_excavator_def_changed(
             swing: Entity::PLACEHOLDER,
         };
         let Some(def) = excavator_defs.get(&handle.0) else {
-            continue;
+            return;
         };
         for e in children_query.iter_descendants(entity) {
             let Ok(name) = name_query.get(e) else {
@@ -180,5 +186,26 @@ pub fn on_excavator_def_changed(
             }
         }
         commands.entity(entity).insert(mapping);
+    }
+}
+
+pub fn set_default_controls(
+    mut excavatordef_instances: Query<
+        (&ExcavatorDefHandle, &mut ExcavatorControls),
+        Changed<ExcavatorDefHandle>,
+    >,
+    excavator_defs: Res<Assets<ExcavatorDef>>,
+) {
+    for (handle, mut controls) in excavatordef_instances.iter_mut() {
+        let Some(def) = excavator_defs.get(&handle.0) else {
+            continue;
+        };
+        *controls = ExcavatorControls {
+            bucket_jaw: def.bucket_jaw.get_default_ratio(),
+            bucket_base: def.bucket_base.get_default_ratio(),
+            stick: def.stick.get_default_ratio(),
+            boom: def.boom.get_default_ratio(),
+            swing: def.swing.get_default_ratio(),
+        };
     }
 }

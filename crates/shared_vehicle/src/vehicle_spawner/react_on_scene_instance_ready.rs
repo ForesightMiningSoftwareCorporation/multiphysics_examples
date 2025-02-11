@@ -24,8 +24,14 @@ impl Plugin for ReactOnSceneInstanceReadyPlugin {
 pub struct ReactOnSceneInstanceReady;
 
 /// Trigger sent when a scene is ready on the scene root entity.
-#[derive(Event, Clone, Debug, Reflect)]
+#[derive(Clone, Debug, Reflect, Component)]
 pub struct OnSceneReady;
+
+impl Event for OnSceneReady {
+    type Traversal = &'static Parent;
+
+    const AUTO_PROPAGATE: bool = true;
+}
 
 pub fn react_on_scene_instance_ready(
     mut commands: Commands,

@@ -2,7 +2,7 @@ pub mod assets;
 pub mod controls;
 pub mod inputs;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::HashSet};
 use controls::{ExcavatorControls, ExcavatorControlsMapping};
 use serde::{Deserialize, Serialize};
 
@@ -19,8 +19,9 @@ impl Plugin for ExcavatorControlsPlugin {
         app.init_asset::<ExcavatorDef>();
         app.init_asset_loader::<assets::ExcavatorDefLoader>();
 
-        app.add_systems(Update, assets::on_excavator_def_changed);
+        //app.add_systems(Update, assets::update_excavator_control_mapping);
         app.add_systems(Update, controls::propagate_controls);
+        app.add_systems(Update, assets::set_default_controls);
     }
 }
 
@@ -43,6 +44,18 @@ impl RotationControlDef {
             return angle;
         };
         angle.clamp(min_max_angle.x, min_max_angle.y)
+    }
+
+    pub fn get_default_ratio(&self) -> f32 {
+        let Some(min_max_angle) = self.min_max_angle else {
+            return self.default_angle;
+        };
+        self.default_angle.remap(
+            self.clamp_angle(min_max_angle.x),
+            self.clamp_angle(min_max_angle.y),
+            0.0,
+            1.0,
+        )
     }
 }
 
@@ -72,4 +85,13 @@ pub struct ExcavatorDef {
     ///
     /// HMS_swing_drive ; axis Y (model is y up?)
     pub swing: RotationControlDef,
+
+    pub look_ats: Vec<LookAtDef>,
+}
+
+#[derive(Debug, Default, Hash, Asset, Serialize, Deserialize, Reflect)]
+pub struct LookAtDef {
+    pub looker: String,
+    pub target: String,
+    pub both_ways: bool,
 }

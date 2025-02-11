@@ -129,7 +129,6 @@ pub fn scoop_detect_trigger(
                 let (_excavator, rock) = if q_excavator_scoop.get(*maybe_excavator).is_ok() {
                     (maybe_excavator, rock)
                 } else {
-                    dbg!("not a SensorStartScoop");
                     continue;
                 };
 

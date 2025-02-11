@@ -15,9 +15,7 @@
   - [ ] Once the truck is full, the user drives it to a muck pile and dumps the material.
   - [x] ui
     - [x] switch between vehicles
-    - [ ] see how much scooped rocks
-    - [ ] see how much in freshly blasted muck pile
-    - [ ] see how much in final muck pile
+    - [x] see how many rocks are in an area -> see `muck_pile.rs` and `stats_rocks.rs`
 
 The project is set up with right-handed Z-up, to the extent possible:
 as both parry and bevy sometimes expect Y-Up, comments are here to guide you.
