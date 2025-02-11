@@ -5,9 +5,12 @@ use bevy::{
         AssetLoader, AsyncWriteExt, LoadContext, RenderAssetUsages,
     },
     prelude::*,
-    render::mesh::Indices,
+    render::mesh::{Indices, VertexAttributeValues},
 };
-use bevy_rapier3d::{prelude::Collider, rapier::prelude::HeightField};
+use bevy_rapier3d::{
+    prelude::{Collider, ContactSkin},
+    rapier::prelude::HeightField,
+};
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
 use std::{fs::File, io::Write, path::Path};
@@ -164,13 +167,16 @@ pub fn on_map_def_changed(
 /// A path to fixing that would be to use hierarchy or other ways to group rocks with their map.
 pub fn on_map_def_handle_changed(
     mut commands: Commands,
-    map_def_instances: Query<(Entity, Ref<MapDefHandle>), Changed<MapDefHandle>>,
+    mut map_def_instances: Query<
+        (Entity, &mut Transform, Ref<MapDefHandle>),
+        Changed<MapDefHandle>,
+    >,
     map_defs: Res<Assets<MapDef>>,
     mut meshes: ResMut<Assets<Mesh>>,
     global_assets: Res<GlobalAssets>,
     existing_rocks: Query<Entity, (With<Rock>, Without<MapDefHandle>)>,
 ) {
-    for (e, map_def_handle) in map_def_instances.iter() {
+    for (e, mut transform, map_def_handle) in map_def_instances.iter_mut() {
         let Some(map_def): Option<&MapDef> = map_defs.get(&map_def_handle.0) else {
             continue;
         };
@@ -248,12 +254,26 @@ pub fn on_map_def_handle_changed(
         );
         let height_field = collider_ground.as_heightfield().unwrap();
         let mut mesh = heightfield_to_bevy_mesh(height_field.raw);
+        // Tunnelling can happen with heightfields, resulting in rocks falling through the ground.
+        // To fix that, we can either add a context skin, or use continuous collision detection (see `bevy_rapier3d::SoftCcd`).
+        let contact_skin = 0.1f32;
+        // Bumping mesh vertices up to avoid seeing a gap between the ground and the rocks.
+        if let VertexAttributeValues::Float32x3(values) =
+            mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION).unwrap()
+        {
+            for pos in values {
+                pos[1] += contact_skin;
+            }
+        }
+        // Bumping the whole map down, so its top stays at z = 0.
+        transform.translation.z = -contact_skin;
         mesh.compute_normals();
         let mesh = meshes.add(mesh);
         commands.entity(e).insert((
             Mesh3d(mesh),
             MeshMaterial3d(global_assets.ground_material.clone_weak()),
             collider_ground,
+            ContactSkin(contact_skin),
         ));
     }
 }
