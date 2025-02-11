@@ -13,7 +13,6 @@ use dotenvy::dotenv;
 use shared_vehicle::{
     excavator_controls::{
         controls::ExcavatorControls, ExcavatorControlsPlugin, ExcavatorDef, ExcavatorDefHandle,
-        RotationControlDef,
     },
     vehicle_spawner::{self, VehicleSpawnerPlugin, VehicleType},
 };
@@ -131,7 +130,7 @@ pub fn setup(
     // */
     // /*
     // Alternatively, to load an existing excavator:
-    let mut excavator_def =
+    let excavator_def =
         ExcavatorDefHandle(asset_server.load("vehicledef/excavator.excavatordef.ron"));
     // */
     // spawn a vehicle for reference and testing

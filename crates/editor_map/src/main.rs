@@ -77,7 +77,7 @@ pub fn setup(
             },
             ..EditorCam::default()
         },
-        Transform::from_xyz(0.0, -5.0, 3.0).looking_at(Vec3::new(0.0, 0.0, 0.3), Vec3::Z),
+        Transform::from_xyz(-63.0, 15.0, 58.0).looking_at(Vec3::new(0.0, 10.0, 0.3), Vec3::Z),
     ));
 
     commands.spawn((
