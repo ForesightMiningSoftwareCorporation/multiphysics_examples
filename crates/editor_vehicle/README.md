@@ -1,9 +1,9 @@
-## Map Editor
+# Map Editor
 
-This crate provides a binary to run experiments on map loading.
+This crate provides a binary to run experiments on vehicle loading.
 
 Features:
-- map loading
-- map export (tap `E` on your keyboard)
+
+- vehicle loading
+- vehicle def export (tap `E` on your keyboard)
 - hot reloading
-- Click to spawn "rock particles"

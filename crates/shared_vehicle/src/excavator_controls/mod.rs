@@ -2,7 +2,7 @@ pub mod assets;
 pub mod controls;
 pub mod inputs;
 
-use bevy::{prelude::*, utils::HashSet};
+use bevy::prelude::*;
 use controls::{ExcavatorControls, ExcavatorControlsMapping};
 use serde::{Deserialize, Serialize};
 

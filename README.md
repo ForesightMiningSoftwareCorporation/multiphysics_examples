@@ -8,17 +8,17 @@
   - [ ] A point-cloud (or block-model) to represent pile of rock particles.
 - A barebone [`editor_vehicle`][./crates/editor_map] to help with vehicle customization.
   - [x] Loads a .ron file to tweak control settings.
-  - [ ] Loads a .ron file to tweak colliders positions.
 - a [sandbox](crates/sandbox/README.md) to help with understanding how to wire things together.
   - [x] A model for a bulldozer to push particles into a wall to make the rock pile steeper.
   - [x] A model of a shovel to pick up scoops of rock (for simplicity, once the scoop is picked, the rock particles are just removed and teleported into the truck).
   - [ ] Once the truck is full, the user drives it to a muck pile and dumps the material.
   - [x] ui
     - [x] switch between vehicles
-    - [x] see how many rocks are in an area -> see `muck_pile.rs` and `stats_rocks.rs`
+    - [x] see how many rocks are in an area (muck piles ; truck ; excavator) -> see `muck_pile.rs` and `stats_rocks.rs`
 
 The project is set up with right-handed Z-up, to the extent possible:
 as both parry and bevy sometimes expect Y-Up, comments are here to guide you.
+Models are also Y-up, but children in the hierarchy and rotated locally.
 
 ## Assets
 
@@ -39,3 +39,37 @@ Those can't be checked in because of their licences:
 The project is set up with [bevy's recommended optimizations](https://bevyengine.org/learn/quick-start/getting-started/setup/#compile-with-performance-optimizations), multi_threaded feature and hot reloading.
 
 A minimal CI from https://github.com/TheBevyFlock/bevy_new_2d, check out their other release scripts!
+
+## How to navigate this project ?
+
+### Map
+
+[shared_map](crates/shared_map) is dedicated to loading a map. You'll probably want to change `MapDef` to adapt to your requirements.
+
+It supports hot reloading, and you can isolate its behaviour by using [editor_map](crates/editor_map).
+
+### Vehicles
+
+#### Shared
+
+[shared_vehicle](crates/shared_vehicle) is dedicated to loading and using a vehicle.
+
+[shared_vehicle::vehicle_spawner](crates/shared_vehicle/vehicle_spawner) is dedicated to loading the vehicle and setting up their minimal requirements.
+
+[shared_vehicle::rapier_vehicle_controller](crates/shared_vehicle/rapier_vehicle_controller)
+is a thin wrapper around [rapier's raycast vehicle controller](https://github.com/dimforge/rapier/blob/master/examples3d/vehicle_controller3.rs).
+
+[shared_vehicle::excavator_controls](crates/shared_vehicle/excavator_controls) is for real-time control of the excavator arms. "Control" is isolated from the input, so it's easier to create bots or automated behaviour if needed.
+
+#### Editor
+
+[editor_vehicle](crates/editor_vehicle) only loads a vehicle, it can be helpful to verify a model loads correctly and inspect it with bevy_editor_egui.
+
+### Sandbox
+
+The sandbox uses the "shared" modules to create a scenario: load a map, load vehicles.
+
+Additionally, more gameplay features are added:
+
+- input is integrated to loaded vehicles
+- visible muck piles are added here and there, and invisible ones are added to vehicles.

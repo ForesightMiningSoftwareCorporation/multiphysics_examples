@@ -7,7 +7,7 @@ use bevy::{
     prelude::*,
     render::mesh::Indices,
 };
-use bevy_rapier3d::{prelude::Collider, rapier::prelude::HeightField, render::ColliderDebug};
+use bevy_rapier3d::{prelude::Collider, rapier::prelude::HeightField};
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
 use std::{fs::File, io::Write, path::Path};

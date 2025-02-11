@@ -93,9 +93,6 @@ pub fn spawn_truck<'a>(
             Collider::cuboid(1.5f32,0.2f32, 1f32),
             ColliderMassProperties::Density(0.1f32),
         ));
-        // TODO: truck loader walls
-        // TODO: component doing 1 or more overlap_box query to detect rocks and assess if truck is full.
-        //   Counting rocks may be irrelevant because they may be arranged very differently.
     });
     // Model
     entity.with_child((

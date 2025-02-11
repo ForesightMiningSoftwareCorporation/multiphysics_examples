@@ -36,7 +36,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Ground
     let mut map = commands.spawn(MapDefHandle(
-        asset_server.load("mapdef/no_cubes.mapdef.ron"),
+        asset_server.load("mapdef/2000_cubes.mapdef.ron"),
     ));
     map.insert((
         Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
@@ -61,7 +61,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     );
 
-    // Muck pile
+    // Muck piles
     commands.queue(SpawnMuckPileCommand {
         position: Isometry3d::from_translation(Vec3::new(-40.0, 40.0, 0.01)),
         local_aabb: bevy::render::primitives::Aabb {

@@ -24,6 +24,8 @@ pub struct LookAt {
 #[derive(Default, Reflect, GizmoConfigGroup)]
 pub struct LookAtGizmos {}
 
+/// Changes [`GlobalTransform`] to look at the target. This plays well with [`PropagateGlobalToTransform`].
+/// Otherwise, this change would be overwritten by bevy's transform propagation.
 pub fn look_at(
     looker: Query<(Entity, &LookAt)>,
     mut targets: Query<&mut GlobalTransform>,

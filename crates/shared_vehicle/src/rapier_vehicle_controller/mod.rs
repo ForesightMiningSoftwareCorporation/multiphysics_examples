@@ -1,3 +1,5 @@
+//! Thin wrapper around [rapier's raycast vehicle controller](https://github.com/dimforge/rapier/blob/master/examples3d/vehicle_controller3.rs).
+
 use bevy::prelude::*;
 use bevy::reflect::Reflect;
 use bevy_rapier3d::{

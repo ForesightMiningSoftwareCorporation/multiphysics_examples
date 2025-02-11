@@ -24,12 +24,13 @@ impl Plugin for ReactOnSceneInstanceReadyPlugin {
 pub struct ReactOnSceneInstanceReady;
 
 /// Trigger sent when a scene is ready on the scene root entity.
+///
+/// Thanks to propagation towards its parents, we can react to a loaded scene on a parent more "gameplay"-oriented.
 #[derive(Clone, Debug, Reflect, Component)]
 pub struct OnSceneReady;
 
 impl Event for OnSceneReady {
     type Traversal = &'static Parent;
-
     const AUTO_PROPAGATE: bool = true;
 }
 

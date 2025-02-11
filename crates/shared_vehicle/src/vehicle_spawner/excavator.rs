@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use bevy::{ecs::traversal::Traversal, prelude::*, utils::hashbrown::HashMap};
+use bevy::{prelude::*, utils::hashbrown::HashMap};
 use bevy_rapier3d::{ prelude::{ CoefficientCombineRule, Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group, MassProperties, Restitution, RigidBody}, rapier};
 use super::{follow::CopyPosition, VehicleType};
 use super::react_on_scene_instance_ready::{OnSceneReady, ReactOnSceneInstanceReady};
@@ -70,7 +70,7 @@ pub fn spawn_excavator<'a>(
         ))
         .observe(move |
             // apply kinematic body parts to relevant pieces.
-            mut trigger: Trigger<OnSceneReady>, mut commands: Commands, 
+            trigger: Trigger<OnSceneReady>, mut commands: Commands, 
             q_children: 
                 Query<&Children>,
             q_parents: Query<&Parent>,
@@ -81,7 +81,6 @@ pub fn spawn_excavator<'a>(
             q_excavator_def: Query<&ExcavatorDefHandle>,
             //
             | {
-                trigger.propagate(true);
                 let look_ats: Option<&Vec<LookAtDef>> = (||{
                     for ancestor in q_parents.iter_ancestors(trigger.entity()) {
                         let Ok(handler) = q_excavator_def.get(ancestor) else {

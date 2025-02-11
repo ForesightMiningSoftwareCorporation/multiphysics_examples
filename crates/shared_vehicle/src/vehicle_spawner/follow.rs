@@ -1,3 +1,4 @@
+/// Used for excavator arms, so independent rapier bodies arm parts follow their model bones.
 use bevy::prelude::*;
 use bevy_rapier3d::plugin::PhysicsSet;
 
