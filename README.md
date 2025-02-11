@@ -33,6 +33,7 @@ Those can't be checked in because of their licences:
   so you'll need to remove some (flavor chains are good candidates.)
   - Re-export it to gltf without animations (it reduces its size).
 - Truck: undisclosed
+  - provided model didn't have a great origin for the bucket to rotate it without mesh interlacing so I modified it.
 
 ## Opinionated decisions
 
@@ -59,7 +60,7 @@ It supports hot reloading, and you can isolate its behaviour by using [editor_ma
 [shared_vehicle::rapier_vehicle_controller](crates/shared_vehicle/rapier_vehicle_controller)
 is a thin wrapper around [rapier's raycast vehicle controller](https://github.com/dimforge/rapier/blob/master/examples3d/vehicle_controller3.rs).
 
-[shared_vehicle::excavator_controls](crates/shared_vehicle/excavator_controls) is for real-time control of the excavator arms. "Control" is isolated from the input, so it's easier to create bots or automated behaviour if needed.
+[shared_vehicle::accessory_controls](crates/shared_vehicle/accessory_controls) is for real-time control of the excavator arms. "Control" is isolated from the input, so it's easier to create bots or automated behaviour if needed.
 
 #### Editor
 
@@ -73,3 +74,9 @@ Additionally, more gameplay features are added:
 
 - input is integrated to loaded vehicles
 - visible muck piles are added here and there, and invisible ones are added to vehicles.
+
+## Colision groups
+
+- `Group_2` is used for ground.
+- `Group_3` is used for excavator parts
+- `Group_4` is used for truck parts

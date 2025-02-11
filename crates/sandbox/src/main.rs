@@ -14,7 +14,7 @@ use dotenvy::dotenv;
 use load_level::add_muck_pile_for_excavator;
 use shared_map::rock::Rock;
 use shared_vehicle::{
-    excavator_controls::ExcavatorControlsPlugin,
+    accessory_controls::AccessoryControlsPlugin,
     rapier_vehicle_controller::debug::VehicleControllerDebugPlugin,
     vehicle_spawner::{self, VehicleSpawnerPlugin},
 };
@@ -47,7 +47,7 @@ fn main() {
             VehicleControllerDebugPlugin,
             shared_map::MapDefPlugin,
             VehicleSpawnerPlugin,
-            ExcavatorControlsPlugin,
+            AccessoryControlsPlugin,
             ControlsPlugin,
             ScoopPlugin,
             StatsRocksPlugin,

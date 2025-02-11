@@ -2,11 +2,17 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_rapier3d::{
     plugin::{TimestepMode, WriteDefaultRapierContext},
-    prelude::RapierRigidBodyHandle,
+    prelude::{Friction, RapierRigidBodyHandle},
 };
 
 use shared_vehicle::{
-    excavator_controls::{controls::ExcavatorControls, ExcavatorDef, ExcavatorDefHandle},
+    accessory_controls::{
+        excavator::{controls::ExcavatorControls, ExcavatorDef, ExcavatorDefHandle},
+        truck::{
+            controls::{TruckControls, TruckMeshMapping},
+            TruckDef, TruckDefHandle,
+        },
+    },
     rapier_vehicle_controller::{VehicleController, VehicleControllerParameters},
     vehicle_spawner::VehicleType,
 };
@@ -25,7 +31,14 @@ impl Plugin for ControlsPlugin {
             Update,
             (update_vehicle_controls, update_vehicle_controller).chain(),
         );
-        app.add_systems(Update, update_excavator_controls);
+        app.add_systems(
+            Update,
+            (
+                update_excavator_controls,
+                update_truck_controls,
+                update_truck_dump_friction,
+            ),
+        );
         app.add_systems(Update, (ui_cycle_vehicles, ui_controls));
     }
 }
@@ -120,6 +133,9 @@ fn ui_controls(
                             ui.label("I,K to move bucket base");
                             ui.label("O,L to move bucket jaw");
                         }
+                        VehicleType::Truck => {
+                            ui.label("T,G to move dump");
+                        }
                         _ => {}
                     }
                 });
@@ -207,5 +223,51 @@ pub fn update_excavator_controls(
         if control_change != ExcavatorControls::default() {
             control.add(&control_change);
         }
+    }
+}
+
+/// System to forward controls to [`TruckControls`]
+pub fn update_truck_controls(
+    current_selection: Res<CurrentSelection>,
+    truck_def: Res<Assets<TruckDef>>,
+    time: Res<Time>,
+    inputs: Res<ButtonInput<KeyCode>>,
+    timestep_mode: Res<TimestepMode>,
+    mut q_controls: Query<(Entity, &mut TruckControls, &mut TruckDefHandle)>,
+) {
+    for (entity, mut control, def_handle) in q_controls.iter_mut() {
+        if current_selection.entity != Some(entity) {
+            continue;
+        }
+        let Some(def) = truck_def.get(&def_handle.0) else {
+            continue;
+        };
+        // capping delta time to max_dt, or we'll issue a move command that is too big,
+        // resulting in a truck difficult to control.
+        let elapsed = match *timestep_mode {
+            TimestepMode::Variable { max_dt, .. } => time.delta_secs().min(max_dt),
+            _ => time.delta_secs(),
+        };
+        let mut control_change = TruckControls::default();
+        control_change.integrate_inputs(elapsed, &inputs, &def);
+        if control_change != TruckControls::default() {
+            control.add(&control_change);
+        }
+    }
+}
+
+/// to help with sliding rocks, we'll lower the friction of the truck dump.
+pub fn update_truck_dump_friction(
+    current_selection: Res<CurrentSelection>,
+    mut q_controls: Query<(Entity, &mut TruckControls, &TruckMeshMapping)>,
+    mut q_friction: Query<&mut Friction>,
+) {
+    for (entity, control, mapping) in q_controls.iter_mut() {
+        if current_selection.entity != Some(entity) {
+            continue;
+        }
+        _ = q_friction.get_mut(mapping.main_dump).map(|mut friction| {
+            friction.coefficient = 1f32 - control.main_dump;
+        });
     }
 }

@@ -6,7 +6,6 @@ use bevy::{
     },
     prelude::*,
 };
-use std::hash::{Hash, Hasher};
 use std::{fs::File, io::Write, path::Path};
 use thiserror::Error;
 
@@ -14,31 +13,8 @@ use crate::vehicle_spawner::react_on_scene_instance_ready::OnSceneReady;
 
 use super::{
     controls::{ExcavatorControls, ExcavatorControlsMapping},
-    ExcavatorDef, ExcavatorDefHandle, RotationControlDef,
+    ExcavatorDef, ExcavatorDefHandle,
 };
-
-impl Hash for RotationControlDef {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        // Destructuring to avoid forgetting to add new fields to the hash if the structure changes.
-        let Self {
-            node_name,
-            axis,
-            min_max_angle,
-            default_angle,
-            sensitivity,
-        } = self;
-        node_name.hash(state);
-        if let Some(min_max_angle) = min_max_angle {
-            min_max_angle.x.to_bits().hash(state);
-            min_max_angle.y.to_bits().hash(state);
-        };
-        axis.x.to_bits().hash(state);
-        axis.y.to_bits().hash(state);
-        axis.z.to_bits().hash(state);
-        default_angle.to_bits().hash(state);
-        sensitivity.to_bits().hash(state);
-    }
-}
 
 impl ExcavatorDef {
     pub fn save<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {

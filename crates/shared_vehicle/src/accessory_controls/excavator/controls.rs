@@ -1,10 +1,9 @@
-use crate::excavator_controls::ExcavatorDef;
 use bevy::prelude::*;
 use bevy_inspector_egui::inspector_options::std_options::NumberDisplay;
 use bevy_inspector_egui::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use super::{ExcavatorDefHandle, RotationControlDef};
+use super::{ExcavatorDef, ExcavatorDefHandle};
 
 /// Real time knobs to control the excavator.
 #[derive(
@@ -68,11 +67,6 @@ pub fn propagate_controls(
             continue;
         };
 
-        fn map_rotation_in_range(def: &RotationControlDef, rotation: f32) -> Quat {
-            let min_max = def.min_max_angle.unwrap();
-            Quat::from_axis_angle(def.axis, rotation.remap(0.0, 1.0, min_max.x, min_max.y))
-        }
-
         let ExcavatorControlsMapping {
             bucket_jaw,
             bucket_base,
@@ -81,19 +75,19 @@ pub fn propagate_controls(
             swing,
         } = *mapping;
         if let Ok(mut transform) = q_transform.get_mut(bucket_jaw) {
-            transform.rotation = map_rotation_in_range(&def.bucket_jaw, controls.bucket_jaw);
+            transform.rotation = def.bucket_jaw.remap_in_range(controls.bucket_jaw);
         }
         if let Ok(mut transform) = q_transform.get_mut(bucket_base) {
-            transform.rotation = map_rotation_in_range(&def.bucket_base, controls.bucket_base);
+            transform.rotation = def.bucket_base.remap_in_range(controls.bucket_base);
         }
         if let Ok(mut transform) = q_transform.get_mut(stick) {
-            transform.rotation = map_rotation_in_range(&def.stick, controls.stick);
+            transform.rotation = def.stick.remap_in_range(controls.stick);
         }
         if let Ok(mut transform) = q_transform.get_mut(boom) {
-            transform.rotation = map_rotation_in_range(&def.boom, controls.boom);
+            transform.rotation = def.boom.remap_in_range(controls.boom);
         }
         if let Ok(mut transform) = q_transform.get_mut(swing) {
-            transform.rotation = Quat::from_axis_angle(def.swing.axis, controls.swing);
+            transform.rotation = def.swing.remap_in_range(controls.swing);
         }
     }
 }

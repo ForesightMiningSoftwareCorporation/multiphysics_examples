@@ -14,4 +14,7 @@ Notes taken while developing this, which may be useful to improve the ecosystem.
 ## TODO
 
 - truck dump
+  - make the dump slippery depending on control.
+- better logic for rocks to stay in truck
+  - activate invisible back wall only if truck is advancing (+ 1 second) + its dump is up.
 - check performances on mac

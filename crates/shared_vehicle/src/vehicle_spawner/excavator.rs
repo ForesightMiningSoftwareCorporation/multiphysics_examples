@@ -1,11 +1,13 @@
 use std::f32::consts::TAU;
 
 use bevy::{prelude::*, utils::hashbrown::HashMap};
-use bevy_rapier3d::{ prelude::{ CoefficientCombineRule, Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group, MassProperties, Restitution, RigidBody}, rapier};
+use bevy_rapier3d::{ prelude::{Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group, MassProperties, RigidBody}, rapier};
 use super::{follow::CopyPosition, VehicleType};
 use super::react_on_scene_instance_ready::{OnSceneReady, ReactOnSceneInstanceReady};
 
-use crate::{excavator_controls::{assets::update_excavator_control_mapping, ExcavatorDef, ExcavatorDefHandle, LookAtDef}, look_at::LookAt};
+use crate::{accessory_controls::{excavator::{
+    assets::update_excavator_control_mapping, ExcavatorDef, ExcavatorDefHandle
+}, LookAtDef}, look_at::LookAt};
 
 pub fn spawn_excavator<'a>(
     commands: &'a mut Commands,
@@ -109,7 +111,6 @@ pub fn spawn_excavator<'a>(
                         commands.entity(entity).insert(CopyPosition(q_parents.get(entity).unwrap().get()));
                         commands.entity(entity).remove_parent_in_place();
                         commands.entity(entity).insert(RigidBody::KinematicPositionBased);
-                        commands.entity(entity).insert(Restitution{ coefficient: 0.0, combine_rule: CoefficientCombineRule::Min });
 
                         // no collision with self and others from same group (all excavator parts)
                     }

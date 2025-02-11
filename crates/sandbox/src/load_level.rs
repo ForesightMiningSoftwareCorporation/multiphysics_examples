@@ -6,9 +6,12 @@ use bevy_math::Vec3A;
 use bevy_rapier3d::{prelude::*, rapier::control::WheelTuning};
 use shared_map::{map_def::MapDefHandle, rock::SpawnRockCommand};
 use shared_vehicle::{
-    excavator_controls::{
-        controls::{ExcavatorControls, ExcavatorControlsMapping},
-        ExcavatorDefHandle,
+    accessory_controls::{
+        excavator::{
+            controls::{ExcavatorControls, ExcavatorControlsMapping},
+            ExcavatorDefHandle,
+        },
+        truck::{controls::TruckControls, TruckDefHandle},
     },
     rapier_vehicle_controller::VehicleControllerParameters,
     vehicle_spawner::{self, VehicleType},
@@ -140,12 +143,15 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         wheel_radius: 0.7,
         ..VehicleControllerParameters::empty()
     };
+    let truck_def = TruckDefHandle(asset_server.load("vehicledef/truck.truckdef.ron"));
     vehicle_spawner::spawn(VehicleType::Truck, &mut commands, &asset_server)
         .insert(
             Transform::from_translation(Vec3::new(10.0, 15.0, 3.0))
                 .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
         )
         .insert(truck_controller_parameters)
+        .insert(truck_def)
+        .insert(TruckControls::default())
         .with_children(|child_builder| {
             // muck pile in the truck
             child_builder.spawn(

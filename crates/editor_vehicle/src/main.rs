@@ -11,8 +11,9 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
 use dotenvy::dotenv;
 use shared_vehicle::{
-    excavator_controls::{
-        controls::ExcavatorControls, ExcavatorControlsPlugin, ExcavatorDef, ExcavatorDefHandle,
+    accessory_controls::{
+        excavator::{controls::ExcavatorControls, ExcavatorDef, ExcavatorDefHandle},
+        AccessoryControlsPlugin,
     },
     vehicle_spawner::{self, VehicleSpawnerPlugin, VehicleType},
 };
@@ -28,7 +29,7 @@ fn main() {
             .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
         RapierDebugRenderPlugin::default(),
         DefaultEditorCamPlugins,
-        ExcavatorControlsPlugin,
+        AccessoryControlsPlugin,
         VehicleSpawnerPlugin,
         WorldInspectorPlugin::new(),
     ));
