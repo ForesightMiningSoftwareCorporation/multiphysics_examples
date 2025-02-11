@@ -1,14 +1,18 @@
-use bevy::{color::palettes, prelude::*};
-use bevy_rapier3d::render::DebugRenderContext;
-
 use super::{VehicleController, VehicleControllerParameters};
+use bevy::{color::palettes, prelude::*};
 
 pub struct VehicleControllerDebugPlugin;
 
 impl Plugin for VehicleControllerDebugPlugin {
     fn build(&self, app: &mut App) {
-        app.init_gizmo_group::<VehicleControllerGizmos>()
-            .add_systems(Update, show_wheels_gizmos);
+        app.init_gizmo_group::<VehicleControllerGizmos>();
+        app.world_mut()
+            .get_resource_mut::<GizmoConfigStore>()
+            .unwrap()
+            .config_mut::<VehicleControllerGizmos>()
+            .0
+            .enabled = false;
+        app.add_systems(Update, show_wheels_gizmos);
     }
 }
 
@@ -19,11 +23,7 @@ pub struct VehicleControllerGizmos {}
 pub fn show_wheels_gizmos(
     mut gizmos: Gizmos<VehicleControllerGizmos>,
     q_vehicles: Query<(&VehicleControllerParameters, &VehicleController)>,
-    rapier_debug: Res<DebugRenderContext>,
 ) {
-    if rapier_debug.enabled == false {
-        return;
-    }
     for (parameters, controller) in q_vehicles.iter() {
         for w in controller.controller.wheels() {
             let global_center_wheel = w.center().into();

@@ -128,7 +128,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let truck_controller_parameters = VehicleControllerParameters {
         wheel_tuning,
-        // truck has more mass so more powerful wheels.
+        // truck has more mass and uses only 2 power wheels so more powerful wheels.
         engine_force: 120f32,
         wheel_brake: [1f32, 1f32],
         wheel_positions: [

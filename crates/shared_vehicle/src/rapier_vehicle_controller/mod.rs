@@ -105,6 +105,10 @@ impl VehicleController {
          * Vehicle we will control manually.
          */
         let mut vehicle = DynamicRayCastVehicleController::new(body_chassis);
+        if !parameters.crawler {
+            vehicle.index_up_axis = 2;
+            vehicle.index_forward_axis = 1;
+        }
 
         for (i, pos) in parameters.wheel_positions.iter().enumerate() {
             let wheel = vehicle.add_wheel(

@@ -126,7 +126,7 @@ fn ui_controls(
             }
             _ => {}
         }
-        ui.collapsing("Debug", |ui| {
+        ui.group(|ui| {
             ui.label("Press ESC to show inspector egui");
             ui.label("Press D to show Debug renderer");
         });

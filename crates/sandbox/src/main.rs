@@ -19,12 +19,14 @@ use shared_vehicle::{
     vehicle_spawner::{self, VehicleSpawnerPlugin},
 };
 use stats_rocks::StatsRocksPlugin;
+use ui_gizmo_toggle::UiGizmoToggle;
 use vehicle_spawner::scoop::ScoopPlugin;
 
 pub mod controls;
 pub mod load_level;
 pub mod muck_pile;
 pub mod stats_rocks;
+pub mod ui_gizmo_toggle;
 
 fn main() {
     dotenv().expect(".env file not found");
@@ -52,6 +54,7 @@ fn main() {
         ),
         bevy_egui::EguiPlugin,
         WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Escape)),
+        UiGizmoToggle,
     ));
     app.insert_resource(TimestepMode::Variable {
         max_dt: 1.0 / 60.0,

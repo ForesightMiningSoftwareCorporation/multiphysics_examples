@@ -9,3 +9,8 @@ Notes taken while developing this, which may be useful to improve the ecosystem.
 - no debug position visualization on wheels / car controller.
 - TimeStepMode max deltatime is surprising when introducing differences with Time.delta_secs ; a Physics Time may help.
 - substeps is not great to use with kinematic position based (the movement is done on the first step)
+
+## TODO
+
+- truck dump
+- check performances on mac

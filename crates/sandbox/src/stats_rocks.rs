@@ -11,8 +11,20 @@ pub struct StatsRocksPlugin;
 #[require(Aabb)]
 pub struct CountRocksInZone(pub usize);
 
+#[derive(Default, Reflect, GizmoConfigGroup)]
+pub struct RockStatsGizmos;
+
 impl Plugin for StatsRocksPlugin {
     fn build(&self, app: &mut App) {
+        app.register_type::<CountRocksInZone>();
+        app.register_type::<RockStatsGizmos>();
+        app.init_gizmo_group::<RockStatsGizmos>();
+        app.world_mut()
+            .get_resource_mut::<GizmoConfigStore>()
+            .unwrap()
+            .config_mut::<RockStatsGizmos>()
+            .0
+            .enabled = false;
         app.add_systems(Update, (count_rocks, ui_rock_count).chain());
         app.add_systems(Update, debug_visual_count_rocks_in_zone);
     }
@@ -62,7 +74,7 @@ pub fn count_rocks(
 }
 
 pub fn debug_visual_count_rocks_in_zone(
-    mut gizmos: Gizmos,
+    mut gizmos: Gizmos<RockStatsGizmos>,
     q_zones: Query<(&GlobalTransform, &Aabb), With<CountRocksInZone>>,
 ) {
     for (gt, aabb) in q_zones.iter() {

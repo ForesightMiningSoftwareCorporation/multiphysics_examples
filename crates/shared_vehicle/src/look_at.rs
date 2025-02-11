@@ -1,6 +1,6 @@
 //! Pistons in excavator look very off when not aligned, so this module helps with that.
 
-use bevy::prelude::*;
+use bevy::{color::palettes::css::ORANGE_RED, prelude::*};
 
 use crate::vehicle_spawner::follow::PropagateGlobalToTransform;
 
@@ -10,7 +10,12 @@ impl Plugin for LookAtPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<LookAt>();
         app.init_gizmo_group::<LookAtGizmos>();
-
+        app.world_mut()
+            .get_resource_mut::<GizmoConfigStore>()
+            .unwrap()
+            .config_mut::<LookAtGizmos>()
+            .0
+            .enabled = false;
         app.add_systems(Update, look_at);
     }
 }
@@ -29,7 +34,7 @@ pub struct LookAtGizmos {}
 pub fn look_at(
     looker: Query<(Entity, &LookAt)>,
     mut targets: Query<&mut GlobalTransform>,
-    mut _my_gizmos: Gizmos<LookAtGizmos>,
+    mut my_gizmos: Gizmos<LookAtGizmos>,
 ) {
     for (looker, look_at) in looker.iter() {
         let Ok([mut looker, target]) = targets.get_many_mut([looker, look_at.target]) else {
@@ -41,15 +46,10 @@ pub fn look_at(
         looker_copy.look_at(target.translation(), looker.up());
         *looker = GlobalTransform::from(looker_copy);
 
-        /*
-        // Debugging lookat.
-
-        _my_gizmos.circle(looker.translation(), 0.4, bevy::color::palettes::css::GREEN);
-        _my_gizmos
+        my_gizmos.circle(looker.translation(), 0.4, bevy::color::palettes::css::GREEN);
+        my_gizmos
             .arrow(looker.translation(), target.translation(), ORANGE_RED)
             .with_tip_length(0.5);
-        _my_gizmos.circle(looker.translation(), 0.4, bevy::color::palettes::css::BLUE);
-
-        */
+        my_gizmos.circle(looker.translation(), 0.4, bevy::color::palettes::css::BLUE);
     }
 }
