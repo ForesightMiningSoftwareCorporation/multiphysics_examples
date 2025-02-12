@@ -39,7 +39,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Ground
     let mut map = commands.spawn(MapDefHandle(
-        asset_server.load("mapdef/test_reload.mapdef.ron"),
+        asset_server.load("mapdef/1000_cubes.mapdef.ron"),
     ));
     map.insert((
         Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),

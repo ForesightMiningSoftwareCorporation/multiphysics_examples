@@ -123,7 +123,7 @@ fn ui_controls(
             });
         if let Some((vehicle_type, _)) = current_vehicle_type {
             ui.group(|ui| {
-                ui.label("WASD to move.");
+                ui.label("Arrow keys to move.");
                 match vehicle_type {
                     VehicleType::Excavator => {
                         ui.label("T,G to move boom");
