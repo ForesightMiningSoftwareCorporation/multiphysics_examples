@@ -1,7 +1,7 @@
 use std::f32::consts::TAU;
 
 use crate::accessory_controls::truck::{
-    assets::update_truck_control_mapping, controls::TruckMeshMapping,
+    controls::TruckMeshMapping,
 };
 use bevy::{prelude::*, utils::HashMap};
 use bevy_rapier3d::{
@@ -131,6 +131,5 @@ pub fn spawn_truck<'a>(
                 commands.entity(trigger.entity()).insert(mesh_mapping);
             },
         );
-    entity.observe(update_truck_control_mapping);
     entity
 }

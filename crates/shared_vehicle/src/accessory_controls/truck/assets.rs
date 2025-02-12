@@ -91,7 +91,8 @@ impl AssetSaver for TruckDefSaver {
     }
 }
 
-/// If an asset has been added or modified, notifies [`TruckDefHandle`] change detection to call [`on_truck_def_changed`].
+/// If an asset has been added or modified, notifies [`TruckDefHandle`] change detection
+/// to call [`set_default_controls`].
 pub fn on_def_changed(
     mut event_reader: EventReader<AssetEvent<TruckDef>>,
     mut truckdef_instances: Query<&mut TruckDefHandle>,
@@ -127,15 +128,12 @@ pub fn update_truck_control_mapping(
     name_query: Query<&Name>,
 ) {
     let entity = trigger.entity();
-    //for (entity, handle) in truckdef_instances.iter() {
     if let Ok(handle) = truckdef_instances.get(entity) {
+        let Some(def) = truck_defs.get(&handle.0) else {
+            return;
+        };
         let mut mapping = TruckControlsMapping {
             main_dump: Entity::PLACEHOLDER,
-        };
-        dbg!("loaded truck");
-        let Some(def) = truck_defs.get(&handle.0) else {
-            dbg!("no truck def");
-            return;
         };
         for e in children_query.iter_descendants(entity) {
             let Ok(name) = name_query.get(e) else {

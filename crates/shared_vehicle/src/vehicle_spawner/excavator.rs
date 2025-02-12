@@ -13,7 +13,7 @@ use bevy_rapier3d::{
 
 use crate::{
     accessory_controls::{
-        excavator::{assets::update_excavator_control_mapping, ExcavatorDef, ExcavatorDefHandle},
+        excavator::{ExcavatorDef, ExcavatorDefHandle},
         LookAtDef,
     },
     look_at::LookAt,
@@ -173,6 +173,5 @@ pub fn spawn_excavator<'a>(
             }
         );
     });
-    entity.observe(update_excavator_control_mapping);
     entity
 }

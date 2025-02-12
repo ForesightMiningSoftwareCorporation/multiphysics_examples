@@ -91,7 +91,8 @@ impl AssetSaver for ExcavatorDefSaver {
     }
 }
 
-/// If an asset has been added or modified, notifies [`ExcavatorDefHandle`] change detection to call [`on_excavator_def_changed`].
+/// If an asset has been added or modified, notifies [`ExcavatorDefHandle`] change detection
+/// to call [`set_default_controls`].
 pub fn on_def_changed(
     mut event_reader: EventReader<AssetEvent<ExcavatorDef>>,
     mut excavatordef_instances: Query<&mut ExcavatorDefHandle>,
@@ -117,7 +118,7 @@ pub fn on_def_changed(
     }
 }
 
-/// Inserts the [`ExcavatorControlsMapping`] to entities with [`ExcavatorDefHandle`].
+/// An observer to insert the [`ExcavatorControlsMapping`] to entities with [`ExcavatorDefHandle`].
 pub fn update_excavator_control_mapping(
     trigger: Trigger<OnSceneReady>,
     mut commands: Commands,
@@ -127,17 +128,16 @@ pub fn update_excavator_control_mapping(
     name_query: Query<&Name>,
 ) {
     let entity = trigger.entity();
-    //for (entity, handle) in excavatordef_instances.iter() {
     if let Ok(handle) = excavatordef_instances.get(entity) {
+        let Some(def) = excavator_defs.get(&handle.0) else {
+            return;
+        };
         let mut mapping = ExcavatorControlsMapping {
             bucket_jaw: Entity::PLACEHOLDER,
             bucket_base: Entity::PLACEHOLDER,
             stick: Entity::PLACEHOLDER,
             boom: Entity::PLACEHOLDER,
             swing: Entity::PLACEHOLDER,
-        };
-        let Some(def) = excavator_defs.get(&handle.0) else {
-            return;
         };
         for e in children_query.iter_descendants(entity) {
             let Ok(name) = name_query.get(e) else {

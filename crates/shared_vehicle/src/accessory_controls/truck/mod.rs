@@ -34,5 +34,6 @@ impl Plugin for TruckAccessoryPlugin {
 
         app.add_systems(Update, controls::propagate_controls);
         app.add_systems(Update, assets::set_default_controls);
+        app.add_observer(assets::update_truck_control_mapping);
     }
 }
