@@ -28,11 +28,11 @@ impl Plugin for ControlsPlugin {
 
         app.add_systems(Update, init_vehicle_controller);
         app.add_systems(
-            Update,
+            FixedUpdate,
             (update_vehicle_controls, update_vehicle_controller).chain(),
         );
         app.add_systems(
-            Update,
+            FixedUpdate,
             (
                 update_excavator_controls,
                 update_truck_controls,

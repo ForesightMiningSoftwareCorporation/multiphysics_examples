@@ -18,7 +18,7 @@ fn main() {
     ));
     app.add_systems(Startup, (init_rapier_context, setup));
     app.add_systems(
-        Update,
+        FixedUpdate,
         (
             init_vehicle_controller,
             update_vehicle_controls,
@@ -119,7 +119,7 @@ pub fn init_vehicle_controller(
 /// System to initialize and insert a [`VehicleController`] after bevy_rapier initializes the rigidbody.
 ///
 pub fn update_vehicle_controller(
-    time: Res<Time>,
+    time: Res<Time<Fixed>>,
     timestep_mode: Res<TimestepMode>,
     mut vehicles: Query<&mut VehicleController>,
     mut context: WriteDefaultRapierContext,

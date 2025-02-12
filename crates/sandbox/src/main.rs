@@ -41,7 +41,8 @@ fn main() {
         // Adds a system that prints diagnostics to the console
         LogDiagnosticsPlugin::default(),
         RapierPhysicsPlugin::<NoUserData>::default()
-            .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
+            .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext)
+            .in_fixed_schedule(),
         RapierDebugRenderPlugin::default(),
         (
             VehicleControllerDebugPlugin,
@@ -56,9 +57,15 @@ fn main() {
         WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Escape)),
         UiGizmoToggle,
     ));
-    app.insert_resource(TimestepMode::Variable {
-        max_dt: 1.0 / 60.0,
-        time_scale: 1.0,
+    // app.insert_resource(TimestepMode::Variable {
+    //     max_dt: 1.0 / 60.0,
+    //     time_scale: 1.0,
+    //     // Substep should be 1, to play well with kinematic position based
+    //     // (otherwise, bevy_rapier would move the body at the first half step, and not the second, resulting in a too quick movement)
+    //     substeps: 1,
+    // });
+    app.insert_resource(TimestepMode::Fixed {
+        dt: 1.0 / 60.0,
         // Substep should be 1, to play well with kinematic position based
         // (otherwise, bevy_rapier would move the body at the first half step, and not the second, resulting in a too quick movement)
         substeps: 1,
