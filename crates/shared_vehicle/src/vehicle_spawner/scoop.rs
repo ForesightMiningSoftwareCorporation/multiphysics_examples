@@ -181,9 +181,7 @@ pub fn scooped_move_to_target(
             + to_target.z * progress_ratio;
         if progress_ratio >= 0.98f32 {
             // reached target
-            let force_continuity = 
-            //(new_position - scooped_transform.translation
-                Vec3::Z * -0.2f32;
+            let force_continuity = Vec3::Z * -0.2f32;
             scooped_transform.translation = target;
 
             commands

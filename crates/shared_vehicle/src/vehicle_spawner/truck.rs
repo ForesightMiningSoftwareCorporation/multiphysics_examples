@@ -1,8 +1,6 @@
 use std::f32::consts::TAU;
 
-use crate::accessory_controls::truck::{
-    controls::TruckMeshMapping,
-};
+use crate::accessory_controls::truck::controls::TruckMeshMapping;
 use bevy::{prelude::*, utils::HashMap};
 use bevy_rapier3d::{
     prelude::{
@@ -79,10 +77,9 @@ pub fn spawn_truck<'a>(
             Transform::from_translation(Vec3::new(0f32, 0f32, -0.4f32))
                 .with_scale(Vec3::new(0.005, 0.005, 0.005))
                 .with_rotation(
-                    // Look back
-                    Quat::from_axis_angle(Vec3::Y, TAU / 2.0) 
-                // look up
-                * Quat::from_axis_angle(Vec3::X, -TAU / 4.0),
+                    // Look back then up
+                    Quat::from_axis_angle(Vec3::Y, TAU / 2.0)
+                        * Quat::from_axis_angle(Vec3::X, -TAU / 4.0),
                 ),
             ReactOnSceneInstanceReady,
             bevy_rapier3d::prelude::AsyncSceneCollider {

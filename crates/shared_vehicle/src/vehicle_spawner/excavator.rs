@@ -97,14 +97,13 @@ pub fn spawn_excavator<'a>(
             ReactOnSceneInstanceReady,
             // NOTE: Compute automatically colliders, we're only selecting a subset of the meshes for better performances.
             // bevy_rapier3d::prelude::AsyncSceneCollider { shape: Some(ComputedColliderShape::default()), named_shapes: default() }
-            bevy_rapier3d::prelude::AsyncSceneCollider { shape: None, named_shapes: 
-                meshes_to_convert_to_collider.clone() },
+            bevy_rapier3d::prelude::AsyncSceneCollider { shape: None, named_shapes: meshes_to_convert_to_collider.clone() },
         ))
         .observe(move |
             // apply kinematic body parts to relevant pieces.
-            trigger: Trigger<OnSceneReady>, mut commands: Commands, 
-            q_children: 
-                Query<&Children>,
+            trigger: Trigger<OnSceneReady>,
+            mut commands: Commands,
+            q_children: Query<&Children>,
             q_parents: Query<&Parent>,
             q_names: Query<&Name>,
             //
