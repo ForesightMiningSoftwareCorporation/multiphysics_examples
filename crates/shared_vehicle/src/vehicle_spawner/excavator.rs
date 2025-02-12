@@ -1,20 +1,34 @@
 use std::f32::consts::TAU;
 
-use bevy::{prelude::*, utils::hashbrown::HashMap};
-use bevy_rapier3d::{ prelude::{Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group, MassProperties, RigidBody}, rapier};
-use super::{follow::CopyPosition, VehicleType};
 use super::react_on_scene_instance_ready::{OnSceneReady, ReactOnSceneInstanceReady};
+use super::{follow::CopyPosition, VehicleType};
+use bevy::{prelude::*, utils::hashbrown::HashMap};
+use bevy_rapier3d::{
+    prelude::{
+        Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group,
+        MassProperties, RigidBody,
+    },
+    rapier,
+};
 
-use crate::{accessory_controls::{excavator::{
-    assets::update_excavator_control_mapping, ExcavatorDef, ExcavatorDefHandle
-}, LookAtDef}, look_at::LookAt};
+use crate::{
+    accessory_controls::{
+        excavator::{assets::update_excavator_control_mapping, ExcavatorDef, ExcavatorDefHandle},
+        LookAtDef,
+    },
+    look_at::LookAt,
+};
 
 pub fn spawn_excavator<'a>(
     commands: &'a mut Commands,
     assets: &'a Res<AssetServer>,
 ) -> EntityCommands<'a> {
     let chassis_dimensions = Vec3::new(1f32, 2f32, 0.4f32);
-    let chassis_collider = Collider::cuboid(chassis_dimensions.x, chassis_dimensions.y, chassis_dimensions.z);
+    let chassis_collider = Collider::cuboid(
+        chassis_dimensions.x,
+        chassis_dimensions.y,
+        chassis_dimensions.z,
+    );
     let excavator =
         assets.load(GltfAssetLabel::Scene(0).from_asset("private/excavator/excavator.gltf"));
     let mut entity = commands.spawn((
@@ -26,31 +40,47 @@ pub fn spawn_excavator<'a>(
         // mass is shifted down to avoid falling on its sides.
         ColliderMassProperties::MassProperties(MassProperties {
             local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
-            ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(0.8f32, chassis_dimensions.into()))
+            ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(
+                0.8f32,
+                chassis_dimensions.into(),
+            ))
         }),
         CollisionGroups::new(Group::GROUP_3, !Group::GROUP_3),
         RigidBody::Dynamic,
     ));
     // Sensor to detect rocks, and move them to the truck.
     /*entity.with_child((
-                Name::new("scoop sensor"),
-                Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
-                Sensor,
-                Collider::cuboid(1f32, 0.4f32, 0.8f32),
-                // no collision with ground
-                CollisionGroups::new(Group::all(), Group::GROUP_1),
-                SensorStartScoop
-            ));*/
+        Name::new("scoop sensor"),
+        Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
+        Sensor,
+        Collider::cuboid(1f32, 0.4f32, 0.8f32),
+        // no collision with ground
+        CollisionGroups::new(Group::all(), Group::GROUP_1),
+        SensorStartScoop
+    ));*/
     let meshes_to_convert_to_collider: HashMap<String, Option<ComputedColliderShape>> = [
         // Boom
-        ("Mesh.018".to_string(), Some(ComputedColliderShape::default())),
+        (
+            "Mesh.018".to_string(),
+            Some(ComputedColliderShape::default()),
+        ),
         // Bucket base
-        ("Mesh.004".to_string(), Some(ComputedColliderShape::default())),
+        (
+            "Mesh.004".to_string(),
+            Some(ComputedColliderShape::default()),
+        ),
         // Bucket jaws
-        ("Mesh.003".to_string(), Some(ComputedColliderShape::default())),
+        (
+            "Mesh.003".to_string(),
+            Some(ComputedColliderShape::default()),
+        ),
         // Stick
-        ("Mesh.007".to_string(), Some(ComputedColliderShape::default())),
-    ].into();
+        (
+            "Mesh.007".to_string(),
+            Some(ComputedColliderShape::default()),
+        ),
+    ]
+    .into();
     // Model
     entity.with_children(| child_builder| {
         child_builder.spawn((

@@ -1,13 +1,12 @@
 //! Plugin for a fake scooping logic (excavator picking up rocks and storing them into the truck).
 //!
 //! This plugin is agnostic to other modules for reuse, but references rocks in comments for context.
-//! 
+//!
 //! This module is not actually used currently, but may be used if simulating realistically is too challenging.
 
 use std::f32::consts::PI;
 
-use bevy::
-    prelude::*;
+use bevy::prelude::*;
 use bevy_rapier3d::{
     prelude::{CollisionEvent, CollisionGroups, ExternalImpulse, Group, RigidBody},
     rapier::prelude::CollisionEventFlags,
