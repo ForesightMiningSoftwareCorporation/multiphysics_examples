@@ -11,6 +11,8 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
 
-# [patch.crates-io]
+[patch.crates-io]
 # Custom optimization or last minute upstream changes may be useful.
 # rapier3d = { path = "../rapier/crates/rapier3d" }
+# This branch contains a hack fix to angular interpolation, which seems to be wrongly computed?
+rapier3d = { git = "https://github.com/Vrixyz/rapier.git", branch = "no_angular_interpolation" }

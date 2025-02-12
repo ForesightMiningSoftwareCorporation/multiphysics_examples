@@ -7,9 +7,11 @@ Notes taken while developing this, which may be useful to improve the ecosystem.
 - Reflect capability is unclear, suboptimal or missing, making it difficult to make editors quickly.
 - no debug position visualization on wheels / car controller ; but `Wheel::raycast_info` is great.
 - `TimeStepMode` max deltatime is surprising when introducing differences with Time.delta_secs ; a `Time<Physics>`  may help.
+- :warning: rapier hack fix for angular interpolation: https://github.com/Vrixyz/rapier/tree/no_angular_interpolation
 - substeps is not great to use with kinematic position based (the movement is done on the first step)
 - gizmo toggle is great ; bevy_rapier should thrive to be compatible with this project's `ui_gizmo_toggle`.
   - maybe upstream to bevy a helper for a gizmo toggled off by default ?
+- add `IntegrationParameters` to prelude?
 
 ## TODO
 
