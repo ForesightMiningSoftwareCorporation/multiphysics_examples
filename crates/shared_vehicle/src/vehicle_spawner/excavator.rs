@@ -91,7 +91,7 @@ pub fn spawn_excavator<'a>(
                         let excavator_def = assets.get(&handler.0)?;
                         return Some(&excavator_def.look_ats);
                     }
-                    return None;
+                    None
                 })();
                 let mut name_to_entity = HashMap::<String, Entity>::default();
                 for lookat in look_ats.iter().flat_map(|lookats| lookats.iter()) {
@@ -136,7 +136,7 @@ pub fn spawn_excavator<'a>(
                             continue;
                         };
                         looker.try_insert(LookAt {
-                            target: target,
+                            target,
                         });
                     }
                 }

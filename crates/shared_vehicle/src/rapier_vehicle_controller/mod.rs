@@ -119,7 +119,7 @@ impl VehicleController {
                 parameters.wheel_radius,
                 &parameters.wheel_tuning,
             );
-            wheel.brake = parameters.wheel_brake[i / 2 as usize];
+            wheel.brake = parameters.wheel_brake[i / 2];
         }
         VehicleController {
             controller: vehicle,

@@ -52,7 +52,7 @@ impl ExcavatorControls {
     }
 
     pub fn add(&mut self, other: &Self) {
-        self.swing = self.swing + other.swing;
+        self.swing += other.swing;
         self.boom = (self.boom + other.boom).clamp(0.0, 1.0);
         self.stick = (self.stick + other.stick).clamp(0.0, 1.0);
         self.bucket_base = (self.bucket_base + other.bucket_base).clamp(0.0, 1.0);

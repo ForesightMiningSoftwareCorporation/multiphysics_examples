@@ -144,19 +144,19 @@ pub fn update_excavator_control_mapping(
                 continue;
             };
             let name = name.as_str();
-            if name == &def.bucket_jaw.node_name {
+            if name == def.bucket_jaw.node_name {
                 mapping.bucket_jaw = e;
                 continue;
-            } else if name == &def.bucket_base.node_name {
+            } else if name == def.bucket_base.node_name {
                 mapping.bucket_base = e;
                 continue;
-            } else if name == &def.stick.node_name {
+            } else if name == def.stick.node_name {
                 mapping.stick = e;
                 continue;
-            } else if name == &def.boom.node_name {
+            } else if name == def.boom.node_name {
                 mapping.boom = e;
                 continue;
-            } else if name == &def.swing.node_name {
+            } else if name == def.swing.node_name {
                 mapping.swing = e;
                 continue;
             }

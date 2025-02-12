@@ -69,8 +69,7 @@ fn ui_cycle_vehicles(
         let next_entity = vehicles
             .iter()
             .cycle()
-            .skip(current_entity_index + 1)
-            .next()
+            .nth(current_entity_index + 1)
             .unwrap();
         current_selection.entity = Some(*next_entity);
     }
@@ -88,7 +87,7 @@ fn ui_controls(
         let current_vehicle_type = current_selection.entity.and_then(|e| {
             q_vehicles
                 .get(e)
-                .map(|(_, vehicle_type, name)| (*vehicle_type, name.clone()))
+                .map(|(_, vehicle_type, name)| (*vehicle_type, name))
                 .ok()
         });
         let selected_display = match current_vehicle_type {
@@ -122,25 +121,22 @@ fn ui_controls(
                     ui.selectable_value(&mut current_selection.entity, Some(e), display_name);
                 }
             });
-        match current_vehicle_type {
-            Some((vehicle_type, _)) => {
-                ui.group(|ui| {
-                    ui.label("WASD to move.");
-                    match vehicle_type {
-                        VehicleType::Excavator => {
-                            ui.label("T,G to move boom");
-                            ui.label("U,J to move stick");
-                            ui.label("I,K to move bucket base");
-                            ui.label("O,L to move bucket jaw");
-                        }
-                        VehicleType::Truck => {
-                            ui.label("T,G to move dump");
-                        }
-                        _ => {}
+        if let Some((vehicle_type, _)) = current_vehicle_type {
+            ui.group(|ui| {
+                ui.label("WASD to move.");
+                match vehicle_type {
+                    VehicleType::Excavator => {
+                        ui.label("T,G to move boom");
+                        ui.label("U,J to move stick");
+                        ui.label("I,K to move bucket base");
+                        ui.label("O,L to move bucket jaw");
                     }
-                });
-            }
-            _ => {}
+                    VehicleType::Truck => {
+                        ui.label("T,G to move dump");
+                    }
+                    _ => {}
+                }
+            });
         }
         ui.group(|ui| {
             ui.label("Press ESC to show inspector egui");
@@ -219,7 +215,7 @@ pub fn update_excavator_controls(
             _ => time.delta_secs(),
         };
         let mut control_change = ExcavatorControls::default();
-        control_change.integrate_inputs(elapsed, &inputs, &def);
+        control_change.integrate_inputs(elapsed, &inputs, def);
         if control_change != ExcavatorControls::default() {
             control.add(&control_change);
         }
@@ -249,7 +245,7 @@ pub fn update_truck_controls(
             _ => time.delta_secs(),
         };
         let mut control_change = TruckControls::default();
-        control_change.integrate_inputs(elapsed, &inputs, &def);
+        control_change.integrate_inputs(elapsed, &inputs, def);
         if control_change != TruckControls::default() {
             control.add(&control_change);
         }

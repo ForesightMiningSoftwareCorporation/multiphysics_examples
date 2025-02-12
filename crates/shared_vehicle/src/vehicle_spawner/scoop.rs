@@ -78,13 +78,13 @@ impl Command for ScoopCommand {
     fn apply(self, world: &mut World) {
         let start_position = world
             .query::<&Transform>()
-            .get(&world, self.to_scoop)
+            .get(world, self.to_scoop)
             .unwrap()
             .translation;
         let time_started = world.get_resource::<Time<Virtual>>().unwrap().elapsed();
         let scoop_target_copy = world
             .query::<&ScoopTarget>()
-            .get(&world, self.target)
+            .get(world, self.target)
             .unwrap()
             .clone();
         let mut random = rand::thread_rng();

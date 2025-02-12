@@ -38,9 +38,9 @@ pub fn ui_rock_count(
     let rock_count = q_rocks.iter().count();
     egui::Window::new("Rocks Count").show(contexts.ctx_mut(), |ui| {
         ui.label(format!("Total Rocks: {}", rock_count));
-        ui.label(format!("Piles:"));
+        ui.label("Piles:");
         for (name, count) in q_piles.iter() {
-            ui.label(format!("{}: {}", name.to_string(), count.0));
+            ui.label(format!("{}: {}", name, count.0));
         }
     });
 }
@@ -66,7 +66,7 @@ pub fn count_rocks(
                 if q_rocks.get(e).is_ok() {
                     amount += 1;
                 }
-                return true;
+                true
             },
         );
         zone.0 = amount;

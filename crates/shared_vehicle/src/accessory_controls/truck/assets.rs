@@ -142,7 +142,7 @@ pub fn update_truck_control_mapping(
                 continue;
             };
             let name = name.as_str();
-            if mapping.main_dump == Entity::PLACEHOLDER && name == &def.main_dump.node_name {
+            if mapping.main_dump == Entity::PLACEHOLDER && name == def.main_dump.node_name {
                 mapping.main_dump = e;
                 continue;
             }

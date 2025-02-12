@@ -29,7 +29,7 @@ pub mod stats_rocks;
 pub mod ui_gizmo_toggle;
 
 fn main() {
-    dotenv().expect(".env file not found");
+    dotenv().expect("\n.env file not found. Please copy and adapt the .env.example\n\nError");
 
     let mut app = App::new();
     app.add_plugins((
