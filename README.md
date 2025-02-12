@@ -11,7 +11,7 @@
 - a [sandbox](crates/sandbox/README.md) to help with understanding how to wire things together.
   - [x] A model for a bulldozer to push particles into a wall to make the rock pile steeper.
   - [x] A model of a shovel to pick up scoops of rock (for simplicity, once the scoop is picked, the rock particles are just removed and teleported into the truck).
-  - [ ] Once the truck is full, the user drives it to a muck pile and dumps the material.
+  - [x] Once the truck is full, the user drives it to a muck pile and dumps the material.
   - [x] ui
     - [x] switch between vehicles
     - [x] see how many rocks are in an area (muck piles ; truck ; excavator) -> see `muck_pile.rs` and `stats_rocks.rs`

@@ -7,7 +7,8 @@ edition = "2021"
 dotenvy = "0.15"
 bevy = { version = "0.15", features = [
     "multi_threaded",
-    "jpeg",
+    # For hot reloading
+    "file_watcher",
     # Optional for iteration times,
     # see https://bevyengine.org/learn/quick-start/getting-started/setup/#enable-fast-compiles-optional
     "dynamic_linking",

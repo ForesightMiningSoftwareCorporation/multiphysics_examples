@@ -118,9 +118,11 @@ pub fn setup(
         }),
     ));
     // */
-    // /*
+    /*
     // Alternatively, to load an existing map:
-    //let mut map = commands.spawn(MapDefHandle(_asset_server.load("mapdef/final.mapdef.ron")));
+    let mut map = commands.spawn(MapDefHandle(
+        _asset_server.load("mapdef/final.mapdef.ron"),
+    ));
     // */
     map.insert(
         Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),

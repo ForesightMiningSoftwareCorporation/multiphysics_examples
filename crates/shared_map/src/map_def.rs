@@ -142,7 +142,7 @@ pub fn on_map_def_changed(
 ) {
     let mut map_def_to_initialize = vec![];
     for event in scene_asset_event_reader.read() {
-        match dbg!(event) {
+        match event {
             AssetEvent::Added { id } => {
                 map_def_to_initialize.push(*id);
             }

@@ -20,7 +20,7 @@ impl Plugin for MapDefPlugin {
             init_global_assets.run_if(|res: Option<Res<GlobalAssets>>| res.is_none()),
         );
         app.add_systems(
-            Update,
+            PreUpdate,
             (
                 map_def::on_map_def_changed,
                 map_def::on_map_def_handle_changed,
