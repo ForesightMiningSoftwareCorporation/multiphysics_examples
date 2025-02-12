@@ -31,6 +31,21 @@ impl Plugin for ScoopPlugin {
 /// Component applied to the sensor of the excavator scoop
 ///
 /// When a [`Scoopable`] enters the sensor, it will be moved to the truck.
+///
+/// ```rust,ignore
+/// # use bevy::prelude::*;
+/// use bevy_rapier3d::prelude::Collider;
+/// use bevy_rapier3d::prelude::Sensor;
+/// use shared_vehicle::vehicle_spawner::scoop::SensorStartScoop;
+/// // commands.spawn...
+/// (
+///     Visibility::default(),
+///     Transform::from_translation(Vec3::new(0.0, 40.0, 0.5)),
+///     Sensor,
+///     Collider::cuboid(1f32, 1f32, 1f32),
+///     SensorStartScoop,
+/// );
+/// ```
 #[derive(Component, Debug, Reflect)]
 pub struct SensorStartScoop;
 

@@ -60,7 +60,13 @@ It supports hot reloading, and you can isolate its behaviour by using [editor_ma
 [shared_vehicle::rapier_vehicle_controller](crates/shared_vehicle/rapier_vehicle_controller)
 is a thin wrapper around [rapier's raycast vehicle controller](https://github.com/dimforge/rapier/blob/master/examples3d/vehicle_controller3.rs).
 
-[shared_vehicle::accessory_controls](crates/shared_vehicle/accessory_controls) is for real-time control of the excavator arms. "Control" is isolated from the input, so it's easier to create bots or automated behaviour if needed.
+[shared_vehicle::accessory_controls](crates/shared_vehicle/accessory_controls) is for real-time control of excavator arm or truck dump. "Control" is isolated from the input, so it's easier to create bots or automated behaviour if needed.
+
+The vehicle accessories work by finding the "control" bone and the mesh of the accessory you want to control, then:
+
+- Compute its collider mesh
+- Unparent it, but make it follow its "control" bone through KinematicPositionBased
+- the accessory controls update the "control" bone rotation.
 
 #### Editor
 
