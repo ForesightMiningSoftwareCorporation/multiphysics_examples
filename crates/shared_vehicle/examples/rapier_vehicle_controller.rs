@@ -120,13 +120,20 @@ pub fn init_vehicle_controller(
 ///
 pub fn update_vehicle_controller(
     time: Res<Time>,
+    timestep_mode: Res<TimestepMode>,
     mut vehicles: Query<&mut VehicleController>,
     mut context: WriteDefaultRapierContext,
 ) {
     for mut vehicle_controller in vehicles.iter_mut() {
         let context = &mut *context;
+        // capping delta time to max_dt, or we'll issue a move command that is too big,
+        // resulting in an excavator difficult to control.
+        let dt = match *timestep_mode {
+            TimestepMode::Variable { max_dt, .. } => time.delta_secs().min(max_dt),
+            _ => time.delta_secs(),
+        };
         vehicle_controller.update_vehicle(
-            time.delta_secs(),
+            dt,
             &mut context.bodies,
             &context.colliders,
             &context.query_pipeline,

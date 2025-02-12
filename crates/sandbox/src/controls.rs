@@ -163,13 +163,20 @@ pub fn init_vehicle_controller(
 ///
 pub fn update_vehicle_controller(
     time: Res<Time>,
+    timestep_mode: Res<TimestepMode>,
     mut vehicles: Query<&mut VehicleController>,
     mut context: WriteDefaultRapierContext,
 ) {
     for mut vehicle_controller in vehicles.iter_mut() {
         let context = &mut *context;
+        // capping delta time to max_dt, or we'll issue a move command that is too big,
+        // resulting in an excavator difficult to control.
+        let dt = match *timestep_mode {
+            TimestepMode::Variable { max_dt, .. } => time.delta_secs().min(max_dt),
+            _ => time.delta_secs(),
+        };
         vehicle_controller.update_vehicle(
-            time.delta_secs(),
+            dt,
             &mut context.bodies,
             &context.colliders,
             &context.query_pipeline,
@@ -210,12 +217,12 @@ pub fn update_excavator_controls(
         };
         // capping delta time to max_dt, or we'll issue a move command that is too big,
         // resulting in an excavator difficult to control.
-        let elapsed = match *timestep_mode {
+        let dt = match *timestep_mode {
             TimestepMode::Variable { max_dt, .. } => time.delta_secs().min(max_dt),
             _ => time.delta_secs(),
         };
         let mut control_change = ExcavatorControls::default();
-        control_change.integrate_inputs(elapsed, &inputs, def);
+        control_change.integrate_inputs(dt, &inputs, def);
         if control_change != ExcavatorControls::default() {
             control.add(&control_change);
         }
@@ -240,12 +247,12 @@ pub fn update_truck_controls(
         };
         // capping delta time to max_dt, or we'll issue a move command that is too big,
         // resulting in a truck difficult to control.
-        let elapsed = match *timestep_mode {
+        let dt = match *timestep_mode {
             TimestepMode::Variable { max_dt, .. } => time.delta_secs().min(max_dt),
             _ => time.delta_secs(),
         };
         let mut control_change = TruckControls::default();
-        control_change.integrate_inputs(elapsed, &inputs, def);
+        control_change.integrate_inputs(dt, &inputs, def);
         if control_change != TruckControls::default() {
             control.add(&control_change);
         }
