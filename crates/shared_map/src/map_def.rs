@@ -24,6 +24,13 @@ use crate::{
 #[derive(Debug, Component, Reflect)]
 pub struct MapDefHandle(pub Handle<MapDef>);
 
+#[derive(Debug, Serialize, Deserialize, Reflect)]
+pub struct RockData {
+    pub translation: Vec3,
+    /// This could be the grade of the rock or an id... name them better and add more if needed :)
+    pub metadata: u32,
+}
+
 #[derive(Debug, Asset, Serialize, Deserialize, Reflect)]
 pub struct MapDef {
     pub vertices_width: usize,
@@ -31,7 +38,7 @@ pub struct MapDef {
     /// Y is scale in height, because parry uses Y-up.
     pub scale: Vec3,
     pub height_map: Vec<f32>,
-    pub rocks: Vec<Isometry3d>,
+    pub rocks: Vec<RockData>,
 }
 
 impl MapDef {
@@ -62,10 +69,15 @@ impl Hash for MapDef {
         scale.x.to_bits().hash(state);
         scale.y.to_bits().hash(state);
         scale.z.to_bits().hash(state);
-        for r in rocks.iter() {
-            r.translation.x.to_bits().hash(state);
-            r.translation.y.to_bits().hash(state);
-            r.translation.z.to_bits().hash(state);
+        for RockData {
+            translation,
+            metadata,
+        } in rocks.iter()
+        {
+            translation.x.to_bits().hash(state);
+            translation.y.to_bits().hash(state);
+            translation.z.to_bits().hash(state);
+            metadata.hash(state);
         }
         for f in height_map {
             f.to_bits().hash(state);
@@ -187,7 +199,10 @@ pub fn on_map_def_handle_changed(
         }
         // Create new rocks
         for r in map_def.rocks.iter() {
-            commands.queue(SpawnRockCommand { isometry: *r });
+            // TODO: pass metadata / grade if needed.
+            commands.queue(SpawnRockCommand {
+                isometry: Isometry3d::from_translation(r.translation),
+            });
         }
         // Create new invisible walls
         commands.entity(e).with_children(|child_builder| {

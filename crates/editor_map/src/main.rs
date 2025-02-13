@@ -91,7 +91,8 @@ pub fn setup(
     // Ground
 
     // /*
-    // Create a ground procedurally
+    // Create a ground procedurally ; hot reloading doesn't work this way:
+    // you'd have to remap the handle to reference the exported file, rather than the in-memory asset.
     let width = 50;
     let length = 50;
     let height = 10f32;

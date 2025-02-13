@@ -39,7 +39,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Ground
     let mut map = commands.spawn(MapDefHandle(
-        asset_server.load("mapdef/2000_cubes.mapdef.ron"),
+        asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
     ));
     map.insert((
         Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
@@ -81,6 +81,14 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         name: "Good pile".to_string(),
         position: Isometry3d::from_translation(Vec3::new(40.0, 40.0, 0.01)),
     });
+
+    commands.spawn((
+        Visibility::default(),
+        Transform::from_translation(Vec3::new(0.0, 40.0, 0.5)),
+        Sensor,
+        Collider::cuboid(1f32, 1f32, 1f32),
+        vehicle_spawner::scoop::SensorStartScoop,
+    ));
 
     // Vehicles
 
