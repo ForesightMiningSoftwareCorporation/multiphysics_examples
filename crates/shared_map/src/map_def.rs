@@ -24,14 +24,14 @@ use crate::{
 #[derive(Debug, Component, Reflect)]
 pub struct MapDefHandle(pub Handle<MapDef>);
 
-#[derive(Debug, Serialize, Deserialize, Reflect)]
+#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct RockData {
     pub translation: Vec3,
     /// This could be the grade of the rock or an id... name them better and add more if needed :)
     pub metadata: u32,
 }
 
-#[derive(Debug, Asset, Serialize, Deserialize, Reflect)]
+#[derive(Debug, Clone, Default, Asset, Serialize, Deserialize, Reflect)]
 pub struct MapDef {
     pub vertices_width: usize,
     pub vertices_length: usize,

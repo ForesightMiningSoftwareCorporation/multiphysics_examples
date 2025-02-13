@@ -11,7 +11,7 @@ use bevy_egui::EguiContexts;
 use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
 use dotenvy::dotenv;
 use shared_map::{
-    map_def::{MapDef, MapDefHandle},
+    map_def::{MapDef, MapDefHandle, RockData},
     rock::{Rock, SpawnRockCommand},
 };
 
@@ -163,7 +163,14 @@ pub fn update_rocks_and_export_map(
         let Some(map) = assets.get_mut(&handle.0) else {
             continue;
         };
-        map.rocks = q_rocks.iter().map(Transform::to_isometry).collect();
+        map.rocks = q_rocks
+            .iter()
+            .map(|t| RockData {
+                translation: t.translation,
+                // TODO: export metadata
+                metadata: 0,
+            })
+            .collect();
         let mut path = PathBuf::new();
         path.push(FileAssetReader::get_base_path());
         path.push("assets");
