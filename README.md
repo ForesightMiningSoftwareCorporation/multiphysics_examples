@@ -61,6 +61,8 @@ cargo run --bin sim_to_mapdef assets/private/Sim\ data/Unbroken\ rock.csv  asset
 
 There is also a `visualize` example to help with understanding data loading in isolation.
 
+Because of performance issues, you may want to not load all rocks, and group them somehow, check out [this rock spawn logic](https://github.com/ForesightMiningSoftwareCorporation/multiphysics_examples/blob/67023c3023c571da4206404c57376bf9993d4050/crates/shared_map/src/map_def.rs#L202-L211) for example.
+
 ### Vehicles
 
 #### Shared
