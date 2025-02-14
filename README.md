@@ -23,6 +23,9 @@ Models are also Y-up, but children in the hierarchy and rotated locally.
 ## Assets
 
 You're responsible for providing assets in `assets/private/` folder.
+
+![/docs/private_folder.png][private folder organization]
+
 For practicity, These assets are shared for all projects, through your `.env`'s `BEVY_ASSET_ROOT`: be sure to adapt `.env.example`.
 
 Those can't be checked in because of their licences:
