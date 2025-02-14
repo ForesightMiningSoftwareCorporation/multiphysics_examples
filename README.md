@@ -98,8 +98,12 @@ Additionally, more gameplay features are added:
 - input is integrated to loaded vehicles
 - visible muck piles are added here and there, and invisible ones are added to vehicles.
 
-## Colision groups
+## Collision groups
 
 - `Group_2` is used for ground.
 - `Group_3` is used for excavator parts
 - `Group_4` is used for truck parts
+
+### Limitations
+
+Check out the `TODO` and `FIXME` for limitations, hacks or surprising behaviours.

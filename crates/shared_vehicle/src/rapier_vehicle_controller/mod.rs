@@ -72,6 +72,8 @@ impl VehicleControllerParameters {
             z: height,
         } = half_size;
         self.wheel_positions = [
+            // TODO: height - 1 because the floor has a contact skin
+            // https://github.com/ForesightMiningSoftwareCorporation/multiphysics_examples/blob/77aaa0a6e3ff9a225689d7e5bf9218c3fcd6b9af/crates/shared_map/src/map_def.rs#L297
             [-width * 1.5, length, -height - 1.0].into(),
             [width * 1.5, length, -height - 1.0].into(),
             [-width * 1.5, -length, -height - 1.0].into(),
