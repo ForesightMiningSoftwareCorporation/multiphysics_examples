@@ -4,7 +4,10 @@ use bevy::{prelude::*, render::view::NoFrustumCulling};
 use bevy_editor_cam::prelude::*;
 use bevy_math::Vec3A;
 use bevy_rapier3d::{prelude::*, rapier::control::WheelTuning};
-use shared_map::{map_def::MapDefHandle, rock::SpawnRockCommand};
+use shared_map::{
+    map_def::{MapDefHandle, CONTACT_SKIN},
+    rock::SpawnRockCommand,
+};
 use shared_vehicle::{
     accessory_controls::{
         excavator::{
@@ -97,15 +100,21 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..WheelTuning::default()
     };
 
+    // We'll spawn vehicles around this point.
+    let spawn_point = Vec3::new(170.0, 120.0, 24.0);
+
     let bulldozer_entity =
         vehicle_spawner::spawn(VehicleType::Bulldozer, &mut commands, &asset_server)
             .insert(
-                Transform::from_translation(Vec3::new(170.0, 120.0, 24.0))
+                Transform::from_translation(spawn_point)
                     .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
             )
             .insert(
                 VehicleControllerParameters::empty()
-                    .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4))
+                    .with_wheel_positions_for_half_size(
+                        Vec3::new(0.5, 1.0, 0.4),
+                        Vec3::Z * -CONTACT_SKIN,
+                    )
                     .with_wheel_tuning(wheel_tuning)
                     .with_crawler(true),
             )
@@ -119,12 +128,15 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     vehicle_spawner::spawn(VehicleType::Excavator, &mut commands, &asset_server)
         .insert(
-            Transform::from_translation(Vec3::new(0.0, 15.0, 3.0))
+            Transform::from_translation(spawn_point + Vec3::new(10.0, 0.0, 0.0))
                 .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
         )
         .insert(
             VehicleControllerParameters::empty()
-                .with_wheel_positions_for_half_size(Vec3::new(0.7, 1.0, 0.4))
+                .with_wheel_positions_for_half_size(
+                    Vec3::new(0.7, 1.0, 0.4),
+                    Vec3::Z * -CONTACT_SKIN,
+                )
                 .with_wheel_tuning(WheelTuning {
                     suspension_stiffness: 100.0,
                     suspension_damping: 10.0,
@@ -142,10 +154,10 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         engine_force: 120f32,
         wheel_brake: [1f32, 1f32],
         wheel_positions: [
-            [-1.3, 1.6, 0.3].into(),
-            [1.3, 1.6, 0.3].into(),
-            [-1.3, -1.2, 0.3].into(),
-            [1.3, -1.2, 0.3].into(),
+            [-1.3, 1.6, 0.3 - CONTACT_SKIN].into(),
+            [1.3, 1.6, 0.3 - CONTACT_SKIN].into(),
+            [-1.3, -1.2, 0.3 - CONTACT_SKIN].into(),
+            [1.3, -1.2, 0.3 - CONTACT_SKIN].into(),
         ],
         wheel_radius: 0.7,
         ..VehicleControllerParameters::empty()
@@ -153,7 +165,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     let truck_def = TruckDefHandle(asset_server.load("vehicledef/truck.truckdef.ron"));
     vehicle_spawner::spawn(VehicleType::Truck, &mut commands, &asset_server)
         .insert(
-            Transform::from_translation(Vec3::new(10.0, 15.0, 3.0))
+            Transform::from_translation(spawn_point - Vec3::new(10.0, 0.0, 0.0))
                 .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
         )
         .insert(truck_controller_parameters)

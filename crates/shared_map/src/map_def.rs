@@ -24,6 +24,10 @@ use crate::{
 #[derive(Debug, Component, Reflect)]
 pub struct MapDefHandle(pub Handle<MapDef>);
 
+/// Tunnelling can happen with heightfields, resulting in rocks falling through the ground.
+/// To fix that, we can either add a context skin, or use continuous collision detection (see `bevy_rapier3d::SoftCcd`).
+pub const CONTACT_SKIN: f32 = 1.0;
+
 #[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct RockData {
     pub translation: Vec3,
@@ -273,28 +277,25 @@ pub fn on_map_def_handle_changed(
         );
         let height_field = collider_ground.as_heightfield().unwrap();
         let mut mesh = heightfield_to_bevy_mesh(height_field.raw);
-        // Tunnelling can happen with heightfields, resulting in rocks falling through the ground.
-        // To fix that, we can either add a context skin, or use continuous collision detection (see `bevy_rapier3d::SoftCcd`).
-        let contact_skin = 1.0f32;
         // Bumping mesh vertices up to avoid seeing a gap between the ground and the rocks.
         if let VertexAttributeValues::Float32x3(values) =
             mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION).unwrap()
         {
             for pos in values {
-                pos[1] += contact_skin;
+                pos[1] += CONTACT_SKIN;
             }
         }
         // Bumping the whole map down, so its top stays at z = 0.
         // TODO: x and y (z in ron) seems inverted..?
         transform.translation = Vec3::new(map_def.scale.z / 2.0, map_def.scale.x / 2.0, 0.0);
-        transform.translation.z = -contact_skin;
+        transform.translation.z = -CONTACT_SKIN;
         mesh.compute_normals();
         let mesh = meshes.add(mesh);
         commands.entity(e).insert((
             Mesh3d(mesh),
             MeshMaterial3d(global_assets.ground_material.clone_weak()),
             collider_ground,
-            ContactSkin(contact_skin),
+            ContactSkin(CONTACT_SKIN),
         ));
     }
 }

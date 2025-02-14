@@ -46,7 +46,7 @@ impl Default for VehicleControllerParameters {
     fn default() -> Self {
         let hw = 0.3;
         let hh = 0.15;
-        Self::empty().with_wheel_positions_for_half_size(Vec3::new(hw, hh, hw))
+        Self::empty().with_wheel_positions_for_half_size(Vec3::new(hw, hh, hw), Vec3::ZERO)
     }
 }
 
@@ -65,6 +65,7 @@ impl VehicleControllerParameters {
     pub fn with_wheel_positions_for_half_size(
         mut self,
         half_size: Vec3,
+        offset: Vec3,
     ) -> VehicleControllerParameters {
         let Vec3 {
             x: width,
@@ -74,10 +75,10 @@ impl VehicleControllerParameters {
         self.wheel_positions = [
             // TODO: height - 1 because the floor has a contact skin
             // https://github.com/ForesightMiningSoftwareCorporation/multiphysics_examples/blob/77aaa0a6e3ff9a225689d7e5bf9218c3fcd6b9af/crates/shared_map/src/map_def.rs#L297
-            [-width * 1.5, length, -height - 1.0].into(),
-            [width * 1.5, length, -height - 1.0].into(),
-            [-width * 1.5, -length, -height - 1.0].into(),
-            [width * 1.5, -length, -height - 1.0].into(),
+            Vec3::from([-width * 1.5, length, -height]) + offset,
+            Vec3::from([width * 1.5, length, -height]) + offset,
+            Vec3::from([-width * 1.5, -length, -height]) + offset,
+            Vec3::from([width * 1.5, -length, -height]) + offset,
         ];
         self.suspension_rest_length = height;
         self.wheel_radius = height / 2.0;
