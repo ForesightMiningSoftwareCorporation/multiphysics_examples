@@ -100,7 +100,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     let bulldozer_entity =
         vehicle_spawner::spawn(VehicleType::Bulldozer, &mut commands, &asset_server)
             .insert(
-                Transform::from_translation(Vec3::new(-10.0, 15.0, 3.0))
+                Transform::from_translation(Vec3::new(170.0, 120.0, 24.0))
                     .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
             )
             .insert(

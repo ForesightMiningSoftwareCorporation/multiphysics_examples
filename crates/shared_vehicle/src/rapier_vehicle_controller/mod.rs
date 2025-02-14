@@ -72,10 +72,10 @@ impl VehicleControllerParameters {
             z: height,
         } = half_size;
         self.wheel_positions = [
-            [-width * 1.5, length, -height].into(),
-            [width * 1.5, length, -height].into(),
-            [-width * 1.5, -length, -height].into(),
-            [width * 1.5, -length, -height].into(),
+            [-width * 1.5, length, -height - 1.0].into(),
+            [width * 1.5, length, -height - 1.0].into(),
+            [-width * 1.5, -length, -height - 1.0].into(),
+            [width * 1.5, -length, -height - 1.0].into(),
         ];
         self.suspension_rest_length = height;
         self.wheel_radius = height / 2.0;
