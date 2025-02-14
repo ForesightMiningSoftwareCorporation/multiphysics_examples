@@ -2,12 +2,8 @@ use std::{env, fs};
 
 use bevy_math::Vec3;
 use ron::ser::PrettyConfig;
-use shared_map::map_def::{MapDef, RockData};
-use sim_data_loader::{
-    broken_rocks::load_broken_rocks,
-    load_all_rocks, seb_data,
-    unbroken_rocks::{generate_heightmap, load_unbroken_rocks, RecordUnBrokenRock},
-};
+use shared_map::map_def::MapDef;
+use sim_data_loader::{load_all_rocks, seb_data, unbroken_rocks::generate_heightmap};
 
 fn main() {
     let mut args = env::args();
@@ -24,29 +20,15 @@ fn main() {
     let output_path = args.next().unwrap();
     let (rocks_for_mapdef, unbroken_rocks) = load_all_rocks(unbroken_rocks_path, broken_rocks_path);
 
-    // lower the unbroken rocks by min_y from broken rocks.
-    /*let bounds_broken_rocks = get_min_max_bounds(&rocks_for_mapdef);
-    let rocks_for_mapdef = center_rocks(rocks_for_mapdef, bounds_broken_rocks);
-    unbroken_rocks.iter_mut().for_each(|rock| {
-        rock.z -= bounds_broken_rocks.0.z;
-    });*/
-
     let sampling = 1f32;
     let height_map = generate_heightmap(&unbroken_rocks, sampling);
 
-    //let rocks_for_mapdef = center_rocks(rocks_for_mapdef);
-
     // write the broken rocks
 
-    let mut existing_output = if let Ok(existing_output) =
+    let mut existing_output =
         ron::de::from_reader::<_, MapDef>(fs::File::open(&output_path).unwrap())
-    {
-        existing_output
-    } else {
-        MapDef::default()
-    };
+            .unwrap_or_default();
     existing_output.rocks = rocks_for_mapdef.clone();
-    //existing_output.rocks = vec![];
     existing_output.height_map = height_map.0.clone();
     existing_output.scale = Vec3::new(
         height_map.1.y as f32 / sampling,

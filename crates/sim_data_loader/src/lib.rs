@@ -38,7 +38,7 @@ pub fn load_all_rocks(
     (rocks_for_mapdef, unbroken_rocks)
 }
 
-fn get_min_max_bounds(unbroken_rocks: &Vec<RecordUnBrokenRock>) -> (Vec3, Vec3) {
+fn get_min_max_bounds(unbroken_rocks: &[RecordUnBrokenRock]) -> (Vec3, Vec3) {
     let (min_coords, max_coords) = unbroken_rocks.iter().fold(
         (
             Vec3::new(f32::INFINITY, f32::INFINITY, f32::INFINITY),

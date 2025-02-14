@@ -35,7 +35,7 @@ pub fn load_unbroken_rocks(
 
 /// Returns the heightmap and it's dimensions.
 pub fn generate_heightmap(
-    blocks: &Vec<RecordUnBrokenRock>,
+    blocks: &[RecordUnBrokenRock],
     sampling_interval: f32,
 ) -> (Vec<f32>, UVec2) {
     // Transform blocks into min/max pairs

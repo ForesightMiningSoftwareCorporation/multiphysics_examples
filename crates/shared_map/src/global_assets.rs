@@ -25,7 +25,7 @@ pub fn init_global_assets(
             rock_half_size * 2f32,
             rock_half_size * 2f32,
         )),
-        rock_half_size: rock_half_size,
+        rock_half_size,
         muck_pile_mesh: meshes.add(Plane3d::new(Vec3::Z, Vec2::ONE / 2f32)),
         muck_pile_material: materials.add(Color::from(palettes::css::GOLD)),
     };
