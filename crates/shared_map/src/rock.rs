@@ -18,7 +18,11 @@ impl Command for SpawnRockCommand {
             Name::new("Rock"),
             Mesh3d(assets.rock_mesh.clone_weak()),
             MeshMaterial3d(assets.rock_material.clone_weak()),
-            Collider::cuboid(0.1, 0.1, 0.1),
+            Collider::cuboid(
+                assets.rock_half_size,
+                assets.rock_half_size,
+                assets.rock_half_size,
+            ),
             RigidBody::Dynamic,
             Transform::from_isometry(self.isometry),
             PickingBehavior::IGNORE,

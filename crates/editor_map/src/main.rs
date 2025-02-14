@@ -168,7 +168,7 @@ pub fn update_rocks_and_export_map(
             .iter()
             .map(|t| RockData {
                 translation: t.translation,
-                // TODO: export metadata
+                // TODO: export metadata/grade..?
                 metadata: 0,
             })
             .collect();

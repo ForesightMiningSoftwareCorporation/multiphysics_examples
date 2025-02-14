@@ -51,25 +51,3 @@ fn get_min_max_bounds(unbroken_rocks: &Vec<RecordUnBrokenRock>) -> (Vec3, Vec3) 
     );
     (min_coords, max_coords)
 }
-
-/// Center the rocks translation, mostly to avoid floating point errors.
-/// Sets the new minimum Z to be ~0.
-// TODO: pass an AABB containing unbroken rocks, as both rocks and unbroken rocks should be centered together.
-fn center_rocks(
-    rocks_for_mapdef: Vec<RockData>,
-    (min_coords, max_coords): (Vec3, Vec3),
-) -> Vec<RockData> {
-    let center = (min_coords + max_coords) / 2.0;
-    let rocks_for_mapdef = rocks_for_mapdef
-        .iter()
-        .map(|rock| RockData {
-            translation: Vec3 {
-                x: rock.translation.x - center.x,
-                y: rock.translation.y - center.y,
-                z: rock.translation.z - min_coords.z,
-            },
-            metadata: rock.metadata,
-        })
-        .collect::<Vec<_>>();
-    rocks_for_mapdef
-}

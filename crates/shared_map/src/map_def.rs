@@ -199,11 +199,14 @@ pub fn on_map_def_handle_changed(
             commands.entity(e).despawn();
         }
         // Create new rocks
-        for r in map_def.rocks.iter() {
+        for (i, r) in map_def.rocks.iter().enumerate() {
             // TODO: pass metadata / grade if needed.
-            commands.queue(SpawnRockCommand {
-                isometry: Isometry3d::from_translation(r.translation),
-            });
+            // An easy optimization is to not spawn all rocks, only a fraction, but show them at a bigger size.
+            if i % 5 == 0 {
+                commands.queue(SpawnRockCommand {
+                    isometry: Isometry3d::from_translation(r.translation),
+                });
+            }
         }
         // Create new invisible walls
         commands.entity(e).with_children(|child_builder| {
@@ -272,7 +275,7 @@ pub fn on_map_def_handle_changed(
         let mut mesh = heightfield_to_bevy_mesh(height_field.raw);
         // Tunnelling can happen with heightfields, resulting in rocks falling through the ground.
         // To fix that, we can either add a context skin, or use continuous collision detection (see `bevy_rapier3d::SoftCcd`).
-        let contact_skin = 0.1f32;
+        let contact_skin = 1.0f32;
         // Bumping mesh vertices up to avoid seeing a gap between the ground and the rocks.
         if let VertexAttributeValues::Float32x3(values) =
             mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION).unwrap()

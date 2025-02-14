@@ -1,5 +1,4 @@
 use bevy_math::{UVec2, Vec3, Vec3Swizzles};
-use bevy_utils::HashMap;
 use core::f32;
 use csv::ReaderBuilder;
 use std::{error::Error, path::Path};
