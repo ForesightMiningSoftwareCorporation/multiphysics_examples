@@ -13,6 +13,7 @@ use super::VehicleType;
 pub fn spawn_bulldozer<'a>(
     commands: &'a mut Commands,
     assets: &'a Res<AssetServer>,
+    transform: Transform,
 ) -> EntityCommands<'a> {
     // Bevy caches the assets so we can just load without any additional bookkeeping.
     let bulldozer = assets
@@ -23,11 +24,19 @@ pub fn spawn_bulldozer<'a>(
         chassis_dimensions.y,
         chassis_dimensions.z,
     );
+    let scaler = commands
+        .spawn((
+            Name::new("bulldozer scaler"),
+            Visibility::default(),
+            transform,
+        ))
+        .id();
+
     let mut entity = commands.spawn((
         Name::new("bulldozer"),
         VehicleType::Bulldozer,
         Visibility::default(),
-        Transform::default(),
+        transform,
         chassis_collider,
         // mass is moved down, for a better adherence to the ground (also chains are heavier than the cabin)
         ColliderMassProperties::MassProperties(MassProperties {
@@ -60,7 +69,7 @@ pub fn spawn_bulldozer<'a>(
     entity.with_child((
         Name::new("bulldozer model"),
         SceneRoot(bulldozer.clone()),
-        Transform::from_translation(Vec3::new(4.4, 0.0, 0.5))
+        Transform::from_translation(Vec3::new(4.4, 0.0, 0.0))
             .with_rotation(
                 Quat::from_axis_angle(Vec3::Z, TAU / 4.0)
                     * Quat::from_axis_angle(Vec3::X, TAU / 4.0),

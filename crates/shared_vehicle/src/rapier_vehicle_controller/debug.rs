@@ -1,3 +1,5 @@
+use crate::vehicle_spawner::VehicleType;
+
 use super::{VehicleController, VehicleControllerParameters};
 use bevy::{color::palettes, prelude::*};
 
@@ -12,7 +14,7 @@ impl Plugin for VehicleControllerDebugPlugin {
             .config_mut::<VehicleControllerGizmos>()
             .0
             .enabled = false;
-        app.add_systems(Update, show_wheels_gizmos);
+        app.add_systems(Update, (show_vehicle_origin_gizmos, show_wheels_gizmos));
     }
 }
 
@@ -41,5 +43,19 @@ pub fn show_wheels_gizmos(
                 );
             }
         }
+    }
+}
+
+pub fn show_vehicle_origin_gizmos(
+    time: Res<Time>,
+    mut gizmos: Gizmos<VehicleControllerGizmos>,
+    q_vehicles: Query<(&GlobalTransform, &VehicleType)>,
+) {
+    for (position, _vehicle_type) in q_vehicles.iter() {
+        gizmos.sphere(
+            Isometry3d::from_translation(position.translation()),
+            5.0 * (time.elapsed_secs() * 0.25).sin(),
+            palettes::basic::PURPLE,
+        );
     }
 }

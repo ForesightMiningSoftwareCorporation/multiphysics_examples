@@ -20,6 +20,7 @@ use super::{
 pub fn spawn_truck<'a>(
     commands: &'a mut Commands,
     assets: &'a Res<AssetServer>,
+    transform: Transform,
 ) -> EntityCommands<'a> {
     let truck = assets.load(GltfAssetLabel::Scene(0).from_asset("private/truck/truck.gltf"));
     let chassis_dimensions = Vec3::new(1.5f32, 2f32, 0.4f32);
@@ -27,7 +28,7 @@ pub fn spawn_truck<'a>(
         Name::new("truck"),
         VehicleType::Truck,
         Visibility::default(),
-        Transform::from_translation(Vec3::new(2f32, 0f32, 0f32)),
+        transform,
         RigidBody::Dynamic,
     ));
     entity.with_children(|child_builder| {

@@ -22,6 +22,7 @@ use crate::{
 pub fn spawn_excavator<'a>(
     commands: &'a mut Commands,
     assets: &'a Res<AssetServer>,
+    transform: Transform,
 ) -> EntityCommands<'a> {
     let chassis_dimensions = Vec3::new(1f32, 2f32, 0.4f32);
     let chassis_collider = Collider::cuboid(
@@ -35,7 +36,7 @@ pub fn spawn_excavator<'a>(
         Name::new("excavator"),
         VehicleType::Excavator,
         Visibility::default(),
-        Transform::default(),
+        transform,
         chassis_collider,
         // mass is shifted down to avoid falling on its sides.
         ColliderMassProperties::MassProperties(MassProperties {
@@ -59,11 +60,17 @@ pub fn spawn_excavator<'a>(
         SensorStartScoop
     ));*/
     let meshes_to_convert_to_collider: HashMap<String, Option<ComputedColliderShape>> = [
+        /*
         // Boom
         (
             "Mesh.018".to_string(),
             Some(ComputedColliderShape::default()),
         ),
+        // Stick
+        (
+            "Mesh.007".to_string(),
+            Some(ComputedColliderShape::default()),
+        ),*/
         // Bucket base
         (
             "Mesh.004".to_string(),
@@ -72,11 +79,6 @@ pub fn spawn_excavator<'a>(
         // Bucket jaws
         (
             "Mesh.003".to_string(),
-            Some(ComputedColliderShape::default()),
-        ),
-        // Stick
-        (
-            "Mesh.007".to_string(),
             Some(ComputedColliderShape::default()),
         ),
     ]

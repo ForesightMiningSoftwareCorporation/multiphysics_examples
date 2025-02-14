@@ -38,10 +38,11 @@ pub fn spawn<'a>(
     vehicle_type: VehicleType,
     commands: &'a mut Commands,
     assets: &'a Res<AssetServer>,
+    transform: Transform,
 ) -> EntityCommands<'a> {
     match vehicle_type {
-        VehicleType::Bulldozer => bulldozer::spawn_bulldozer(commands, assets),
-        VehicleType::Excavator => excavator::spawn_excavator(commands, assets),
-        VehicleType::Truck => truck::spawn_truck(commands, assets),
+        VehicleType::Bulldozer => bulldozer::spawn_bulldozer(commands, assets, transform),
+        VehicleType::Excavator => excavator::spawn_excavator(commands, assets, transform),
+        VehicleType::Truck => truck::spawn_truck(commands, assets, transform),
     }
 }
