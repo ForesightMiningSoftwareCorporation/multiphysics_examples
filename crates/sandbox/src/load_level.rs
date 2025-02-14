@@ -41,6 +41,9 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut map = commands.spawn(MapDefHandle(
         asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
     ));
+    // let mut map = commands.spawn(MapDefHandle(
+    //     asset_server.load("mapdef/1000_cubes.mapdef.ron"),
+    // ));
 
     map.insert((
         Transform::default().with_rotation(

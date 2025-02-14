@@ -5,7 +5,7 @@
 - A barebone [`editor_map`][./crates/editor_map] to help with level creation.
   - [x] A topography mesh (floor). A parry Heightfield, the  crate is here to help with level editing.
   - [x] Initialize a pile of cubes close to the wall for the rock.
-  - [ ] A point-cloud (or block-model) to represent pile of rock particles.
+  - [x] A point-cloud (or block-model) to represent pile of rock particles.
 - A barebone [`editor_vehicle`][./crates/editor_map] to help with vehicle customization.
   - [x] Loads a .ron file to tweak control settings.
 - a [sandbox](crates/sandbox/README.md) to help with understanding how to wire things together.
@@ -48,6 +48,18 @@ A minimal CI from https://github.com/TheBevyFlock/bevy_new_2d, check out their o
 [shared_map](crates/shared_map) is dedicated to loading a map. You'll probably want to change `MapDef` to adapt to your requirements.
 
 It supports hot reloading, and you can isolate its behaviour by using [editor_map](crates/editor_map).
+
+### sim_data_loader
+
+To load more complex maps, you can use this module, which transforms block models into a digestible format for the `shared_map` module.
+
+For example, you can invoke a data "migration" with:
+
+```sh
+cargo run --bin sim_to_mapdef assets/private/Sim\ data/Unbroken\ rock.csv  assets/private/Sim\ data/Broken\ rock.csv assets/private/Sim\ data/transformed/imported_cubes.mapdef.ron`
+```
+
+There is also a `visualize` example to help with understanding data loading in isolation.
 
 ### Vehicles
 
