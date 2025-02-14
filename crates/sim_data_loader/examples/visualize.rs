@@ -1,6 +1,5 @@
-use bevy::{input::keyboard::KeyboardInput, prelude::*, utils::HashMap};
+use bevy::{asset::RenderAssetUsages, prelude::*, render::mesh::Indices};
 use bevy_editor_cam::prelude::*;
-use bevy_math::VectorSpace;
 use sim_data_loader::unbroken_rocks::{generate_heightmap, load_unbroken_rocks};
 
 pub fn main() {
@@ -17,7 +16,15 @@ pub struct HeightMap {
     pub dim: UVec2,
 }
 
-fn setup(mut commands: Commands) {
+#[derive(Resource, Debug)]
+pub struct HeightMapAlt(pub sim_data_loader::seb_data::MapDef);
+
+fn setup(
+    mut commands: Commands,
+    // to show alternative data format
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     commands.spawn((
         Camera3d::default(),
         EditorCam {
@@ -37,11 +44,33 @@ fn setup(mut commands: Commands) {
         rock.y -= 36100.0;
         rock.z -= 800.0;
     });
-    let height_hash_map = generate_heightmap(&unbroken_rocks, 2f32);
+    let height_map = generate_heightmap(&unbroken_rocks, 2f32);
+    let alternative =
+        sim_data_loader::seb_data::to_mapdef_alternative(&[], &height_map.0, &height_map.1);
     commands.insert_resource(HeightMap {
-        heightmap: height_hash_map.0,
-        dim: height_hash_map.1,
+        heightmap: height_map.0,
+        dim: height_map.1,
     });
+
+    let mesh = Mesh::new(
+        bevy::render::mesh::PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    )
+    .with_inserted_indices(Indices::U32(
+        alternative.floor_idx.into_iter().flatten().collect(),
+    ));
+    let mut mesh = mesh.with_inserted_attribute(
+        Mesh::ATTRIBUTE_POSITION,
+        alternative
+            .floor_vtx
+            .iter()
+            .map(|pos| [pos.x, pos.y, pos.z])
+            .collect::<Vec<_>>(),
+    );
+    mesh.compute_flat_normals();
+
+    let mesh = meshes.add(mesh);
+    commands.spawn((Mesh3d(mesh), MeshMaterial3d(materials.add(Color::WHITE))));
 }
 
 fn show_heighthashmap(

@@ -1,11 +1,7 @@
 use std::{env, fs};
 
 use bevy_math::Vec3;
-use parry3d::{
-    math::Vector,
-    na::{DMatrix, Matrix},
-};
-use ron::{ser::PrettyConfig, Map};
+use ron::ser::PrettyConfig;
 use shared_map::map_def::{MapDef, RockData};
 use sim_data_loader::{
     broken_rocks::load_broken_rocks,
@@ -79,24 +75,8 @@ fn main() {
     let mut output_path_alternative = output_path.clone();
     output_path_alternative.push_str(".seb.ron");
 
-    let matrix =
-        DMatrix::<f32>::from_fn(height_map.1.x as usize, height_map.1.y as usize, |x, y| {
-            height_map.0[(x + y * height_map.1.x as usize) as usize]
-        });
-    let parry_heightfield = parry3d::shape::HeightField::new(matrix, Vector::new(1.0, 1.0, 1.0));
-    let trimesh = parry_heightfield.to_trimesh();
-
-    let data_alternative: seb_data::MapDef = seb_data::MapDef {
-        rocks: rocks_for_mapdef
-            .iter()
-            .map(|rock| seb_data::RockData {
-                translation: rock.translation,
-                size: Vec3::ONE,
-            })
-            .collect(),
-        floor_vtx: trimesh.0.iter().map(|v| Vec3::new(v.x, v.y, v.z)).collect(),
-        floor_idx: trimesh.1,
-    };
+    let data_alternative =
+        seb_data::to_mapdef_alternative(&rocks_for_mapdef, &height_map.0, &height_map.1);
 
     ron::ser::to_writer_pretty(
         fs::File::create(&output_path_alternative).unwrap(),
