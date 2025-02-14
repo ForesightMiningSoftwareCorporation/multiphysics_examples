@@ -2,7 +2,7 @@ use std::{error::Error, path::Path};
 
 use csv::ReaderBuilder;
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct RecordBrokenRock {
     pub x: f32,
     pub y: f32,

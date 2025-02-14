@@ -4,7 +4,7 @@ use core::f32;
 use csv::ReaderBuilder;
 use std::{error::Error, path::Path};
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct RecordUnBrokenRock {
     pub x: f32,
     pub y: f32,

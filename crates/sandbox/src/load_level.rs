@@ -41,8 +41,12 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut map = commands.spawn(MapDefHandle(
         asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
     ));
+
     map.insert((
-        Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
+        Transform::default().with_rotation(
+            Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)
+                * Quat::from_rotation_y(std::f32::consts::FRAC_PI_2),
+        ),
         CollisionGroups::new(Group::GROUP_2, Group::ALL),
     ))
     .observe(

@@ -192,6 +192,7 @@ pub fn on_map_def_handle_changed(
         let Some(map_def): Option<&MapDef> = map_defs.get(&map_def_handle.0) else {
             continue;
         };
+        // remove walls
         commands.entity(e).despawn_descendants();
         // Clear previous rocks
         for e in existing_rocks.iter() {
@@ -281,6 +282,8 @@ pub fn on_map_def_handle_changed(
             }
         }
         // Bumping the whole map down, so its top stays at z = 0.
+        // TODO: x and y (z in ron) seems inverted..?
+        transform.translation = Vec3::new(map_def.scale.z / 2.0, map_def.scale.x / 2.0, 0.0);
         transform.translation.z = -contact_skin;
         mesh.compute_normals();
         let mesh = meshes.add(mesh);

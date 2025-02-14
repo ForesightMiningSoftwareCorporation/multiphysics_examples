@@ -125,9 +125,10 @@ pub fn setup(
         _asset_server.load("mapdef/final.mapdef.ron"),
     ));
     // */
-    map.insert(
-        Transform::default().with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
-    )
+    map.insert(Transform::default().with_rotation(
+        Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)
+            * Quat::from_rotation_y(std::f32::consts::FRAC_PI_2),
+    ))
     .observe(
         |trigger: Trigger<Pointer<Move>>,
          mut commands: Commands,
