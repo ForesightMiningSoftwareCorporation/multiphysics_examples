@@ -1,7 +1,7 @@
 use crate::instancing3d::{InstanceBuffer, InstanceData, InstanceMaterialData};
 use crate::prep_vertex_buffer::{GpuRenderConfig, RenderConfig, RenderMode, WgPrepVertexBuffer};
-use crate::step::TimestampChannel;
 use crate::resources::{AppState, PhysicsContext, RunState, Timestamps};
+use crate::step::TimestampChannel;
 use bevy::asset::Assets;
 use bevy::color::Color;
 use bevy::hierarchy::DespawnRecursiveExt;
@@ -77,9 +77,6 @@ pub fn setup_graphics(
     setup_particles_graphics(&mut commands, &device, &*physics, &mut meshes);
 }
 
-
-
-
 fn setup_particles_graphics(
     commands: &mut Commands,
     device: &RenderDevice,
@@ -88,12 +85,12 @@ fn setup_particles_graphics(
 ) {
     let device = device.wgpu_device();
     let colors = [
-        Color::srgb_u8(234,208,168),
-        Color::srgb_u8(182,159,102),
-        Color::srgb_u8(107,84,40),
-        Color::srgb_u8(118,85,43),
-        Color::srgb_u8(64,41,5),
-        Color::srgb_u8(89,58,14),
+        Color::srgb_u8(234, 208, 168),
+        Color::srgb_u8(182, 159, 102),
+        Color::srgb_u8(107, 84, 40),
+        Color::srgb_u8(118, 85, 43),
+        Color::srgb_u8(64, 41, 5),
+        Color::srgb_u8(89, 58, 14),
     ];
     let radius = physics.particles[0].volume.init_radius();
     let cube = meshes.add(Cuboid {

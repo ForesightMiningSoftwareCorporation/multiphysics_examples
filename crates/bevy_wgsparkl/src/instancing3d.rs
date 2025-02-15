@@ -1,5 +1,6 @@
 //! A shader that renders a mesh multiple times in one draw call.
 
+use bevy::render::sync_world::MainEntity;
 use bevy::{
     core_pipeline::core_3d::Transparent3d,
     ecs::{
@@ -27,7 +28,6 @@ use bevy::{
 };
 use bytemuck::{Pod, Zeroable};
 use std::sync::Arc;
-use bevy::render::sync_world::MainEntity;
 
 pub const INSTANCING_SHADER_HANDLE: Handle<Shader> = Handle::weak_from_u128(3222377299100772450);
 
@@ -95,7 +95,8 @@ fn queue_custom(
         let view_key = msaa_key | MeshPipelineKey::from_hdr(view.hdr);
         let rangefinder = view.rangefinder3d();
         for (entity, main_entity) in &material_meshes {
-            let Some(mesh_instance) = render_mesh_instances.render_mesh_queue_data(*main_entity) else {
+            let Some(mesh_instance) = render_mesh_instances.render_mesh_queue_data(*main_entity)
+            else {
                 continue;
             };
             let Some(mesh) = meshes.get(mesh_instance.mesh_asset_id) else {

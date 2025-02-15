@@ -4,8 +4,8 @@ use async_channel::{Receiver, Sender};
 use bevy::prelude::*;
 use bevy::render::renderer::{RenderDevice, RenderQueue, WgpuWrapper};
 use bevy::tasks::ComputeTaskPool;
-use std::time::Instant;
 use bevy_rapier3d::plugin::{RapierContext, RapierContextMut, WriteRapierContext};
+use std::time::Instant;
 use wgcore::kernel::KernelInvocationQueue;
 use wgcore::re_exports::encase::StorageBuffer;
 use wgcore::timestamps::GpuTimestamps;
@@ -101,8 +101,10 @@ fn step_simulation_multisteps(
             let rb = &rapier.rigidbody_set.bodies[coupling.body];
             GpuVelocity {
                 linear: *rb.linvel()
-                    + gravity * rapier.simulation.integration_parameters.dt * (rb.is_dynamic() as u32 as f32)
-                    / (app_state.num_substeps as f32),
+                    + gravity
+                        * rapier.simulation.integration_parameters.dt
+                        * (rb.is_dynamic() as u32 as f32)
+                        / (app_state.num_substeps as f32),
                 angular: rb.angvel().clone(),
             }
         })

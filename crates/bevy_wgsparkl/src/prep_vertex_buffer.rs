@@ -71,7 +71,11 @@ impl GpuRenderConfig {
 }
 
 #[derive(Shader)]
-#[shader(src = "prep_vertex_buffer3d.wgsl", derive(WgParticle, WgGrid, WgSvd2, WgSvd3), composable = false)]
+#[shader(
+    src = "prep_vertex_buffer3d.wgsl",
+    derive(WgParticle, WgGrid, WgSvd2, WgSvd3),
+    composable = false
+)]
 pub struct WgPrepVertexBuffer {
     main: ComputePipeline,
 }

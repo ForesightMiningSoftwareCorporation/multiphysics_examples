@@ -1,10 +1,13 @@
+use crate::prep_vertex_buffer::{GpuRenderConfig, RenderConfig, WgPrepVertexBuffer};
 use bevy::prelude::Resource;
 use wgcore::hot_reloading::HotReloadState;
 use wgcore::timestamps::GpuTimestamps;
 use wgsparkl3d::pipeline::{MpmData, MpmPipeline};
-use wgsparkl3d::rapier::prelude::{CCDSolver, ColliderSet, DefaultBroadPhase, ImpulseJointSet, IntegrationParameters, IslandManager, MultibodyJointSet, NarrowPhase, PhysicsPipeline, RigidBodySet};
+use wgsparkl3d::rapier::prelude::{
+    CCDSolver, ColliderSet, DefaultBroadPhase, ImpulseJointSet, IntegrationParameters,
+    IslandManager, MultibodyJointSet, NarrowPhase, PhysicsPipeline, RigidBodySet,
+};
 use wgsparkl3d::solver::Particle;
-use crate::prep_vertex_buffer::{GpuRenderConfig, RenderConfig, WgPrepVertexBuffer};
 
 #[derive(Resource)]
 pub struct AppState {
