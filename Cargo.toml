@@ -12,16 +12,12 @@ opt-level = 1
 opt-level = 3
 
 [workspace.dependencies]
-wgcore = { version = "0.2", git = "https://github.com/dimforge/wgmath", rev = "585486ee4086fd3c12941c592f0ee6c1f5d7a1f7" }
-wgebra = { version = "0.2", git = "https://github.com/dimforge/wgmath", rev = "585486ee4086fd3c12941c592f0ee6c1f5d7a1f7" }
-wgparry3d = { version = "0.2", git = "https://github.com/dimforge/wgmath", rev = "585486ee4086fd3c12941c592f0ee6c1f5d7a1f7" }
-wgrapier3d = { version = "0.2", git = "https://github.com/dimforge/wgmath", rev = "585486ee4086fd3c12941c592f0ee6c1f5d7a1f7" }
-wgsparkl3d = { git = "https://github.com/dimforge/wgsparkl", rev = "f45777736d98cf7ec34cf0050e12d37218a9392f" }
+wgcore = { version = "0.2", features = ["derive"] }
+wgebra = "0.2"
+wgparry3d = "0.2"
+wgrapier3d = "0.2"
 
-#wgcore = { version = "0.2", path = "../wgmath/crates/wgcore" }
-#wgebra = { version = "0.2", path = "../wgmath/crates/wgebra" }
-#wgparry3d = { version = "0.2", path = "../wgmath/crates/wgparry/crates/wgparry3d" }
-#wgrapier3d = { version = "0.2", path = "../wgmath/crates/wgrapier/crates/wgrapier3d" }
+wgsparkl3d = { git = "https://github.com/dimforge/wgsparkl.git", rev = "6114a73606a2976dc5771f1def5d597a55a546ed" }
 #wgsparkl3d = { path = "../wgsparkl/crates/wgsparkl3d" }
 
 [patch.crates-io]
@@ -32,3 +28,13 @@ wgsparkl3d = { git = "https://github.com/dimforge/wgsparkl", rev = "f45777736d98
 encase = { git = "https://github.com/sebcrozet/encase.git", rev = "6755c1414c225cbeac9fde1ff9394b70d3b05404" }
 parry3d = { git = "https://github.com/dimforge/parry.git", rev = "407fb449504dde7ba0a3d80a8de7e37ac991a77a" }
 bevy_rapier3d = { git = "https://github.com/dimforge/bevy_rapier.git", rev = "a4e9343cd75ce2be788280de2c21ed7efb9039b7" }
+
+wgcore = { git = "https://github.com/dimforge/wgmath.git", rev = "32b54c802be6040c5f003e7d3def4a33e4730d92" }
+wgebra = { git = "https://github.com/dimforge/wgmath.git", rev = "32b54c802be6040c5f003e7d3def4a33e4730d92" }
+wgparry3d = { git = "https://github.com/dimforge/wgmath.git", rev = "32b54c802be6040c5f003e7d3def4a33e4730d92" }
+wgrapier3d = { git = "https://github.com/dimforge/wgmath.git", rev = "32b54c802be6040c5f003e7d3def4a33e4730d92" }
+
+#wgcore = { version = "0.2", path = "../wgmath/crates/wgcore" }
+#wgebra = { version = "0.2", path = "../wgmath/crates/wgebra" }
+#wgparry3d = { version = "0.2", path = "../wgmath/crates/wgparry/crates/wgparry3d" }
+#wgrapier3d = { version = "0.2", path = "../wgmath/crates/wgrapier/crates/wgrapier3d" }
