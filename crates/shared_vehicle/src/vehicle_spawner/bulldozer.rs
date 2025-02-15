@@ -35,7 +35,7 @@ pub fn spawn_bulldozer<'a>(
             local_center_of_mass: Vec3::new(0.0, 0.0, -2.0) * transform.scale,
             ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(
                 0.8f32,
-                chassis_dimensions.into(),
+                (chassis_dimensions * transform.scale).into(),
             ))
         }),
         RigidBody::Dynamic,
@@ -61,7 +61,7 @@ pub fn spawn_bulldozer<'a>(
     entity.with_child((
         Name::new("bulldozer model"),
         SceneRoot(bulldozer.clone()),
-        Transform::from_translation(Vec3::new(4.4, 0.0, 0.0))
+        Transform::from_translation(Vec3::new(4.4, 0.0, 0.05))
             .with_rotation(
                 Quat::from_axis_angle(Vec3::Z, TAU / 4.0)
                     * Quat::from_axis_angle(Vec3::X, TAU / 4.0),

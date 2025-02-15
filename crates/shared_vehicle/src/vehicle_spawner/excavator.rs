@@ -88,7 +88,7 @@ pub fn spawn_excavator<'a>(
         child_builder.spawn((
             Name::new("excavator model"),
             SceneRoot(excavator.clone()),
-            Transform::from_translation(Vec3::new(0.0, 0.0, -1f32))
+            Transform::from_translation(Vec3::new(0.0, 0.0, -1.35f32))
                 .with_scale(Vec3::new(0.4, 0.4, 0.4))
                 .with_rotation(
                     // Look back

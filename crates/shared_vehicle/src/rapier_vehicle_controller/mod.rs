@@ -59,7 +59,7 @@ impl VehicleControllerParameters {
             wheel_radius: 0.5,
             crawler: false,
             wheel_brake: [0.25, 0.25],
-            engine_force: 10.0,
+            engine_force: 20.0,
         }
     }
     pub fn with_wheel_positions_for_half_size(

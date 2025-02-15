@@ -75,7 +75,7 @@ pub fn spawn_truck<'a>(
         .with_child((
             Name::new("truck model"),
             SceneRoot(truck.clone()),
-            Transform::from_translation(Vec3::new(0f32, 0f32, -0.4f32))
+            Transform::from_translation(Vec3::new(0f32, 0f32, -0.95f32))
                 .with_scale(Vec3::new(0.005, 0.005, 0.005))
                 .with_rotation(
                     // Look back then up

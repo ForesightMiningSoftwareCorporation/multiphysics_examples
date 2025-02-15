@@ -89,7 +89,11 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
         .with_wheel_tuning(wheel_tuning)
         .with_crawler(true);
-    bulldozer_parameters.engine_force *= scale;
+    bulldozer_parameters.engine_force *= scale * scale;
+    bulldozer_parameters
+        .wheel_brake
+        .iter_mut()
+        .for_each(|w| *w = 2.0 * scale);
     bulldozer_parameters
         .wheel_positions
         .iter_mut()
@@ -143,8 +147,9 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut truck_controller_parameters = VehicleControllerParameters {
         wheel_tuning,
         // truck has more mass and uses only 2 power wheels so more powerful wheels.
-        engine_force: 120f32 * scale * scale,
-        wheel_brake: [1f32 * scale, 1f32 * scale],
+        engine_force: 320f32 * scale * scale,
+        // rear wheel is always braking
+        wheel_brake: [2f32 * scale * scale, 0.5f32 * scale * scale],
         wheel_positions: [
             Vec3::new(-1.3, 1.6, 0.3 - CONTACT_SKIN),
             Vec3::new(1.3, 1.6, 0.3 - CONTACT_SKIN),
