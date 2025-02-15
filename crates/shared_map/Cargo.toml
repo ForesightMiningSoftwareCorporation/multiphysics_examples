@@ -9,3 +9,23 @@ bevy_rapier3d = { version = "0.28" }
 thiserror = "2.0"
 serde = { version = "1", features = ["derive"] }
 ron = "0.8"
+
+# Bellow was copied from the wgsparkl testbed.
+# Probably contains way too much stuffs.
+#nalgebra = { workspace = true, features = ["rand"] }
+#wgpu = { workspace = true }
+#naga_oil = { workspace = true }
+#bytemuck = { workspace = true }
+#async-channel = { workspace = true }
+
+wgcore = { version = "0.2", path = "../../../wgmath/crates/wgcore" }
+wgebra = { version = "0.2", path = "../../../wgmath/crates/wgebra" }
+wgparry3d = { version = "0.2", path = "../../../wgmath/crates/wgparry/crates/wgparry3d" }
+wgsparkl3d = { path = "../../../wgsparkl/crates/wgsparkl3d" }
+bevy_wgsparkl = { path = "../bevy_wgsparkl" }
+
+#futures-test = "0.3"
+#serial_test = "3"
+#approx = "0.5"
+#async-std = { version = "1", features = ["attributes"] }
+#futures = "0.3"

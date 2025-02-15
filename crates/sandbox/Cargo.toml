@@ -20,7 +20,22 @@ bevy_math = { version = "0.15", features = ["rand"] }
 bevy_editor_cam = "0.5.0"
 bevy_rapier3d = "0.28"
 
+# For MPM
+bytemuck = "1"
+async-channel = "2"
+futures = "0.3"
+nalgebra = "0.33"
+wgpu = { version = "23", features = ["naga-ir"] }
+wgcore = { version = "0.2", path = "../../../wgmath/crates/wgcore" }
+wgebra = { version = "0.2", path = "../../../wgmath/crates/wgebra" }
+wgparry3d = { version = "0.2", path = "../../../wgmath/crates/wgparry/crates/wgparry3d" }
+wgrapier3d = { version = "0.2", path = "../../../wgmath/crates/wgrapier/crates/wgrapier3d" }
+wgsparkl3d = { path = "../../../wgsparkl/crates/wgsparkl3d" }
+bevy_wgsparkl = { path = "../bevy_wgsparkl" }
+parry3d = "0.18"
+
 # inner crates
 
 shared_map = { path = "../shared_map" }
 shared_vehicle = { path = "../shared_vehicle" }
+serde = { version = "1.0.217", features = ["derive"] }

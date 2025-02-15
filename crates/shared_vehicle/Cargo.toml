@@ -12,3 +12,4 @@ ron = "0.8"
 # bevy is on rand 0.8
 rand = "0.8.0"
 bevy-inspector-egui = "0.29"
+bevy_wgsparkl = { path = "../bevy_wgsparkl" }
