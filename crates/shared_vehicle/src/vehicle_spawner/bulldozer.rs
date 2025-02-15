@@ -7,6 +7,7 @@ use bevy_rapier3d::{
     },
     rapier,
 };
+use bevy_wgsparkl::components::MpmCouplingEnabled;
 
 use super::VehicleType;
 
@@ -54,6 +55,7 @@ pub fn spawn_bulldozer<'a>(
             principal_inertia: Vec3::ONE * 0.01,
             ..default()
         }),
+        MpmCouplingEnabled,
     ));
     // Models are oftentimes not adapted to real usecase, rather than re-exporting a model,
     // we can adapt its scale, position, rotation by spawning it as a child.

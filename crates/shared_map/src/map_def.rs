@@ -7,6 +7,7 @@ use bevy::{
     prelude::*,
     render::mesh::{Indices, VertexAttributeValues},
 };
+use bevy_rapier3d::dynamics::RigidBody;
 use bevy_rapier3d::{
     prelude::{Collider, ContactSkin},
     rapier::prelude::HeightField,
@@ -20,6 +21,7 @@ use crate::{
     global_assets::GlobalAssets,
     rock::{Rock, SpawnRockCommand},
 };
+use bevy_wgsparkl::components::MpmCouplingEnabled;
 
 #[derive(Debug, Component, Reflect)]
 pub struct MapDefHandle(pub Handle<MapDef>);
@@ -202,16 +204,16 @@ pub fn on_map_def_handle_changed(
         for e in existing_rocks.iter() {
             commands.entity(e).despawn();
         }
-        // Create new rocks
-        for (i, r) in map_def.rocks.iter().enumerate() {
-            // An easy optimization is to not spawn all rocks, only a fraction, but show them at a bigger size.
-            if i % 5 == 0 {
-                commands.queue(SpawnRockCommand {
-                    // TODO: pass metadata / grade if needed.
-                    isometry: Isometry3d::from_translation(r.translation),
-                });
-            }
-        }
+
+        // // Create new rocks
+        // for (i, r) in map_def.rocks.iter().enumerate() {
+        //     // TODO: pass metadata / grade if needed.
+        //     // An easy optimization is to not spawn all rocks, only a fraction, but show them at a bigger size.
+        //     commands.queue(SpawnRockCommand {
+        //         isometry: Isometry3d::from_translation(r.translation),
+        //     });
+        // }
+
         // Create new invisible walls
         commands.entity(e).with_children(|child_builder| {
             let wall_depth_half = 10.0 / 2.0;
@@ -263,6 +265,21 @@ pub fn on_map_def_handle_changed(
                     0.0,
                 )),
             ));
+
+            // HACK: an invisible floor below the topography to catch particles passing in-between
+            //       triangles.
+            let min_z = *map_def
+                .height_map
+                .iter()
+                .min_by(|a, b| a.partial_cmp(b).unwrap())
+                .unwrap();
+            let collider = Collider::cuboid(map_def.scale.x, 1.0, map_def.scale.z);
+            child_builder.spawn((
+                Name::new("floor bottom"),
+                collider,
+                Transform::from_translation(Vec3::new(0.0, 0.0, min_z)),
+                MpmCouplingEnabled,
+            ));
         });
 
         let width = map_def.vertices_width;
@@ -277,14 +294,14 @@ pub fn on_map_def_handle_changed(
         );
         let height_field = collider_ground.as_heightfield().unwrap();
         let mut mesh = heightfield_to_bevy_mesh(height_field.raw);
-        // Bumping mesh vertices up to avoid seeing a gap between the ground and the rocks.
-        if let VertexAttributeValues::Float32x3(values) =
-            mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION).unwrap()
-        {
-            for pos in values {
-                pos[1] += CONTACT_SKIN;
-            }
-        }
+        // // Bumping mesh vertices up to avoid seeing a gap between the ground and the rocks.
+        // if let VertexAttributeValues::Float32x3(values) =
+        //     mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION).unwrap()
+        // {
+        //     for pos in values {
+        //         pos[1] += CONTACT_SKIN;
+        //     }
+        // }
         // Bumping the whole map down, so its top stays at z = 0.
         // TODO: x and y (z in ron) seems inverted..?
         transform.translation = Vec3::new(map_def.scale.z / 2.0, map_def.scale.x / 2.0, 0.0);
@@ -294,8 +311,10 @@ pub fn on_map_def_handle_changed(
         commands.entity(e).insert((
             Mesh3d(mesh),
             MeshMaterial3d(global_assets.ground_material.clone_weak()),
+            RigidBody::Fixed,
             collider_ground,
             ContactSkin(CONTACT_SKIN),
+            MpmCouplingEnabled,
         ));
     }
 }

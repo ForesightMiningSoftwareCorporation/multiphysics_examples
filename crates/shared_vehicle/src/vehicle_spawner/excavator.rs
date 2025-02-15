@@ -2,15 +2,6 @@ use std::f32::consts::TAU;
 
 use super::react_on_scene_instance_ready::{OnSceneReady, ReactOnSceneInstanceReady};
 use super::{follow::CopyPosition, VehicleType};
-use bevy::{prelude::*, utils::hashbrown::HashMap};
-use bevy_rapier3d::{
-    prelude::{
-        Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group,
-        MassProperties, RigidBody,
-    },
-    rapier,
-};
-
 use crate::{
     accessory_controls::{
         excavator::{ExcavatorDef, ExcavatorDefHandle},
@@ -18,6 +9,18 @@ use crate::{
     },
     look_at::LookAt,
 };
+use bevy::{prelude::*, utils::hashbrown::HashMap};
+use bevy_rapier3d::dynamics::Velocity;
+use bevy_rapier3d::parry::bounding_volume::{Aabb, BoundingVolume};
+use bevy_rapier3d::parry::shape::{SharedShape, Triangle};
+use bevy_rapier3d::{
+    prelude::{
+        Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group,
+        MassProperties, RigidBody,
+    },
+    rapier,
+};
+use bevy_wgsparkl::components::MpmCouplingEnabled;
 
 pub fn spawn_excavator<'a>(
     commands: &'a mut Commands,
@@ -59,6 +62,9 @@ pub fn spawn_excavator<'a>(
         CollisionGroups::new(Group::all(), Group::GROUP_1),
         SensorStartScoop
     ));*/
+
+    let bucket_base_name = "Mesh.004";
+    let bucket_jaws_name = "Mesh.003";
     let meshes_to_convert_to_collider: HashMap<String, Option<ComputedColliderShape>> = [
         /*
         // Boom
@@ -73,12 +79,12 @@ pub fn spawn_excavator<'a>(
         ),*/
         // Bucket base
         (
-            "Mesh.004".to_string(),
+            bucket_base_name.to_string(),
             Some(ComputedColliderShape::default()),
         ),
         // Bucket jaws
         (
-            "Mesh.003".to_string(),
+            bucket_jaws_name.to_string(),
             Some(ComputedColliderShape::default()),
         ),
     ]
@@ -108,6 +114,7 @@ pub fn spawn_excavator<'a>(
             q_children: Query<&Children>,
             q_parents: Query<&Parent>,
             q_names: Query<&Name>,
+            q_collider: Query<&Collider>,
             //
             // add flavor lookat parts
             assets: Res<Assets<ExcavatorDef>>,
@@ -142,6 +149,38 @@ pub fn spawn_excavator<'a>(
                         commands.entity(entity).insert(CopyPosition(q_parents.get(entity).unwrap().get()));
                         commands.entity(entity).remove_parent_in_place();
                         commands.entity(entity).insert(RigidBody::KinematicPositionBased);
+                        commands.entity(entity).insert(MpmCouplingEnabled);
+
+                        // This is the hard-coded AABB of the shovel bucket.
+                        let aabb = Aabb { mins: [-35.630722, 297.40216, 449.29544].into(), maxs: [335.56757, 608.67285, 705.7152].into() };
+
+                        let (mut vtx, mut idx) = aabb.to_trimesh();
+
+                        // This super ugly piece removes faces of the aabb from the jaw or base
+                        // to approximate their original shapes.
+                        if name.to_string() == bucket_jaws_name {
+                            // Remove the last two faces.
+                            for _ in 0..4 {
+                                idx.remove(8);
+                            }
+                            // Remove the first three faces.
+                            for _ in 0..6 {
+                                idx.remove(0);
+                            }
+                        } else {
+                            assert_eq!(name.to_string(), bucket_base_name, "Unsupported collision mesh supported for the excavator.");
+
+                            // Remove the fourth and the last faces.
+                            idx.remove(10);
+                            idx.remove(10);
+                            idx.remove(6);
+                            idx.remove(6);
+                        }
+
+
+
+                        let new_shape = SharedShape::trimesh(vtx.to_vec(), idx).unwrap();
+                        commands.entity(entity).insert(Collider::from(new_shape));
 
                         // no collision with self and others from same group (all excavator parts)
                     }

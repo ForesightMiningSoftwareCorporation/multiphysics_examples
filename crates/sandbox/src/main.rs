@@ -1,3 +1,4 @@
+use bevy::asset::load_internal_asset;
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     input::common_conditions::{input_just_pressed, input_toggle_active},
@@ -9,9 +10,11 @@ use bevy_rapier3d::{
     prelude::*,
     rapier::prelude::{DebugRenderPipeline, IntegrationParameters},
 };
+use bevy_wgsparkl::instancing3d::INSTANCING_SHADER_HANDLE;
 use controls::ControlsPlugin;
 use dotenvy::dotenv;
 use load_level::add_muck_pile_for_excavator;
+use shared_map::global_assets::{init_global_assets, GlobalAssets};
 use shared_map::rock::Rock;
 use shared_vehicle::{
     accessory_controls::AccessoryControlsPlugin,
@@ -24,6 +27,7 @@ use vehicle_spawner::scoop::ScoopPlugin;
 
 pub mod controls;
 pub mod load_level;
+pub mod mpm;
 pub mod muck_pile;
 pub mod stats_rocks;
 pub mod ui_gizmo_toggle;
@@ -41,7 +45,7 @@ fn main() {
         // Adds a system that prints diagnostics to the console
         LogDiagnosticsPlugin::default(),
         RapierPhysicsPlugin::<NoUserData>::default(),
-            // .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
+        // .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
         RapierDebugRenderPlugin::default(),
         (
             VehicleControllerDebugPlugin,
@@ -55,7 +59,16 @@ fn main() {
         bevy_egui::EguiPlugin,
         WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Escape)),
         UiGizmoToggle,
+        bevy_wgsparkl::instancing3d::ParticlesMaterialPlugin,
     ));
+
+    load_internal_asset!(
+        app,
+        INSTANCING_SHADER_HANDLE,
+        "../../bevy_wgsparkl/src/instancing3d.wgsl",
+        Shader::from_wgsl
+    );
+
     app.insert_resource(TimestepMode::Variable {
         max_dt: 1.0 / 60.0,
         time_scale: 1.0,
@@ -72,10 +85,27 @@ fn main() {
     });
 
     app.add_systems(Startup, init_rapier_configuration);
-    app.add_systems(Startup, load_level::spawn_level);
+    app.add_systems(
+        Startup,
+        (
+            init_global_assets.run_if(|res: Option<Res<GlobalAssets>>| res.is_none()),
+            load_level::spawn_level,
+            bevy_wgsparkl::startup::setup_app,
+        )
+            .chain(),
+    );
 
     app.add_systems(Update, add_scoopable_to_rocks);
     app.add_systems(Update, add_muck_pile_for_excavator);
+    app.add_systems(Update, bevy_wgsparkl::step::step_simulation);
+    app.add_systems(
+        Update,
+        (
+            crate::mpm::setup_mpm_particles,
+            bevy_wgsparkl::startup::setup_graphics,
+        )
+            .chain(),
+    );
 
     app.add_systems(
         Update,
@@ -88,7 +118,9 @@ fn main() {
     app.run();
 }
 
-pub fn init_rapier_configuration(mut config: Query<&mut RapierConfiguration, With<DefaultRapierContext>>) {
+pub fn init_rapier_configuration(
+    mut config: Query<&mut RapierConfiguration, With<DefaultRapierContext>>,
+) {
     let mut config = config.single_mut();
     *config = RapierConfiguration {
         gravity: -Vec3::Z * 9.81,

@@ -1,7 +1,14 @@
 use std::f32::consts::TAU;
 
+use super::{
+    follow::CopyPosition,
+    react_on_scene_instance_ready::{OnSceneReady, ReactOnSceneInstanceReady},
+    scoop::ScoopTarget,
+    VehicleType,
+};
 use crate::accessory_controls::truck::controls::TruckMeshMapping;
 use bevy::{prelude::*, utils::HashMap};
+use bevy_rapier3d::dynamics::Velocity;
 use bevy_rapier3d::{
     prelude::{
         Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Friction, Group,
@@ -9,13 +16,7 @@ use bevy_rapier3d::{
     },
     rapier,
 };
-
-use super::{
-    follow::CopyPosition,
-    react_on_scene_instance_ready::{OnSceneReady, ReactOnSceneInstanceReady},
-    scoop::ScoopTarget,
-    VehicleType,
-};
+use bevy_wgsparkl::components::MpmCouplingEnabled;
 
 pub fn spawn_truck<'a>(
     commands: &'a mut Commands,
@@ -121,6 +122,7 @@ pub fn spawn_truck<'a>(
                         if name.as_str() == main_dump_name {
                             mesh_mapping.main_dump = entity;
                             commands.entity(entity).insert(Friction::default());
+                            commands.entity(entity).insert(MpmCouplingEnabled);
                         }
 
                         // no collision with self and others from same group (all truck parts)
