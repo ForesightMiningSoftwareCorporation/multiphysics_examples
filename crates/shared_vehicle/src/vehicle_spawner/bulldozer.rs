@@ -24,14 +24,6 @@ pub fn spawn_bulldozer<'a>(
         chassis_dimensions.y,
         chassis_dimensions.z,
     );
-    let scaler = commands
-        .spawn((
-            Name::new("bulldozer scaler"),
-            Visibility::default(),
-            transform,
-        ))
-        .id();
-
     let mut entity = commands.spawn((
         Name::new("bulldozer"),
         VehicleType::Bulldozer,

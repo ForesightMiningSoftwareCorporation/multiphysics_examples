@@ -21,25 +21,6 @@ use shared_vehicle::{
 };
 
 pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn((
-        Camera3d::default(),
-        EditorCam {
-            orbit_constraint: OrbitConstraint::Fixed {
-                up: Vec3::Z,
-                can_pass_tdc: false,
-            },
-            ..EditorCam::default()
-        },
-        Transform::from_xyz(-63.0, 15.0, 58.0).looking_at(Vec3::new(0.0, 10.0, 0.3), Vec3::Z),
-    ));
-    commands.spawn((
-        DirectionalLight {
-            shadows_enabled: true,
-            ..default()
-        },
-        Transform::default().looking_to(Vec3::new(1.0, -1.0, -1.0), Vec3::Z),
-    ));
-
     // Ground
     let mut map = commands.spawn(MapDefHandle(
         asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
@@ -108,6 +89,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
         .with_wheel_tuning(wheel_tuning)
         .with_crawler(true);
+    bulldozer_parameters.engine_force *= scale;
     bulldozer_parameters
         .wheel_positions
         .iter_mut()
@@ -136,10 +118,16 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
             suspension_stiffness: 100.0,
             suspension_damping: 10.0,
             side_friction_stiffness: 0.8,
+            friction_slip: 100000.5 * scale * scale,
             ..WheelTuning::default()
         })
         .with_crawler(true);
-    excavator_parameters.wheel_radius = 0.7;
+    excavator_parameters.engine_force *= scale * scale;
+    excavator_parameters.wheel_radius *= scale;
+    excavator_parameters
+        .wheel_brake
+        .iter_mut()
+        .for_each(|w| *w = 2.0 * scale);
     excavator_parameters.suspension_rest_length *= scale;
     excavator_parameters
         .wheel_positions
@@ -198,6 +186,26 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
             .to_bundle_minimal(),
         );
     });
+
+    commands.spawn((
+        Camera3d::default(),
+        EditorCam {
+            orbit_constraint: OrbitConstraint::Fixed {
+                up: Vec3::Z,
+                can_pass_tdc: false,
+            },
+            ..EditorCam::default()
+        },
+        Transform::from_translation(spawn_point + Vec3::new(-63.0, 15.0, 58.0))
+            .looking_at(spawn_point + Vec3::new(0.0, 10.0, 0.3), Vec3::Z),
+    ));
+    commands.spawn((
+        DirectionalLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        Transform::default().looking_to(Vec3::new(1.0, -1.0, -1.0), Vec3::Z),
+    ));
 }
 
 pub fn add_muck_pile_for_excavator(

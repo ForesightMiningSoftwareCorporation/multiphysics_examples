@@ -43,7 +43,7 @@ pub fn spawn_excavator<'a>(
             local_center_of_mass: Vec3::new(0.0, 0.0, -1.0) * transform.scale,
             ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(
                 0.8f32,
-                chassis_dimensions.into(),
+                (chassis_dimensions * transform.scale).into(),
             ))
         }),
         CollisionGroups::new(Group::GROUP_3, !Group::GROUP_3),
