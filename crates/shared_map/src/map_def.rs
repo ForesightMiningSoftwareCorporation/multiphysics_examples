@@ -205,7 +205,7 @@ pub fn on_map_def_handle_changed(
         // Create new rocks
         for (i, r) in map_def.rocks.iter().enumerate() {
             // An easy optimization is to not spawn all rocks, only a fraction, but show them at a bigger size.
-            if i % 15 == 0 {
+            if i % 5 == 0 {
                 commands.queue(SpawnRockCommand {
                     // TODO: pass metadata / grade if needed.
                     isometry: Isometry3d::from_translation(r.translation),
