@@ -44,8 +44,8 @@ pub fn spawn_bulldozer<'a>(
     // bulldozer front, to push rocks.
     entity.with_child((
         Name::new("bulldozer front"),
-        Transform::from_translation(Vec3::new(0.0, 2.5, -0.5)),
-        Collider::cuboid(1f32, 0.4f32, 0.8f32),
+        Transform::from_translation(Vec3::new(0.0, 0.0, -0.5)),
+        Collider::cuboid(1.5f32, 3.0f32, 1.2f32),
         // no collision with ground
         CollisionGroups::new(Group::all(), !Group::GROUP_2),
         // mass shouldn't impact too much or the vehicle will just fall towards its front.

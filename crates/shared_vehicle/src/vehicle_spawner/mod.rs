@@ -40,8 +40,10 @@ pub fn spawn<'a>(
     assets: &'a Res<AssetServer>,
     transform: Transform,
 ) -> EntityCommands<'a> {
+    let mut bulldozer_transform = transform;
+    bulldozer_transform.scale *= 1.3;
     match vehicle_type {
-        VehicleType::Bulldozer => bulldozer::spawn_bulldozer(commands, assets, transform),
+        VehicleType::Bulldozer => bulldozer::spawn_bulldozer(commands, assets, bulldozer_transform),
         VehicleType::Excavator => excavator::spawn_excavator(commands, assets, transform),
         VehicleType::Truck => truck::spawn_truck(commands, assets, transform),
     }
