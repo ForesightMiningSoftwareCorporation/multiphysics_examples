@@ -40,7 +40,7 @@ pub fn spawn_bulldozer<'a>(
         chassis_collider,
         // mass is moved down, for a better adherence to the ground (also chains are heavier than the cabin)
         ColliderMassProperties::MassProperties(MassProperties {
-            local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
+            local_center_of_mass: Vec3::new(0.0, 0.0, -2.0) * transform.scale,
             ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(
                 0.8f32,
                 chassis_dimensions.into(),

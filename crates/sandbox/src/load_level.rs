@@ -102,6 +102,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // We'll spawn vehicles around this point.
     let spawn_point = Vec3::new(170.0, 120.0, 24.0);
+    // TODO: consider changing the engine speed (or mass of objects) depending on the chosen scale.
     let scale = 2.5f32;
     let mut bulldozer_parameters = VehicleControllerParameters::empty()
         .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
@@ -129,25 +130,32 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let excavator_def =
         ExcavatorDefHandle(asset_server.load("vehicledef/excavator.excavatordef.ron"));
-
+    let mut excavator_parameters = VehicleControllerParameters::empty()
+        .with_wheel_positions_for_half_size(Vec3::new(0.7, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
+        .with_wheel_tuning(WheelTuning {
+            suspension_stiffness: 100.0,
+            suspension_damping: 10.0,
+            side_friction_stiffness: 0.8,
+            ..WheelTuning::default()
+        })
+        .with_crawler(true);
+    excavator_parameters.wheel_radius = 0.7;
+    excavator_parameters.suspension_rest_length *= scale;
+    excavator_parameters
+        .wheel_positions
+        .iter_mut()
+        .for_each(|w| {
+            *w *= scale;
+        });
     vehicle_spawner::spawn(
         VehicleType::Excavator,
         &mut commands,
         &asset_server,
         Transform::from_translation(spawn_point + Vec3::new(10.0, 0.0, 0.0))
-            .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
+            .with_rotation(Quat::from_rotation_z(180f32.to_radians()))
+            .with_scale(Vec3::splat(scale)),
     )
-    .insert(
-        VehicleControllerParameters::empty()
-            .with_wheel_positions_for_half_size(Vec3::new(0.7, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
-            .with_wheel_tuning(WheelTuning {
-                suspension_stiffness: 100.0,
-                suspension_damping: 10.0,
-                side_friction_stiffness: 0.8,
-                ..WheelTuning::default()
-            })
-            .with_crawler(true),
-    )
+    .insert(excavator_parameters)
     .insert(excavator_def)
     .insert(ExcavatorControls::default());
 
