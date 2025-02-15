@@ -1,12 +1,12 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
-use bevy_rapier3d::{
-    plugin::{TimestepMode},
-    prelude::{Friction, RapierRigidBodyHandle},
-};
 use bevy_rapier3d::plugin::{DefaultRapierContext, ReadRapierContext};
 use bevy_rapier3d::prelude::{Velocity, WriteRapierContext};
 use bevy_rapier3d::rapier::dynamics::RigidBodyVelocity;
+use bevy_rapier3d::{
+    plugin::TimestepMode,
+    prelude::{Friction, RapierRigidBodyHandle},
+};
 use shared_vehicle::{
     accessory_controls::{
         excavator::{controls::ExcavatorControls, ExcavatorDef, ExcavatorDefHandle},
