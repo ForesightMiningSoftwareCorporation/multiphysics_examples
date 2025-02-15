@@ -18,10 +18,6 @@ ron = "0.8"
 #bytemuck = { workspace = true }
 #async-channel = { workspace = true }
 
-wgcore = { version = "0.2", path = "../../../wgmath/crates/wgcore" }
-wgebra = { version = "0.2", path = "../../../wgmath/crates/wgebra" }
-wgparry3d = { version = "0.2", path = "../../../wgmath/crates/wgparry/crates/wgparry3d" }
-wgsparkl3d = { path = "../../../wgsparkl/crates/wgsparkl3d" }
 bevy_wgsparkl = { path = "../bevy_wgsparkl" }
 
 #futures-test = "0.3"
