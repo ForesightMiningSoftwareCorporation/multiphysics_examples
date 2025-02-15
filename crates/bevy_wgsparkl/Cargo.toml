@@ -1,0 +1,19 @@
+[package]
+name = "bevy_wgsparkl"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.15"
+bytemuck = "1"
+async-channel = "2"
+futures = "0.3"
+nalgebra = "0.33"
+wgpu = { version = "23", features = ["naga-ir"] }
+wgcore = { version = "0.2", path = "../../../wgmath/crates/wgcore" }
+wgebra = { version = "0.2", path = "../../../wgmath/crates/wgebra" }
+wgparry3d = { version = "0.2", path = "../../../wgmath/crates/wgparry/crates/wgparry3d" }
+wgrapier3d = { version = "0.2", path = "../../../wgmath/crates/wgrapier/crates/wgrapier3d" }
+wgsparkl3d = { path = "../../../wgsparkl/crates/wgsparkl3d" }
+parry3d = "0.18"
+bevy_rapier3d = "0.28"
