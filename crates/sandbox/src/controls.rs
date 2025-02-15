@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_rapier3d::{
-    plugin::{TimestepMode, WriteDefaultRapierContext},
+    plugin::{TimestepMode},
     prelude::{Friction, RapierRigidBodyHandle},
 };
-
+use bevy_rapier3d::plugin::{DefaultRapierContext, ReadRapierContext};
+use bevy_rapier3d::prelude::{Velocity, WriteRapierContext};
+use bevy_rapier3d::rapier::dynamics::RigidBodyVelocity;
 use shared_vehicle::{
     accessory_controls::{
         excavator::{controls::ExcavatorControls, ExcavatorDef, ExcavatorDefHandle},
@@ -166,10 +168,10 @@ pub fn update_vehicle_controller(
     time: Res<Time>,
     timestep_mode: Res<TimestepMode>,
     mut vehicles: Query<&mut VehicleController>,
-    mut context: WriteDefaultRapierContext,
+    mut context: WriteRapierContext,
 ) {
+    let mut context = context.single_mut();
     for mut vehicle_controller in vehicles.iter_mut() {
-        let context = &mut *context;
         // capping delta time to max_dt, or we'll issue a move command that is too big,
         // resulting in an excavator difficult to control.
         let dt = match *timestep_mode {
@@ -178,9 +180,9 @@ pub fn update_vehicle_controller(
         };
         vehicle_controller.update_vehicle(
             dt,
-            &mut context.bodies,
-            &context.colliders,
-            &context.query_pipeline,
+            &mut context.rigidbody_set.bodies,
+            &context.colliders.colliders,
+            &context.query_pipeline.query_pipeline,
         );
     }
 }

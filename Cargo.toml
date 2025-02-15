@@ -16,3 +16,5 @@ opt-level = 3
 # rapier3d = { path = "../rapier/crates/rapier3d" }
 # This branch contains a hack fix to angular interpolation, which seems to be wrongly computed?
 rapier3d = { git = "https://github.com/Vrixyz/rapier.git", branch = "no_angular_interpolation" }
+
+bevy_rapier3d = { git = "https://github.com/dimforge/bevy_rapier.git", rev = "a4e9343cd75ce2be788280de2c21ed7efb9039b7" }

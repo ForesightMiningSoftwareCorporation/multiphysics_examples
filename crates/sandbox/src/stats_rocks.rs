@@ -2,7 +2,7 @@ use bevy_egui::{egui, EguiContexts};
 
 use bevy::{color::palettes, prelude::*, render::primitives::Aabb};
 use bevy_math::bounding::Aabb3d;
-use bevy_rapier3d::plugin::ReadDefaultRapierContext;
+use bevy_rapier3d::plugin::ReadRapierContext;
 use shared_map::rock::Rock;
 
 pub struct StatsRocksPlugin;
@@ -46,7 +46,7 @@ pub fn ui_rock_count(
 }
 
 pub fn count_rocks(
-    rapier_context: ReadDefaultRapierContext,
+    rapier_context: ReadRapierContext,
     mut q_zones: Query<(&GlobalTransform, &mut CountRocksInZone, &Aabb)>,
     q_rocks: Query<Entity, With<Rock>>,
 ) {

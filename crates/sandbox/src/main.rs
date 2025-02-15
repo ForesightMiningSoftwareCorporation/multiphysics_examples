@@ -40,8 +40,8 @@ fn main() {
         FrameTimeDiagnosticsPlugin,
         // Adds a system that prints diagnostics to the console
         LogDiagnosticsPlugin::default(),
-        RapierPhysicsPlugin::<NoUserData>::default()
-            .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
+        RapierPhysicsPlugin::<NoUserData>::default(),
+            // .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
         RapierDebugRenderPlugin::default(),
         (
             VehicleControllerDebugPlugin,
@@ -71,7 +71,7 @@ fn main() {
         pipeline: debug_render_pipeline,
     });
 
-    app.add_systems(PreStartup, init_rapier_context);
+    app.add_systems(Startup, init_rapier_configuration);
     app.add_systems(Startup, load_level::spawn_level);
 
     app.add_systems(Update, add_scoopable_to_rocks);
@@ -88,22 +88,29 @@ fn main() {
     app.run();
 }
 
-pub fn init_rapier_context(mut commands: Commands) {
-    let mut rapier_context = RapierContext::default();
-    rapier_context.integration_parameters = IntegrationParameters {
-        length_unit: 1f32,
-        ..default()
+pub fn init_rapier_configuration(mut config: Query<&mut RapierConfiguration, With<DefaultRapierContext>>) {
+    let mut config = config.single_mut();
+    *config = RapierConfiguration {
+        gravity: -Vec3::Z * 9.81,
+        force_update_from_transform_changes: true,
+        ..RapierConfiguration::new(1f32)
     };
-    commands.spawn((
-        Name::new("Rapier Context"),
-        rapier_context,
-        RapierConfiguration {
-            gravity: -Vec3::Z * 9.81,
-            force_update_from_transform_changes: true,
-            ..RapierConfiguration::new(1f32)
-        },
-        DefaultRapierContext,
-    ));
+
+    // let mut rapier_context = RapierContext::default();
+    // rapier_context.integration_parameters = IntegrationParameters {
+    //     length_unit: 1f32,
+    //     ..default()
+    // };
+    // commands.spawn((
+    //     Name::new("Rapier Context"),
+    //     rapier_context,
+    //     RapierConfiguration {
+    //         gravity: -Vec3::Z * 9.81,
+    //         force_update_from_transform_changes: true,
+    //         ..RapierConfiguration::new(1f32)
+    //     },
+    //     DefaultRapierContext,
+    // ));
 }
 
 pub fn add_scoopable_to_rocks(
