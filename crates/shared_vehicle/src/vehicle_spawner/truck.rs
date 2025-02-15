@@ -43,10 +43,10 @@ pub fn spawn_truck<'a>(
             ),
             // mass is shifted down to avoid falling on its sides.
             ColliderMassProperties::MassProperties(MassProperties {
-                local_center_of_mass: Vec3::new(0.0, 0.0, -1.0),
+                local_center_of_mass: Vec3::new(0.0, 0.0, -1.0) * transform.scale,
                 ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(
                     2f32,
-                    chassis_dimensions.into(),
+                    (chassis_dimensions * transform.scale).into(),
                 ))
             }),
             CollisionGroups::new(Group::GROUP_4, !Group::GROUP_4),

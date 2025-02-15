@@ -114,13 +114,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         ExcavatorDefHandle(asset_server.load("vehicledef/excavator.excavatordef.ron"));
     let mut excavator_parameters = VehicleControllerParameters::empty()
         .with_wheel_positions_for_half_size(Vec3::new(0.7, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
-        .with_wheel_tuning(WheelTuning {
-            suspension_stiffness: 100.0,
-            suspension_damping: 10.0,
-            side_friction_stiffness: 0.8,
-            friction_slip: 100000.5 * scale * scale,
-            ..WheelTuning::default()
-        })
+        .with_wheel_tuning(wheel_tuning)
         .with_crawler(true);
     excavator_parameters.engine_force *= scale * scale;
     excavator_parameters.wheel_radius *= scale;
@@ -128,7 +122,6 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         .wheel_brake
         .iter_mut()
         .for_each(|w| *w = 2.0 * scale);
-    excavator_parameters.suspension_rest_length *= scale;
     excavator_parameters
         .wheel_positions
         .iter_mut()
@@ -147,27 +140,34 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     .insert(excavator_def)
     .insert(ExcavatorControls::default());
 
-    let truck_controller_parameters = VehicleControllerParameters {
+    let mut truck_controller_parameters = VehicleControllerParameters {
         wheel_tuning,
         // truck has more mass and uses only 2 power wheels so more powerful wheels.
-        engine_force: 120f32,
-        wheel_brake: [1f32, 1f32],
+        engine_force: 120f32 * scale * scale,
+        wheel_brake: [1f32 * scale, 1f32 * scale],
         wheel_positions: [
-            [-1.3, 1.6, 0.3 - CONTACT_SKIN].into(),
-            [1.3, 1.6, 0.3 - CONTACT_SKIN].into(),
-            [-1.3, -1.2, 0.3 - CONTACT_SKIN].into(),
-            [1.3, -1.2, 0.3 - CONTACT_SKIN].into(),
+            Vec3::new(-1.3, 1.6, 0.3 - CONTACT_SKIN),
+            Vec3::new(1.3, 1.6, 0.3 - CONTACT_SKIN),
+            Vec3::new(-1.3, -1.2, 0.3 - CONTACT_SKIN),
+            Vec3::new(1.3, -1.2, 0.3 - CONTACT_SKIN),
         ],
-        wheel_radius: 0.7,
+        wheel_radius: 0.7 * scale,
         ..VehicleControllerParameters::empty()
     };
+    truck_controller_parameters
+        .wheel_positions
+        .iter_mut()
+        .for_each(|w| {
+            *w *= scale;
+        });
     let truck_def = TruckDefHandle(asset_server.load("vehicledef/truck.truckdef.ron"));
     vehicle_spawner::spawn(
         VehicleType::Truck,
         &mut commands,
         &asset_server,
         Transform::from_translation(spawn_point - Vec3::new(10.0, 0.0, 0.0))
-            .with_rotation(Quat::from_rotation_z(180f32.to_radians())),
+            .with_rotation(Quat::from_rotation_z(180f32.to_radians()))
+            .with_scale(Vec3::splat(scale)),
     )
     .insert(truck_controller_parameters)
     .insert(truck_def)

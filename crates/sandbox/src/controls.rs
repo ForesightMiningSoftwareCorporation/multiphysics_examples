@@ -126,7 +126,8 @@ fn ui_controls(
                 ui.label("Arrow keys to move.");
                 match vehicle_type {
                     VehicleType::Excavator => {
-                        ui.label("T,G to move boom");
+                        ui.label("T,G to move swing");
+                        ui.label("Y,H to move boom");
                         ui.label("U,J to move stick");
                         ui.label("I,K to move bucket base");
                         ui.label("O,L to move bucket jaw");

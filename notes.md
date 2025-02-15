@@ -16,6 +16,7 @@ Notes taken while developing this, which may be useful to improve the ecosystem.
   - using fixed update is way more laggy (this is expected because variable timestep has a concept of max_dt,
     effectively slowing the simulation, that's where [bevy_fixed_update_task](https://crates.io/crates/bevy_fixed_update_task) can help).
   - the model loading to collider doesn't work, probably a bug on this repository, where we should react to the async collider being created, or order after the relevant systems in bevy_rapier (but they are probably in fixed update then).
+- local_center_of_mass don't seem to take into account the transform hierarchy (or even self.transform.scale)
 
 ## TODO
 
