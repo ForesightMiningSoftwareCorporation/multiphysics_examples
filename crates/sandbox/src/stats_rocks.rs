@@ -5,6 +5,9 @@ use bevy_math::bounding::Aabb3d;
 use bevy_rapier3d::plugin::ReadRapierContext;
 use shared_map::rock::Rock;
 
+/// Plugin to count rocks if we use CPU.
+///
+/// Currently wgsparkl doesn't support raycasting so this plugin is not relevant.
 pub struct StatsRocksPlugin;
 
 #[derive(Debug, Component, Reflect)]

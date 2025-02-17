@@ -11,10 +11,13 @@
 - a [sandbox](crates/sandbox/README.md) to help with understanding how to wire things together.
   - [x] A model for a bulldozer to push particles into a wall to make the rock pile steeper.
   - [x] A model of a shovel to pick up scoops of rock (for simplicity, once the scoop is picked, the rock particles are just removed and teleported into the truck).
+    - [x] Excavator arm initialized with a model. See [accessory_controls](crates/shared_vehicle/src/accessory_controls).
   - [x] Once the truck is full, the user drives it to a muck pile and dumps the material.
   - [x] ui
     - [x] switch between vehicles
-    - [x] see how many rocks are in an area (muck piles ; truck ; excavator) -> see `muck_pile.rs` and `stats_rocks.rs`
+    - [ ] see how many rocks are in an area (muck piles ; truck ; excavator)
+      - ~~See `muck_pile.rs` and `stats_rocks.rs`~~ ; <- This is a CPU only implementation.
+      - You should export particles positions from GPU if you need that feature. 
 
 The project is set up with right-handed Z-up, to the extent possible:
 as both parry and bevy sometimes expect Y-Up, comments are here to guide you.
@@ -45,6 +48,10 @@ The project is set up with [bevy's recommended optimizations](https://bevyengine
 A minimal CI from https://github.com/TheBevyFlock/bevy_new_2d, check out their other release scripts!
 
 ## How to navigate this project ?
+
+[Sandbox](#Sandbox) is the main final project. Run it with `cargo run --release -p sandbox`.
+
+Let's go through important modules:
 
 ### Map
 
@@ -106,4 +113,4 @@ Additionally, more gameplay features are added:
 
 ### Limitations
 
-Check out the `TODO` and `FIXME` for limitations, hacks or surprising behaviours.
+Check out the `TODO`, `FIXME` and `HACK` for limitations, hacks or surprising behaviours.

@@ -21,7 +21,6 @@ use shared_vehicle::{
     rapier_vehicle_controller::debug::VehicleControllerDebugPlugin,
     vehicle_spawner::{self, VehicleSpawnerPlugin},
 };
-use stats_rocks::StatsRocksPlugin;
 use ui_gizmo_toggle::UiGizmoToggle;
 use vehicle_spawner::scoop::ScoopPlugin;
 
@@ -45,7 +44,6 @@ fn main() {
         // Adds a system that prints diagnostics to the console
         LogDiagnosticsPlugin::default(),
         RapierPhysicsPlugin::<NoUserData>::default(),
-        // .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
         RapierDebugRenderPlugin::default(),
         (
             VehicleControllerDebugPlugin,
@@ -53,8 +51,9 @@ fn main() {
             VehicleSpawnerPlugin,
             AccessoryControlsPlugin,
             ControlsPlugin,
-            ScoopPlugin,
-            StatsRocksPlugin,
+            // FIXME: These are CPU implementations, not compatible with wgsparkl.
+            // ScoopPlugin,
+            // StatsRocksPlugin,
         ),
         bevy_egui::EguiPlugin,
         WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Escape)),
