@@ -58,7 +58,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Vehicles
 
     let wheel_tuning = WheelTuning {
-        suspension_stiffness: 100.0,
+        suspension_stiffness: 80.0,
         suspension_damping: 10.0,
         ..WheelTuning::default()
     };
@@ -68,15 +68,15 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     // TODO: consider changing the engine speed (or mass of objects) depending on the chosen scale.
     let scale = 2.5f32;
     let mut bulldozer_parameters = VehicleControllerParameters::empty()
-        .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
+        .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.5, 0.4), Vec3::Z * -CONTACT_SKIN)
         .with_wheel_tuning(wheel_tuning)
         .with_crawler(true);
     bulldozer_parameters.wheel_radius *= scale;
-    bulldozer_parameters.engine_force = 50.0 * scale * scale;
+    bulldozer_parameters.engine_force = 60.0 * scale * scale;
     bulldozer_parameters
         .wheel_brake
         .iter_mut()
-        .for_each(|w| *w = 15.0 * scale);
+        .for_each(|w| *w = 14.0 * scale);
     bulldozer_parameters
         .wheel_positions
         .iter_mut()
