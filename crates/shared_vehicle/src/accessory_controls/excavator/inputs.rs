@@ -13,38 +13,38 @@ impl ExcavatorControls {
             match *key {
                 // swing
                 KeyCode::KeyT => {
-                    self.swing += 0.1 * elapsed * def.swing.sensitivity;
+                    self.swing.desired += 0.1 * elapsed * def.swing.sensitivity;
                 }
                 KeyCode::KeyG => {
-                    self.swing -= 0.1 * elapsed * def.swing.sensitivity;
+                    self.swing.desired -= 0.1 * elapsed * def.swing.sensitivity;
                 }
                 // boom
                 KeyCode::KeyY => {
-                    self.boom += 0.1 * elapsed * def.boom.sensitivity;
+                    self.boom.desired += 0.1 * elapsed * def.boom.sensitivity;
                 }
                 KeyCode::KeyH => {
-                    self.boom -= 0.1 * elapsed * def.boom.sensitivity;
+                    self.boom.desired -= 0.1 * elapsed * def.boom.sensitivity;
                 }
                 // stick
                 KeyCode::KeyU => {
-                    self.stick += 0.1 * elapsed * def.stick.sensitivity;
+                    self.stick.desired += 0.1 * elapsed * def.stick.sensitivity;
                 }
                 KeyCode::KeyJ => {
-                    self.stick -= 0.1 * elapsed * def.stick.sensitivity;
+                    self.stick.desired -= 0.1 * elapsed * def.stick.sensitivity;
                 }
                 // bucket base
                 KeyCode::KeyI => {
-                    self.bucket_base += 0.1 * elapsed * def.bucket_base.sensitivity;
+                    self.bucket_base.desired += 0.1 * elapsed * def.bucket_base.sensitivity;
                 }
                 KeyCode::KeyK => {
-                    self.bucket_base -= 0.1 * elapsed * def.bucket_base.sensitivity;
+                    self.bucket_base.desired -= 0.1 * elapsed * def.bucket_base.sensitivity;
                 }
                 // bucket jaw
                 KeyCode::KeyO => {
-                    self.bucket_jaw += 0.1 * elapsed * def.bucket_jaw.sensitivity;
+                    self.bucket_jaw.desired += 0.1 * elapsed * def.bucket_jaw.sensitivity;
                 }
                 KeyCode::KeyL => {
-                    self.bucket_jaw -= 0.1 * elapsed * def.bucket_jaw.sensitivity;
+                    self.bucket_jaw.desired -= 0.1 * elapsed * def.bucket_jaw.sensitivity;
                 }
                 _ => {}
             }
@@ -52,10 +52,12 @@ impl ExcavatorControls {
     }
 
     pub fn add(&mut self, other: &Self) {
-        self.swing += other.swing;
-        self.boom = (self.boom + other.boom).clamp(0.0, 1.0);
-        self.stick = (self.stick + other.stick).clamp(0.0, 1.0);
-        self.bucket_base = (self.bucket_base + other.bucket_base).clamp(0.0, 1.0);
-        self.bucket_jaw = (self.bucket_jaw + other.bucket_jaw).clamp(0.0, 1.0);
+        self.swing.desired += other.swing.desired;
+        self.boom.desired = (self.boom.desired + other.boom.desired).clamp(0.0, 1.0);
+        self.stick.desired = (self.stick.desired + other.stick.desired).clamp(0.0, 1.0);
+        self.bucket_base.desired =
+            (self.bucket_base.desired + other.bucket_base.desired).clamp(0.0, 1.0);
+        self.bucket_jaw.desired =
+            (self.bucket_jaw.desired + other.bucket_jaw.desired).clamp(0.0, 1.0);
     }
 }

@@ -2,7 +2,7 @@ pub mod excavator;
 pub mod truck;
 
 use bevy::prelude::*;
-use excavator::ExcavatorAccessoryPlugin;
+use excavator::{controls::ControlKnob, ExcavatorAccessoryPlugin};
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
 use truck::TruckAccessoryPlugin;
@@ -22,7 +22,10 @@ pub struct RotationControlDef {
     pub axis: Vec3,
     pub min_max_angle: Option<Vec2>,
     pub default_angle: f32,
+    /// How fast the desired angle should move.
     pub sensitivity: f32,
+    /// How fast the rotation should move to the desired angle.
+    pub sensitivity_lerp_mult: f32,
 }
 
 impl RotationControlDef {
@@ -33,23 +36,27 @@ impl RotationControlDef {
         angle.clamp(min_max_angle.x, min_max_angle.y)
     }
 
-    pub fn get_default_ratio(&self) -> f32 {
+    pub fn get_default_knob(&self) -> ControlKnob {
         let Some(min_max_angle) = self.min_max_angle else {
-            return self.default_angle;
+            return ControlKnob {
+                current_value: 0.0,
+                desired: 0.0,
+            };
         };
-        self.default_angle.remap(
-            self.clamp_angle(min_max_angle.x),
-            self.clamp_angle(min_max_angle.y),
-            0.0,
-            1.0,
-        )
+        let current_value = self
+            .default_angle
+            .remap(min_max_angle.x, min_max_angle.y, 0.0, 1.0);
+        ControlKnob {
+            current_value: current_value,
+            desired: current_value,
+        }
     }
 
     pub fn remap_in_range(&self, rotation: f32) -> Quat {
         let Some(min_max) = self.min_max_angle else {
             return Quat::from_axis_angle(self.axis, rotation);
         };
-        Quat::from_axis_angle(self.axis, rotation.remap(0.0, 1.0, min_max.x, min_max.y))
+        Quat::from_axis_angle(self.axis, min_max.x.lerp(min_max.y, rotation))
     }
 }
 impl Hash for RotationControlDef {
@@ -61,6 +68,7 @@ impl Hash for RotationControlDef {
             min_max_angle,
             default_angle,
             sensitivity,
+            sensitivity_lerp_mult,
         } = self;
         node_name.hash(state);
         if let Some(min_max_angle) = min_max_angle {
@@ -72,6 +80,7 @@ impl Hash for RotationControlDef {
         axis.z.to_bits().hash(state);
         default_angle.to_bits().hash(state);
         sensitivity.to_bits().hash(state);
+        sensitivity_lerp_mult.to_bits().hash(state);
     }
 }
 

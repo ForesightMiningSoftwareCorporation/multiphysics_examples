@@ -5,6 +5,6 @@
         min_max_angle: Some((1.5707964, 2.5)),
         default_angle: 1.5707964,
         sensitivity: 3.5,
+        sensitivity_lerp_mult: 3.0,
     ),
-    invisible_wall_rear_name: "invisible_wall_rear",
 )

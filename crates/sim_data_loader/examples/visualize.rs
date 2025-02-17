@@ -1,11 +1,7 @@
 use bevy::{asset::RenderAssetUsages, prelude::*, render::mesh::Indices};
 use bevy_editor_cam::prelude::*;
 use shared_map::map_def::RockData;
-use sim_data_loader::{
-    broken_rocks::load_broken_rocks,
-    load_all_rocks,
-    unbroken_rocks::{generate_heightmap, load_unbroken_rocks},
-};
+use sim_data_loader::{load_all_rocks, unbroken_rocks::generate_heightmap};
 
 pub fn main() {
     App::new()
@@ -58,12 +54,6 @@ fn setup(
         "assets/private/Sim data/Unbroken rock.csv",
         "assets/private/Sim data/Broken rock.csv",
     );
-    // lower the unbroken rocks by min_y from broken rocks.
-    // unbroken_rocks.iter_mut().for_each(|rock| {
-    //     rock.x -= 86100.0;
-    //     rock.y -= 36100.0;
-    //     rock.z -= 800.0;
-    // });
     let height_map = generate_heightmap(&unbroken_rocks, 1f32);
     let alternative =
         sim_data_loader::seb_data::to_mapdef_alternative(&[], &height_map.0, &height_map.1);

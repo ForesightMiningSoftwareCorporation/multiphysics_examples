@@ -17,7 +17,7 @@ wgebra = "0.2"
 wgparry3d = "0.2"
 wgrapier3d = "0.2"
 
-wgsparkl3d = { git = "https://github.com/dimforge/wgsparkl.git", rev = "6114a73606a2976dc5771f1def5d597a55a546ed" }
+wgsparkl3d = { git = "https://github.com/dimforge/wgsparkl.git", rev = "f64d3911fa517ec53807d771d8e42aa876e04a38" }
 #wgsparkl3d = { path = "../wgsparkl/crates/wgsparkl3d" }
 
 [patch.crates-io]

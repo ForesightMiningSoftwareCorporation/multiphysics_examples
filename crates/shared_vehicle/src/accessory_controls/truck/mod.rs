@@ -16,8 +16,6 @@ pub struct TruckDefHandle(pub Handle<TruckDef>);
 pub struct TruckDef {
     /// Main dump
     pub main_dump: RotationControlDef,
-    /// Invisible wall in the back of the dump
-    pub invisible_wall_rear_name: String,
 }
 
 pub struct TruckAccessoryPlugin;

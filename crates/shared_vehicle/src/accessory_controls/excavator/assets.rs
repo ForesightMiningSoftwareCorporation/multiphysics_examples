@@ -177,11 +177,11 @@ pub fn set_default_controls(
             continue;
         };
         *controls = ExcavatorControls {
-            bucket_jaw: def.bucket_jaw.get_default_ratio(),
-            bucket_base: def.bucket_base.get_default_ratio(),
-            stick: def.stick.get_default_ratio(),
-            boom: def.boom.get_default_ratio(),
-            swing: def.swing.get_default_ratio(),
+            bucket_jaw: def.bucket_jaw.get_default_knob(),
+            bucket_base: def.bucket_base.get_default_knob(),
+            stick: def.stick.get_default_knob(),
+            boom: def.boom.get_default_knob(),
+            swing: def.swing.get_default_knob(),
         };
     }
 }

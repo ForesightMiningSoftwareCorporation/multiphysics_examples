@@ -158,7 +158,7 @@ pub fn set_default_controls(
             continue;
         };
         *controls = TruckControls {
-            main_dump: def.main_dump.get_default_ratio(),
+            main_dump: def.main_dump.get_default_knob().current_value,
         };
     }
 }
