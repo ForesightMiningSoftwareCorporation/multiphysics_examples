@@ -36,10 +36,6 @@ fn main() {
         update_rocks_and_export_map.run_if(input_just_pressed(KeyCode::KeyE)),
     );
     app.add_systems(Update, ui_controls);
-    println!("\n\nInstructions:");
-    println!("Press 'E' to export the map.");
-    println!("Press 'C' and move your cursor on the ground to spawn rocks.");
-    println!("\n\n");
     app.run();
 }
 
@@ -58,8 +54,7 @@ pub fn setup(
     mut commands: Commands,
     // `_map_def` is useful if you want to create an asset procedurally.
     mut _map_def: ResMut<Assets<MapDef>>,
-    // `_asset_server` is useful to load an existing map.
-    _asset_server: Res<AssetServer>,
+    asset_server: Res<AssetServer>,
 ) {
     commands.spawn((
         Camera3d::default(),
@@ -69,6 +64,12 @@ pub fn setup(
                 can_pass_tdc: false,
             },
             ..EditorCam::default()
+        },
+        EnvironmentMapLight {
+            diffuse_map: asset_server.load("environment_maps/diffuse_rgb9e5_zstd.ktx2"),
+            specular_map: asset_server.load("environment_maps/specular_rgb9e5_zstd.ktx2"),
+            intensity: 500.0,
+            ..default()
         },
         Transform::from_xyz(-63.0, 15.0, 58.0).looking_at(Vec3::new(0.0, 10.0, 0.3), Vec3::Z),
     ));
@@ -115,31 +116,9 @@ pub fn setup(
     /*
     // Alternatively, to load an existing map:
     let mut map = commands.spawn(MapDefHandle(
-        _asset_server.load("mapdef/final.mapdef.ron"),
+        asset_server.load("mapdef/final.mapdef.ron"),
     ));
     // */
-    map.insert(Transform::default().with_rotation(
-        Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)
-            * Quat::from_rotation_y(std::f32::consts::FRAC_PI_2),
-    ))
-    .observe(
-        |trigger: Trigger<Pointer<Move>>,
-         mut commands: Commands,
-         inputs: Res<ButtonInput<KeyCode>>| {
-            if !inputs.pressed(KeyCode::KeyC) {
-                return;
-            }
-            let Some(position) = trigger.hit.position else {
-                return;
-            };
-            let Some(normal) = trigger.hit.normal else {
-                return;
-            };
-            commands.queue(SpawnRockCommand {
-                isometry: Isometry3d::new(position + normal * 3.0, Quat::default()),
-            });
-        },
-    );
 }
 
 /// Updates the rocks list then saves the [`MapDef`]s to a file.
@@ -199,6 +178,5 @@ pub fn update_rocks_and_export_map(
 pub fn ui_controls(mut ctx: EguiContexts) {
     bevy_egui::egui::Window::new("Control").show(ctx.ctx_mut(), |ui| {
         ui.label("Press 'E' to export the map");
-        ui.label("Press 'C' and move your cursor on the ground to spawn rocks");
     });
 }

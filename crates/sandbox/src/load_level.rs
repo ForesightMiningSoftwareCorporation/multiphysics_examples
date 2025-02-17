@@ -25,9 +25,6 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut map = commands.spawn(MapDefHandle(
         asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
     ));
-    // let mut map = commands.spawn(MapDefHandle(
-    //     asset_server.load("mapdef/1000_cubes.mapdef.ron"),
-    // ));
 
     map.insert((
         Transform::default().with_rotation(
@@ -35,25 +32,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
                 * Quat::from_rotation_y(std::f32::consts::FRAC_PI_2),
         ),
         CollisionGroups::new(Group::GROUP_2, Group::ALL),
-    ))
-    .observe(
-        |trigger: Trigger<Pointer<Move>>,
-         mut commands: Commands,
-         inputs: Res<ButtonInput<KeyCode>>| {
-            if !inputs.pressed(KeyCode::KeyC) {
-                return;
-            }
-            let Some(position) = trigger.hit.position else {
-                return;
-            };
-            let Some(normal) = trigger.hit.normal else {
-                return;
-            };
-            commands.queue(SpawnRockCommand {
-                isometry: Isometry3d::new(position + normal * 3.0, Quat::default()),
-            });
-        },
-    );
+    ));
 
     // Vehicles
 
@@ -177,6 +156,8 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     // Muck piles
+    // FIXME: This is not really useful anymore as `CountRocksInZone` doesn't support wgsparkl.
+    //        But this serves as a visual objective.
     commands.queue(SpawnMuckPileCommand {
         local_aabb: bevy::render::primitives::Aabb {
             center: Vec3A::new(0.0, 0.0, 0.5),
@@ -187,6 +168,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     // Camera, light
+    let diffuse_map = asset_server.load("environment_maps/diffuse_rgb9e5_zstd.ktx2");
     commands.spawn((
         Camera3d::default(),
         EditorCam {
@@ -196,6 +178,17 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             ..EditorCam::default()
         },
+        EnvironmentMapLight {
+            diffuse_map: diffuse_map.clone(),
+            specular_map: asset_server.load("environment_maps/specular_rgb9e5_zstd.ktx2"),
+            intensity: 500.0,
+            ..default()
+        },
+        bevy_editor_cam::extensions::independent_skybox::IndependentSkybox::new(
+            diffuse_map,
+            1000.0,
+            default(),
+        ),
         Transform::from_translation(spawn_point + Vec3::new(-63.0, 15.0, 58.0))
             .looking_at(spawn_point + Vec3::new(0.0, 10.0, 0.3), Vec3::Z),
     ));
