@@ -127,22 +127,6 @@ pub fn init_rapier_configuration(
         force_update_from_transform_changes: true,
         ..RapierConfiguration::new(1f32)
     };
-
-    // let mut rapier_context = RapierContext::default();
-    // rapier_context.integration_parameters = IntegrationParameters {
-    //     length_unit: 1f32,
-    //     ..default()
-    // };
-    // commands.spawn((
-    //     Name::new("Rapier Context"),
-    //     rapier_context,
-    //     RapierConfiguration {
-    //         gravity: -Vec3::Z * 9.81,
-    //         force_update_from_transform_changes: true,
-    //         ..RapierConfiguration::new(1f32)
-    //     },
-    //     DefaultRapierContext,
-    // ));
 }
 
 pub fn add_scoopable_to_rocks(

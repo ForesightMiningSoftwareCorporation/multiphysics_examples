@@ -5,30 +5,25 @@ use bevy::{
         AssetLoader, AsyncWriteExt, LoadContext, RenderAssetUsages,
     },
     prelude::*,
-    render::mesh::{Indices, VertexAttributeValues},
+    render::mesh::Indices,
 };
 use bevy_rapier3d::dynamics::RigidBody;
-use bevy_rapier3d::{
-    prelude::{Collider, ContactSkin},
-    rapier::prelude::HeightField,
-};
+use bevy_rapier3d::{prelude::Collider, rapier::prelude::HeightField};
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
 use std::{fs::File, io::Write, path::Path};
 use thiserror::Error;
 
-use crate::{
-    global_assets::GlobalAssets,
-    rock::{Rock, SpawnRockCommand},
-};
+use crate::{global_assets::GlobalAssets, rock::Rock};
 use bevy_wgsparkl::components::MpmCouplingEnabled;
 
 #[derive(Debug, Component, Reflect)]
 pub struct MapDefHandle(pub Handle<MapDef>);
 
+/// FIXME: Currently not used, we should remove that.
 /// Tunnelling can happen with heightfields, resulting in rocks falling through the ground.
 /// To fix that, we can either add a context skin, or use continuous collision detection (see `bevy_rapier3d::SoftCcd`).
-pub const CONTACT_SKIN: f32 = 1.0;
+pub const CONTACT_SKIN: f32 = 0.0;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct RockData {
@@ -179,10 +174,7 @@ pub fn on_map_def_changed(
     }
 }
 
-/// Actually initializes the map and creates the rock entities.
-///
-/// FIXME: ⚠️ it supports only 1 map, as it will remove all existing rocks.
-/// A path to fixing that would be to use hierarchy or other ways to group rocks with their map.
+/// Actually initializes the map.
 pub fn on_map_def_handle_changed(
     mut commands: Commands,
     mut map_def_instances: Query<
@@ -204,15 +196,6 @@ pub fn on_map_def_handle_changed(
         for e in existing_rocks.iter() {
             commands.entity(e).despawn();
         }
-
-        // // Create new rocks
-        // for (i, r) in map_def.rocks.iter().enumerate() {
-        //     // TODO: pass metadata / grade if needed.
-        //     // An easy optimization is to not spawn all rocks, only a fraction, but show them at a bigger size.
-        //     commands.queue(SpawnRockCommand {
-        //         isometry: Isometry3d::from_translation(r.translation),
-        //     });
-        // }
 
         // Create new invisible walls
         commands.entity(e).with_children(|child_builder| {
@@ -313,7 +296,7 @@ pub fn on_map_def_handle_changed(
             MeshMaterial3d(global_assets.ground_material.clone_weak()),
             RigidBody::Fixed,
             collider_ground,
-            ContactSkin(CONTACT_SKIN),
+            //ContactSkin(CONTACT_SKIN),
             MpmCouplingEnabled,
         ));
     }

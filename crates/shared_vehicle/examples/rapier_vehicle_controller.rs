@@ -1,22 +1,18 @@
 //! isolated example of a vehicle controller. it's taking the same parameters as the truck in the sandbox.
 
 use bevy::prelude::*;
-use bevy_rapier3d::{
-    prelude::*,
-    rapier::{control::WheelTuning, prelude::IntegrationParameters},
-    render::RapierDebugRenderPlugin,
-};
+use bevy_rapier3d::prelude::WriteRapierContext;
+use bevy_rapier3d::{prelude::*, rapier::control::WheelTuning, render::RapierDebugRenderPlugin};
 use shared_vehicle::rapier_vehicle_controller::{VehicleController, VehicleControllerParameters};
 
 fn main() {
     let mut app = App::new();
     app.add_plugins((
         DefaultPlugins,
-        bevy_rapier3d::prelude::RapierPhysicsPlugin::<NoUserData>::default()
-            .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
+        bevy_rapier3d::prelude::RapierPhysicsPlugin::<NoUserData>::default(),
         RapierDebugRenderPlugin::default(),
     ));
-    app.add_systems(Startup, (init_rapier_context, setup));
+    app.add_systems(Startup, (init_rapier_configuration, setup));
     app.add_systems(
         Update,
         (
@@ -29,22 +25,15 @@ fn main() {
     app.run();
 }
 
-pub fn init_rapier_context(mut commands: Commands) {
-    let mut rapier_context = RapierContext::default();
-    rapier_context.integration_parameters = IntegrationParameters {
-        length_unit: 1f32,
-        ..default()
+pub fn init_rapier_configuration(
+    mut config: Query<&mut RapierConfiguration, With<DefaultRapierContext>>,
+) {
+    let mut config = config.single_mut();
+    *config = RapierConfiguration {
+        gravity: -Vec3::Z * 9.81,
+        force_update_from_transform_changes: true,
+        ..RapierConfiguration::new(1f32)
     };
-    commands.spawn((
-        Name::new("Rapier Context"),
-        rapier_context,
-        RapierConfiguration {
-            gravity: -Vec3::Z * 9.81,
-            force_update_from_transform_changes: true,
-            ..RapierConfiguration::new(1f32)
-        },
-        DefaultRapierContext,
-    ));
 }
 
 fn setup(mut commands: Commands) {
@@ -55,7 +44,7 @@ fn setup(mut commands: Commands) {
 
     // Ground
     commands.spawn((
-        Collider::cuboid(100.0, 100.0, 1.0),
+        Collider::cuboid(50.0, 50.0, 1.0),
         Transform::from_translation(Vec3::Z - 1.5),
         RigidBody::Fixed,
     ));
@@ -122,10 +111,10 @@ pub fn update_vehicle_controller(
     time: Res<Time>,
     timestep_mode: Res<TimestepMode>,
     mut vehicles: Query<&mut VehicleController>,
-    mut context: WriteDefaultRapierContext,
+    mut context: WriteRapierContext,
 ) {
     for mut vehicle_controller in vehicles.iter_mut() {
-        let context = &mut *context;
+        let mut context = context.single_mut();
         // capping delta time to max_dt, or we'll issue a move command that is too big,
         // resulting in an excavator difficult to control.
         let dt = match *timestep_mode {
@@ -134,9 +123,9 @@ pub fn update_vehicle_controller(
         };
         vehicle_controller.update_vehicle(
             dt,
-            &mut context.bodies,
-            &context.colliders,
-            &context.query_pipeline,
+            &mut context.rigidbody_set.bodies,
+            &context.colliders.colliders,
+            &context.query_pipeline.query_pipeline,
         );
     }
 }

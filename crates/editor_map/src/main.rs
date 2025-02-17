@@ -8,7 +8,7 @@ use bevy::{
 };
 use bevy_editor_cam::prelude::*;
 use bevy_egui::EguiContexts;
-use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
+use bevy_rapier3d::prelude::*;
 use dotenvy::dotenv;
 use shared_map::{
     map_def::{MapDef, MapDefHandle, RockData},
@@ -22,15 +22,14 @@ fn main() {
     app.add_plugins((
         DefaultPlugins,
         MeshPickingPlugin,
-        RapierPhysicsPlugin::<NoUserData>::default()
-            .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
+        RapierPhysicsPlugin::<NoUserData>::default(),
         RapierDebugRenderPlugin::default(),
         DefaultEditorCamPlugins,
         shared_map::MapDefPlugin,
         bevy_egui::EguiPlugin,
     ));
 
-    app.add_systems(PreStartup, init_rapier_context);
+    app.add_systems(Startup, init_rapier_configuration);
     app.add_systems(Startup, setup);
     app.add_systems(
         Update,
@@ -44,21 +43,15 @@ fn main() {
     app.run();
 }
 
-pub fn init_rapier_context(mut commands: Commands) {
-    let mut rapier_context = RapierContext::default();
-    rapier_context.integration_parameters = IntegrationParameters {
-        length_unit: 1f32,
-        ..default()
+pub fn init_rapier_configuration(
+    mut config: Query<&mut RapierConfiguration, With<DefaultRapierContext>>,
+) {
+    let mut config = config.single_mut();
+    *config = RapierConfiguration {
+        gravity: -Vec3::Z * 9.81,
+        force_update_from_transform_changes: true,
+        ..RapierConfiguration::new(1f32)
     };
-    commands.spawn((
-        Name::new("Rapier Context"),
-        rapier_context,
-        RapierConfiguration {
-            gravity: -Vec3::Z * 9.81,
-            ..RapierConfiguration::new(1f32)
-        },
-        DefaultRapierContext,
-    ));
 }
 
 pub fn setup(

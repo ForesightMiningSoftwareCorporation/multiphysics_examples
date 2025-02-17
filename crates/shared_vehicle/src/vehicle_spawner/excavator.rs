@@ -10,9 +10,8 @@ use crate::{
     look_at::LookAt,
 };
 use bevy::{prelude::*, utils::hashbrown::HashMap};
-use bevy_rapier3d::dynamics::Velocity;
-use bevy_rapier3d::parry::bounding_volume::{Aabb, BoundingVolume};
-use bevy_rapier3d::parry::shape::{SharedShape, Triangle};
+use bevy_rapier3d::parry::bounding_volume::Aabb;
+use bevy_rapier3d::parry::shape::SharedShape;
 use bevy_rapier3d::{
     prelude::{
         Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Group,
@@ -94,7 +93,7 @@ pub fn spawn_excavator<'a>(
         child_builder.spawn((
             Name::new("excavator model"),
             SceneRoot(excavator.clone()),
-            Transform::from_translation(Vec3::new(0.0, 0.0, -1.35f32))
+            Transform::from_translation(Vec3::new(0.0, 0.0, -0.75f32))
                 .with_scale(Vec3::new(0.4, 0.4, 0.4))
                 .with_rotation(
                     // Look back
@@ -114,7 +113,6 @@ pub fn spawn_excavator<'a>(
             q_children: Query<&Children>,
             q_parents: Query<&Parent>,
             q_names: Query<&Name>,
-            q_collider: Query<&Collider>,
             //
             // add flavor lookat parts
             assets: Res<Assets<ExcavatorDef>>,
@@ -154,7 +152,7 @@ pub fn spawn_excavator<'a>(
                         // This is the hard-coded AABB of the shovel bucket.
                         let aabb = Aabb { mins: [-35.630722, 297.40216, 449.29544].into(), maxs: [335.56757, 608.67285, 705.7152].into() };
 
-                        let (mut vtx, mut idx) = aabb.to_trimesh();
+                        let (vtx, mut idx) = aabb.to_trimesh();
 
                         // This super ugly piece removes faces of the aabb from the jaw or base
                         // to approximate their original shapes.

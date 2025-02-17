@@ -8,7 +8,7 @@ use bevy::{
 };
 use bevy_editor_cam::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_rapier3d::{prelude::*, rapier::prelude::IntegrationParameters};
+use bevy_rapier3d::prelude::*;
 use dotenvy::dotenv;
 use shared_vehicle::{
     accessory_controls::{
@@ -25,8 +25,7 @@ fn main() {
     app.add_plugins((
         DefaultPlugins,
         MeshPickingPlugin,
-        RapierPhysicsPlugin::<NoUserData>::default()
-            .with_custom_initialization(RapierContextInitialization::NoAutomaticRapierContext),
+        RapierPhysicsPlugin::<NoUserData>::default(),
         RapierDebugRenderPlugin::default(),
         DefaultEditorCamPlugins,
         AccessoryControlsPlugin,
@@ -34,7 +33,7 @@ fn main() {
         WorldInspectorPlugin::new(),
     ));
 
-    app.add_systems(PreStartup, init_rapier_context);
+    app.add_systems(Startup, init_rapier_configuration);
     app.add_systems(Startup, setup);
     app.add_systems(
         Update,
@@ -46,21 +45,15 @@ fn main() {
     app.run();
 }
 
-pub fn init_rapier_context(mut commands: Commands) {
-    let mut rapier_context = RapierContext::default();
-    rapier_context.integration_parameters = IntegrationParameters {
-        length_unit: 1f32,
-        ..default()
+pub fn init_rapier_configuration(
+    mut config: Query<&mut RapierConfiguration, With<DefaultRapierContext>>,
+) {
+    let mut config = config.single_mut();
+    *config = RapierConfiguration {
+        gravity: -Vec3::Z * 9.81,
+        force_update_from_transform_changes: true,
+        ..RapierConfiguration::new(1f32)
     };
-    commands.spawn((
-        Name::new("Rapier Context"),
-        rapier_context,
-        RapierConfiguration {
-            gravity: -Vec3::Z * 9.81,
-            ..RapierConfiguration::new(1f32)
-        },
-        DefaultRapierContext,
-    ));
 }
 
 pub fn setup(
@@ -135,10 +128,15 @@ pub fn setup(
         ExcavatorDefHandle(asset_server.load("vehicledef/excavator.excavatordef.ron"));
     // */
     // spawn a vehicle for reference and testing
-    vehicle_spawner::spawn(VehicleType::Excavator, &mut commands, &asset_server)
-        .insert(excavator_def)
-        .insert(ExcavatorControls::default())
-        .insert(RigidBody::Fixed);
+    vehicle_spawner::spawn(
+        VehicleType::Excavator,
+        &mut commands,
+        &asset_server,
+        Transform::default(),
+    )
+    .insert(excavator_def)
+    .insert(ExcavatorControls::default())
+    .insert(RigidBody::Fixed);
 }
 
 /// Saves the [`ExcavatorDef`]s to a file.

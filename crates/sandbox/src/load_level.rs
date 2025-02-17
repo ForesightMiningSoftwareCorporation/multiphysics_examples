@@ -55,24 +55,6 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     );
 
-    // Muck piles
-    commands.queue(SpawnMuckPileCommand {
-        position: Isometry3d::from_translation(Vec3::new(-40.0, 40.0, 0.01)),
-        local_aabb: bevy::render::primitives::Aabb {
-            center: Vec3A::new(0.0, 0.0, 0.5),
-            half_extents: Vec3A::new(5.0, 5.0, 5.0),
-        },
-        name: "Waste pile".to_string(),
-    });
-    commands.queue(SpawnMuckPileCommand {
-        local_aabb: bevy::render::primitives::Aabb {
-            center: Vec3A::new(0.0, 0.0, 0.5),
-            half_extents: Vec3A::new(5.0, 5.0, 5.0),
-        },
-        name: "Good pile".to_string(),
-        position: Isometry3d::from_translation(Vec3::new(40.0, 40.0, 0.01)),
-    });
-
     // Vehicles
 
     let wheel_tuning = WheelTuning {
@@ -89,11 +71,12 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_wheel_positions_for_half_size(Vec3::new(0.5, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
         .with_wheel_tuning(wheel_tuning)
         .with_crawler(true);
-    bulldozer_parameters.engine_force *= scale * scale;
+    bulldozer_parameters.wheel_radius *= scale;
+    bulldozer_parameters.engine_force = 50.0 * scale * scale;
     bulldozer_parameters
         .wheel_brake
         .iter_mut()
-        .for_each(|w| *w = 2.0 * scale);
+        .for_each(|w| *w = 15.0 * scale);
     bulldozer_parameters
         .wheel_positions
         .iter_mut()
@@ -147,9 +130,9 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut truck_controller_parameters = VehicleControllerParameters {
         wheel_tuning,
         // truck has more mass and uses only 2 power wheels so more powerful wheels.
-        engine_force: 320f32 * scale * scale,
+        engine_force: 340f32 * scale * scale,
         // rear wheel is always braking
-        wheel_brake: [2f32 * scale * scale, 0.5f32 * scale * scale],
+        wheel_brake: [2.5f32 * scale * scale, 0.6f32 * scale * scale],
         wheel_positions: [
             Vec3::new(-1.3, 1.6, 0.3 - CONTACT_SKIN),
             Vec3::new(1.3, 1.6, 0.3 - CONTACT_SKIN),
@@ -192,6 +175,17 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         );
     });
 
+    // Muck piles
+    commands.queue(SpawnMuckPileCommand {
+        local_aabb: bevy::render::primitives::Aabb {
+            center: Vec3A::new(0.0, 0.0, 0.5),
+            half_extents: Vec3A::new(15.0, 15.0, 15.0),
+        },
+        name: "Muck Pile".to_string(),
+        position: Isometry3d::from_translation(spawn_point + Vec3::new(-60.0, 0.0, 0.01 - 6.0)),
+    });
+
+    // Camera, light
     commands.spawn((
         Camera3d::default(),
         EditorCam {

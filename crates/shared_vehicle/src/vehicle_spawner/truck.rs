@@ -8,7 +8,6 @@ use super::{
 };
 use crate::accessory_controls::truck::controls::TruckMeshMapping;
 use bevy::{prelude::*, utils::HashMap};
-use bevy_rapier3d::dynamics::Velocity;
 use bevy_rapier3d::{
     prelude::{
         Collider, ColliderMassProperties, CollisionGroups, ComputedColliderShape, Friction, Group,
@@ -76,7 +75,7 @@ pub fn spawn_truck<'a>(
         .with_child((
             Name::new("truck model"),
             SceneRoot(truck.clone()),
-            Transform::from_translation(Vec3::new(0f32, 0f32, -0.95f32))
+            Transform::from_translation(Vec3::new(0f32, 0f32, -0.35f32))
                 .with_scale(Vec3::new(0.005, 0.005, 0.005))
                 .with_rotation(
                     // Look back then up

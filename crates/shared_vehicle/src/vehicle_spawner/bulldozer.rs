@@ -19,7 +19,7 @@ pub fn spawn_bulldozer<'a>(
     // Bevy caches the assets so we can just load without any additional bookkeeping.
     let bulldozer = assets
         .load(GltfAssetLabel::Scene(0).from_asset("private/Bulldozer 3D Model/Bulldozer.glb"));
-    let chassis_dimensions = Vec3::new(1f32, 2f32, 0.4f32);
+    let chassis_dimensions = Vec3::new(1f32, 1.5f32, 0.2f32);
     let chassis_collider = Collider::cuboid(
         chassis_dimensions.x,
         chassis_dimensions.y,
@@ -33,9 +33,9 @@ pub fn spawn_bulldozer<'a>(
         chassis_collider,
         // mass is moved down, for a better adherence to the ground (also chains are heavier than the cabin)
         ColliderMassProperties::MassProperties(MassProperties {
-            local_center_of_mass: Vec3::new(0.0, 0.0, -2.0) * transform.scale,
+            local_center_of_mass: Vec3::new(0.0, 0.0, -1.0) * transform.scale,
             ..MassProperties::from_rapier(rapier::prelude::MassProperties::from_cuboid(
-                0.8f32,
+                2.8f32,
                 (chassis_dimensions * transform.scale).into(),
             ))
         }),
@@ -44,8 +44,8 @@ pub fn spawn_bulldozer<'a>(
     // bulldozer front, to push rocks.
     entity.with_child((
         Name::new("bulldozer front"),
-        Transform::from_translation(Vec3::new(0.0, 0.0, -0.5)),
-        Collider::cuboid(1.5f32, 3.0f32, 1.2f32),
+        Transform::from_translation(Vec3::new(0.0, 1.0, -0.5)),
+        Collider::cuboid(1.0f32, 2f32, 1.2f32),
         // no collision with ground
         CollisionGroups::new(Group::all(), !Group::GROUP_2),
         // mass shouldn't impact too much or the vehicle will just fall towards its front.
@@ -63,7 +63,7 @@ pub fn spawn_bulldozer<'a>(
     entity.with_child((
         Name::new("bulldozer model"),
         SceneRoot(bulldozer.clone()),
-        Transform::from_translation(Vec3::new(4.4, 0.0, 0.05))
+        Transform::from_translation(Vec3::new(4.4, 0.0, 0.75))
             .with_rotation(
                 Quat::from_axis_angle(Vec3::Z, TAU / 4.0)
                     * Quat::from_axis_angle(Vec3::X, TAU / 4.0),
