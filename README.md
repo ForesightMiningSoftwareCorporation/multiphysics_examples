@@ -45,7 +45,7 @@ Those can't be checked in because of their licences:
 
 The project is set up with [bevy's recommended optimizations](https://bevyengine.org/learn/quick-start/getting-started/setup/#compile-with-performance-optimizations), multi_threaded feature and hot reloading.
 
-A minimal CI from https://github.com/TheBevyFlock/bevy_new_2d, check out their other release scripts!
+A minimal CI from <https://github.com/TheBevyFlock/bevy_new_2d>, check out their other release scripts!
 
 ## How to navigate this project ?
 
@@ -96,6 +96,16 @@ The vehicle accessories work by finding the "control" bone and the mesh of the a
 
 [editor_vehicle](crates/editor_vehicle) only loads a vehicle, it can be helpful to verify a model loads correctly and inspect it with bevy_editor_egui.
 
+### bevy_wgsparkl
+
+Integrates <https://github.com/dimforge/wgsparkl> into bevy.
+
+Known limitations:
+
+- Doesn't support scene queries (you'd have to reach for gpu data)
+- Only 1 upload supported: dynamic shape addition is not yet supported.
+- debug mode not supported: launch the app with `--release`
+
 ### Sandbox
 
 The sandbox uses the "shared" modules to create a scenario: load a map, load vehicles.
@@ -103,7 +113,7 @@ The sandbox uses the "shared" modules to create a scenario: load a map, load veh
 Additionally, more gameplay features are added:
 
 - input is integrated to loaded vehicles
-- visible muck piles are added here and there, and invisible ones are added to vehicles.
+- a loading screen
 
 ## Collision groups
 
