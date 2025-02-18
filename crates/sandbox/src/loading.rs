@@ -69,7 +69,6 @@ pub struct Rotate;
 
 pub const ID_ROOT: &str = "root";
 pub const ID_SPLASH: &str = "splash";
-pub const ID_LOADING_TEXT: &str = "loading_text";
 
 /// An extension trait for spawning UI containers.
 pub trait Containers {
@@ -97,6 +96,7 @@ impl Containers for Commands<'_, '_> {
 }
 
 fn spawn_loading_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn((Camera2d, StateScoped(Screen::Loading)));
     commands
         .ui_root()
         .insert((
@@ -116,20 +116,6 @@ fn spawn_loading_screen(mut commands: Commands, asset_server: Res<AssetServer>) 
                 },
                 ImageNode::new(asset_server.load("loading/donut.png")),
                 Rotate,
-            ));
-            children.spawn((
-                Name::new("Label"),
-                LoadingMarker {
-                    id: ID_LOADING_TEXT.into(),
-                },
-                Text("Loading...".into()),
-                TextFont::from_font_size(24.0),
-                TextColor(LABEL_TEXT),
-                Node {
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                StateScoped(Screen::Loading),
             ));
         });
 }
@@ -243,10 +229,10 @@ fn apply_from_to_color_background(
     }
 }
 
-fn rotate(time: Res<Time>, mut to_update: Query<&mut Transform, With<Rotate>>) {
+fn rotate(mut to_update: Query<&mut Transform, With<Rotate>>) {
     for (mut transform) in to_update.iter_mut() {
-        transform.rotate(Quat::from_rotation_z(
-            90f32.to_radians() * time.delta_secs(),
-        ));
+        transform.rotate(Quat::from_rotation_z(90f32.to_radians() 
+        // Estimate fps, using time would lead to big rotations if loading hangs
+        * 1f32 / 60f32));
     }
 }
