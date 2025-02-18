@@ -5,26 +5,57 @@ use bevy_editor_cam::prelude::*;
 use bevy_math::Vec3A;
 use bevy_rapier3d::{prelude::*, rapier::control::WheelTuning};
 use shared_map::{
-    map_def::{MapDefHandle, CONTACT_SKIN},
+    map_def::{MapDef, MapDefHandle, CONTACT_SKIN},
     rock::SpawnRockCommand,
 };
 use shared_vehicle::{
     accessory_controls::{
         excavator::{
             controls::{ExcavatorControls, ExcavatorControlsMapping},
-            ExcavatorDefHandle,
+            ExcavatorDef, ExcavatorDefHandle,
         },
-        truck::{controls::TruckControls, TruckDefHandle},
+        truck::{controls::TruckControls, TruckDef, TruckDefHandle},
     },
     rapier_vehicle_controller::VehicleControllerParameters,
-    vehicle_spawner::{self, VehicleType},
+    vehicle_spawner::{
+        self, bulldozer::BULLDOZER_PATH, excavator::EXCAVATOR_PATH, truck::TRUCK_PATH, VehicleType,
+    },
 };
 
-pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
+#[derive(Resource, Debug, Reflect)]
+pub struct LevelResources {
+    pub map_def_handle: Handle<MapDef>,
+    pub excavator_def: Handle<ExcavatorDef>,
+    pub truck_def: Handle<TruckDef>,
+
+    pub bulldozer_model: Handle<Scene>,
+    pub excavator_model: Handle<Scene>,
+    pub truck_model: Handle<Scene>,
+
+    pub diffuse_map: Handle<Image>,
+    pub specular_map: Handle<Image>,
+}
+
+pub fn load_level_resources(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(LevelResources {
+        map_def_handle: asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
+        excavator_def: asset_server.load("vehicledef/excavator.excavatordef.ron"),
+        truck_def: asset_server.load("vehicledef/truck.truckdef.ron"),
+        diffuse_map: asset_server.load("environment_maps/diffuse_rgb9e5_zstd.ktx2"),
+        specular_map: asset_server.load("environment_maps/specular_rgb9e5_zstd.ktx2"),
+        bulldozer_model: asset_server.load(GltfAssetLabel::Scene(0).from_asset(BULLDOZER_PATH)),
+        excavator_model: asset_server.load(GltfAssetLabel::Scene(0).from_asset(EXCAVATOR_PATH)),
+        truck_model: asset_server.load(GltfAssetLabel::Scene(0).from_asset(TRUCK_PATH)),
+    });
+}
+
+pub fn spawn_level(
+    mut commands: Commands,
+    resources: Res<LevelResources>,
+    asset_server: Res<AssetServer>,
+) {
     // Ground
-    let mut map = commands.spawn(MapDefHandle(
-        asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
-    ));
+    let mut map = commands.spawn(MapDefHandle(resources.map_def_handle.clone()));
 
     map.insert((
         Transform::default().with_rotation(
@@ -77,8 +108,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         entity: Some(bulldozer_entity),
     });
 
-    let excavator_def =
-        ExcavatorDefHandle(asset_server.load("vehicledef/excavator.excavatordef.ron"));
+    let excavator_def = ExcavatorDefHandle(resources.excavator_def.clone());
     let mut excavator_parameters = VehicleControllerParameters::empty()
         .with_wheel_positions_for_half_size(Vec3::new(0.7, 1.0, 0.4), Vec3::Z * -CONTACT_SKIN)
         .with_wheel_tuning(wheel_tuning)
@@ -128,7 +158,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         .for_each(|w| {
             *w *= scale;
         });
-    let truck_def = TruckDefHandle(asset_server.load("vehicledef/truck.truckdef.ron"));
+    let truck_def = TruckDefHandle(resources.truck_def.clone());
     vehicle_spawner::spawn(
         VehicleType::Truck,
         &mut commands,
@@ -168,7 +198,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     // Camera, light
-    let diffuse_map = asset_server.load("environment_maps/diffuse_rgb9e5_zstd.ktx2");
+    let diffuse_map = resources.diffuse_map.clone();
     commands.spawn((
         Camera3d::default(),
         EditorCam {
@@ -180,7 +210,7 @@ pub fn spawn_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         EnvironmentMapLight {
             diffuse_map: diffuse_map.clone(),
-            specular_map: asset_server.load("environment_maps/specular_rgb9e5_zstd.ktx2"),
+            specular_map: resources.specular_map.clone(),
             intensity: 500.0,
             ..default()
         },

@@ -11,14 +11,15 @@ use bevy_wgsparkl::components::MpmCouplingEnabled;
 
 use super::VehicleType;
 
+pub const BULLDOZER_PATH: &str = "private/Bulldozer 3D Model/Bulldozer.glb";
+
 pub fn spawn_bulldozer<'a>(
     commands: &'a mut Commands,
     assets: &'a Res<AssetServer>,
     transform: Transform,
 ) -> EntityCommands<'a> {
     // Bevy caches the assets so we can just load without any additional bookkeeping.
-    let bulldozer = assets
-        .load(GltfAssetLabel::Scene(0).from_asset("private/Bulldozer 3D Model/Bulldozer.glb"));
+    let bulldozer = assets.load(GltfAssetLabel::Scene(0).from_asset(BULLDOZER_PATH));
     let chassis_dimensions = Vec3::new(1f32, 1.5f32, 0.2f32);
     let chassis_collider = Collider::cuboid(
         chassis_dimensions.x,

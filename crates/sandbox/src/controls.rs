@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
-use bevy_rapier3d::plugin::{DefaultRapierContext, ReadRapierContext};
-use bevy_rapier3d::prelude::{Velocity, WriteRapierContext};
-use bevy_rapier3d::rapier::dynamics::RigidBodyVelocity;
+use bevy_rapier3d::prelude::WriteRapierContext;
 use bevy_rapier3d::{
     plugin::TimestepMode,
     prelude::{Friction, RapierRigidBodyHandle},
@@ -18,6 +16,8 @@ use shared_vehicle::{
     rapier_vehicle_controller::{VehicleController, VehicleControllerParameters},
     vehicle_spawner::VehicleType,
 };
+
+use crate::loading::Gameplay;
 
 pub struct ControlsPlugin;
 
@@ -41,7 +41,10 @@ impl Plugin for ControlsPlugin {
                 update_truck_dump_friction,
             ),
         );
-        app.add_systems(Update, (ui_cycle_vehicles, ui_controls));
+        app.add_systems(
+            Update,
+            (ui_cycle_vehicles, ui_controls).run_if(in_state(Gameplay::Running)),
+        );
     }
 }
 

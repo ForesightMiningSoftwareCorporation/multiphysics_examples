@@ -6,14 +6,12 @@ use bevy::{
 };
 use bevy_editor_cam::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_rapier3d::{
-    prelude::*,
-    rapier::prelude::{DebugRenderPipeline, IntegrationParameters},
-};
+use bevy_rapier3d::{prelude::*, rapier::prelude::DebugRenderPipeline};
 use bevy_wgsparkl::instancing3d::INSTANCING_SHADER_HANDLE;
 use controls::ControlsPlugin;
 use dotenvy::dotenv;
-use load_level::add_muck_pile_for_excavator;
+use load_level::{add_muck_pile_for_excavator, load_level_resources};
+use loading::Screen;
 use shared_map::global_assets::{init_global_assets, GlobalAssets};
 use shared_map::rock::Rock;
 use shared_vehicle::{
@@ -21,14 +19,16 @@ use shared_vehicle::{
     rapier_vehicle_controller::debug::VehicleControllerDebugPlugin,
     vehicle_spawner::{self, VehicleSpawnerPlugin},
 };
+use timer_trigger::{TimerTrigger, TimerTriggerPlugin};
 use ui_gizmo_toggle::UiGizmoToggle;
-use vehicle_spawner::scoop::ScoopPlugin;
 
 pub mod controls;
 pub mod load_level;
+pub mod loading;
 pub mod mpm;
 pub mod muck_pile;
 pub mod stats_rocks;
+pub mod timer_trigger;
 pub mod ui_gizmo_toggle;
 
 fn main() {
@@ -59,6 +59,8 @@ fn main() {
         WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Escape)),
         UiGizmoToggle,
         bevy_wgsparkl::instancing3d::ParticlesMaterialPlugin,
+        loading::plugin,
+        TimerTriggerPlugin,
     ));
 
     load_internal_asset!(
@@ -83,15 +85,18 @@ fn main() {
         pipeline: debug_render_pipeline,
     });
 
-    app.add_systems(Startup, init_rapier_configuration);
     app.add_systems(
         Startup,
         (
+            init_rapier_configuration,
+            load_level_resources,
             init_global_assets.run_if(|res: Option<Res<GlobalAssets>>| res.is_none()),
-            load_level::spawn_level,
             bevy_wgsparkl::startup::setup_app,
-        )
-            .chain(),
+        ),
+    );
+    app.add_systems(
+        OnEnter(Screen::Gameplay),
+        (load_level::spawn_level,).chain(),
     );
 
     app.add_systems(Update, add_scoopable_to_rocks);

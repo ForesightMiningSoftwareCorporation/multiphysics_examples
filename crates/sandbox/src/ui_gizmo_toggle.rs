@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
+use crate::loading::Gameplay;
+
 pub struct UiGizmoToggle;
 
 impl Plugin for UiGizmoToggle {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, ui_toggle_gizmo);
+        app.add_systems(Update, ui_toggle_gizmo.run_if(in_state(Gameplay::Running)));
     }
 }
 

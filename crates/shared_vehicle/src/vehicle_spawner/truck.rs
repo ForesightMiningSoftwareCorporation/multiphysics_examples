@@ -17,12 +17,14 @@ use bevy_rapier3d::{
 };
 use bevy_wgsparkl::components::MpmCouplingEnabled;
 
+pub const TRUCK_PATH: &str = "private/truck/truck.gltf";
+
 pub fn spawn_truck<'a>(
     commands: &'a mut Commands,
     assets: &'a Res<AssetServer>,
     transform: Transform,
 ) -> EntityCommands<'a> {
-    let truck = assets.load(GltfAssetLabel::Scene(0).from_asset("private/truck/truck.gltf"));
+    let truck = assets.load(GltfAssetLabel::Scene(0).from_asset(TRUCK_PATH));
     let chassis_dimensions = Vec3::new(1.5f32, 2f32, 0.4f32);
     let mut entity = commands.spawn((
         Name::new("truck"),

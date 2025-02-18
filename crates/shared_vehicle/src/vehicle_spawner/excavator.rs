@@ -21,6 +21,8 @@ use bevy_rapier3d::{
 };
 use bevy_wgsparkl::components::MpmCouplingEnabled;
 
+pub const EXCAVATOR_PATH: &str = "private/excavator/excavator.gltf";
+
 pub fn spawn_excavator<'a>(
     commands: &'a mut Commands,
     assets: &'a Res<AssetServer>,
@@ -32,8 +34,7 @@ pub fn spawn_excavator<'a>(
         chassis_dimensions.y,
         chassis_dimensions.z,
     );
-    let excavator =
-        assets.load(GltfAssetLabel::Scene(0).from_asset("private/excavator/excavator.gltf"));
+    let excavator = assets.load(GltfAssetLabel::Scene(0).from_asset(EXCAVATOR_PATH));
     let mut entity = commands.spawn((
         Name::new("excavator"),
         VehicleType::Excavator,
