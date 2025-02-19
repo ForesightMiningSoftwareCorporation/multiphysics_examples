@@ -21,8 +21,9 @@ use wgsparkl3d::rapier::prelude::{ColliderBuilder, ColliderSet, RigidBodyBuilder
 use wgsparkl3d::{
     models::ElasticCoefficients,
     pipeline::MpmData,
-    solver::{Particle, ParticleMassProps, ParticlePhase, SimulationParams},
+    solver::{Particle, ParticlePhase, SimulationParams},
 };
+use wgsparkl3d::solver::ParticleDynamics;
 
 pub fn setup_mpm_particles(
     mut commands: Commands,
@@ -112,10 +113,10 @@ pub fn setup_mpm_particles(
             let subrock_size = subrock.extents();
             let volume = subrock_size.x * subrock_size.y * subrock_size.z;
             let density = 2700.0;
+            let radius = volume.cbrt() / 2.0;
             particles.push(Particle {
                 position: subrock.center().coords,
-                velocity: Vector3::zeros(),
-                volume: ParticleMassProps::new(density * volume, volume.cbrt() / 2.0),
+                dynamics: ParticleDynamics::with_density(radius, density),
                 model: ElasticCoefficients::from_young_modulus(10_000_000.0, 0.2),
                 plasticity: Some(DruckerPrager {
                     // TODO: tune these values.

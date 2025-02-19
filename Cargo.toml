@@ -17,7 +17,7 @@ wgebra = "0.2"
 wgparry3d = "0.2"
 wgrapier3d = "0.2"
 
-wgsparkl3d = { git = "https://github.com/dimforge/wgsparkl.git", rev = "f64d3911fa517ec53807d771d8e42aa876e04a38" }
+wgsparkl3d = { git = "https://github.com/dimforge/wgsparkl.git", rev = "5b3876c93cf4de52cb0d78f90cc6844e16c35074" }
 #wgsparkl3d = { path = "../wgsparkl/crates/wgsparkl3d" }
 
 [patch.crates-io]
@@ -29,10 +29,10 @@ encase = { git = "https://github.com/sebcrozet/encase.git", rev = "6755c1414c225
 parry3d = { git = "https://github.com/dimforge/parry.git", rev = "407fb449504dde7ba0a3d80a8de7e37ac991a77a" }
 bevy_rapier3d = { git = "https://github.com/dimforge/bevy_rapier.git", rev = "a4e9343cd75ce2be788280de2c21ed7efb9039b7" }
 
-wgcore = { git = "https://github.com/dimforge/wgmath.git", rev = "32b54c802be6040c5f003e7d3def4a33e4730d92" }
-wgebra = { git = "https://github.com/dimforge/wgmath.git", rev = "32b54c802be6040c5f003e7d3def4a33e4730d92" }
-wgparry3d = { git = "https://github.com/dimforge/wgmath.git", rev = "32b54c802be6040c5f003e7d3def4a33e4730d92" }
-wgrapier3d = { git = "https://github.com/dimforge/wgmath.git", rev = "32b54c802be6040c5f003e7d3def4a33e4730d92" }
+wgcore = { git = "https://github.com/dimforge/wgmath.git", rev = "db1fbf0f5e7693af512e47e20c5fc3457b2c3737" }
+wgebra = { git = "https://github.com/dimforge/wgmath.git", rev = "db1fbf0f5e7693af512e47e20c5fc3457b2c3737" }
+wgparry3d = { git = "https://github.com/dimforge/wgmath.git", rev = "db1fbf0f5e7693af512e47e20c5fc3457b2c3737" }
+wgrapier3d = { git = "https://github.com/dimforge/wgmath.git", rev = "db1fbf0f5e7693af512e47e20c5fc3457b2c3737" }
 
 #wgcore = { version = "0.2", path = "../wgmath/crates/wgcore" }
 #wgebra = { version = "0.2", path = "../wgmath/crates/wgebra" }

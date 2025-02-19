@@ -92,7 +92,7 @@ fn setup_particles_graphics(
         Color::srgb_u8(64, 41, 5),
         Color::srgb_u8(89, 58, 14),
     ];
-    let radius = physics.particles[0].volume.init_radius();
+    let radius = physics.particles[0].dynamics.init_radius;
     let cube = meshes.add(Cuboid {
         half_size: Vec3::splat(radius),
     });
