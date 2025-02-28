@@ -26,6 +26,14 @@ pub fn spawn_bulldozer<'a>(
         chassis_dimensions.y,
         chassis_dimensions.z,
     );
+
+    let parent = commands
+        .spawn((
+            Name::new("bulldozer scaler"),
+            //            Transform::from_scale(Vec3::splat(5f32)),
+            Transform::from_scale(Vec3::splat(1.2f32)),
+        ))
+        .id();
     let mut entity = commands.spawn((
         Name::new("bulldozer"),
         VehicleType::Bulldozer,
@@ -42,6 +50,7 @@ pub fn spawn_bulldozer<'a>(
         }),
         RigidBody::Dynamic,
     ));
+    entity.set_parent(parent);
     // bulldozer front, to push rocks.
     entity.with_child((
         Name::new("bulldozer front"),
@@ -71,6 +80,5 @@ pub fn spawn_bulldozer<'a>(
             )
             .with_scale(Vec3::new(0.8, 0.8, 0.5)),
     ));
-
     entity
 }
