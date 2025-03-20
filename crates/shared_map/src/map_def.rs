@@ -7,7 +7,10 @@ use bevy::{
     prelude::*,
     render::mesh::Indices,
 };
-use bevy_rapier3d::dynamics::RigidBody;
+use bevy_rapier3d::{
+    dynamics::RigidBody,
+    prelude::{CollisionGroups, Group},
+};
 use bevy_rapier3d::{prelude::Collider, rapier::prelude::HeightField};
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
@@ -32,6 +35,8 @@ pub struct RockData {
     pub metadata: u32,
 }
 
+#[derive(Debug, Clone, Component, Serialize, Deserialize, Reflect)]
+pub struct MapLoaded;
 #[derive(Debug, Clone, Default, Asset, Serialize, Deserialize, Reflect)]
 pub struct MapDef {
     pub vertices_width: usize,
@@ -40,6 +45,7 @@ pub struct MapDef {
     pub scale: Vec3,
     pub height_map: Vec<f32>,
     pub rocks: Vec<RockData>,
+    pub spawn_point: Option<Vec3>,
 }
 
 impl MapDef {
@@ -64,9 +70,15 @@ impl Hash for MapDef {
             scale,
             rocks,
             height_map,
+            spawn_point,
         } = self;
         vertices_width.hash(state);
         vertices_length.hash(state);
+        if let Some(spawn_point) = spawn_point {
+            spawn_point.x.to_bits().hash(state);
+            spawn_point.y.to_bits().hash(state);
+            spawn_point.z.to_bits().hash(state);
+        }
         scale.x.to_bits().hash(state);
         scale.y.to_bits().hash(state);
         scale.z.to_bits().hash(state);
@@ -190,12 +202,38 @@ pub fn on_map_def_handle_changed(
         let Some(map_def): Option<&MapDef> = map_defs.get(&map_def_handle.0) else {
             continue;
         };
+        trace!("updating map def: {:?}", e);
         // remove walls
         commands.entity(e).despawn_descendants();
         // Clear previous rocks
         for e in existing_rocks.iter() {
             commands.entity(e).despawn();
         }
+
+        let width = map_def.vertices_width;
+        let length = map_def.vertices_length;
+        let height = map_def.scale.y;
+        let collider_ground = Collider::heightfield(
+            map_def.height_map.clone(),
+            width,
+            length,
+            // `Collider::heightfield` uses Y-up, we've rotated it.
+            Vec3::new(map_def.scale.x, height, map_def.scale.z),
+        );
+        let height_field = collider_ground.as_heightfield().unwrap();
+        let mut mesh = heightfield_to_bevy_mesh(height_field.raw);
+        // // Bumping mesh vertices up to avoid seeing a gap between the ground and the rocks.
+        // if let VertexAttributeValues::Float32x3(values) =
+        //     mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION).unwrap()
+        // {
+        //     for pos in values {
+        //         pos[1] += CONTACT_SKIN;
+        //     }
+        // }
+        // Bumping the whole map down, so its top stays at z = 0.
+        // TODO: x and y (z in ron) seems inverted..?
+        transform.translation = Vec3::new(map_def.scale.z / 2.0, map_def.scale.x / 2.0, 0.0);
+        transform.translation.z = -CONTACT_SKIN;
 
         // Create new invisible walls
         commands.entity(e).with_children(|child_builder| {
@@ -251,44 +289,39 @@ pub fn on_map_def_handle_changed(
 
             // HACK: an invisible floor below the topography to catch particles passing in-between
             //       triangles.
-            let min_z = *map_def
+            let ground_height = 1f32;
+            let min_height = *map_def
                 .height_map
                 .iter()
                 .min_by(|a, b| a.partial_cmp(b).unwrap())
                 .unwrap();
-            let collider = Collider::cuboid(map_def.scale.x, 1.0, map_def.scale.z);
+            let collider = Collider::cuboid(map_def.scale.x, ground_height, map_def.scale.z);
             child_builder.spawn((
                 Name::new("floor bottom"),
                 collider,
-                Transform::from_translation(Vec3::new(0.0, 0.0, min_z)),
+                Transform::from_translation(Vec3::new(
+                    0.0,
+                    -min_height * map_def.scale.y - ground_height / 2f32,
+                    0.0,
+                )),
+                CollisionGroups::new(Group::GROUP_2, Group::ALL),
                 MpmCouplingEnabled,
             ));
+            if let Some(spawn_point) = map_def.spawn_point {
+                dbg!(transform.translation);
+                dbg!(transform.rotation);
+                dbg!(transform.scale);
+                dbg!(spawn_point);
+                child_builder.spawn((
+                    Mesh3d(global_assets.spawn_mesh.clone_weak()),
+                    MeshMaterial3d(global_assets.spawn_material.clone_weak()),
+                    Transform::from_translation(
+                        // cancel out the map's transform.
+                        transform.compute_affine().inverse().matrix3 * spawn_point,
+                    ),
+                ));
+            }
         });
-
-        let width = map_def.vertices_width;
-        let length = map_def.vertices_length;
-        let height = map_def.scale.y;
-        let collider_ground = Collider::heightfield(
-            map_def.height_map.clone(),
-            width,
-            length,
-            // `Collider::heightfield` uses Y-up, we've rotated it.
-            Vec3::new(map_def.scale.x, height, map_def.scale.z),
-        );
-        let height_field = collider_ground.as_heightfield().unwrap();
-        let mut mesh = heightfield_to_bevy_mesh(height_field.raw);
-        // // Bumping mesh vertices up to avoid seeing a gap between the ground and the rocks.
-        // if let VertexAttributeValues::Float32x3(values) =
-        //     mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION).unwrap()
-        // {
-        //     for pos in values {
-        //         pos[1] += CONTACT_SKIN;
-        //     }
-        // }
-        // Bumping the whole map down, so its top stays at z = 0.
-        // TODO: x and y (z in ron) seems inverted..?
-        transform.translation = Vec3::new(map_def.scale.z / 2.0, map_def.scale.x / 2.0, 0.0);
-        transform.translation.z = -CONTACT_SKIN;
         mesh.compute_normals();
         let mesh = meshes.add(mesh);
         commands.entity(e).insert((
@@ -298,6 +331,7 @@ pub fn on_map_def_handle_changed(
             collider_ground,
             //ContactSkin(CONTACT_SKIN),
             MpmCouplingEnabled,
+            MapLoaded,
         ));
     }
 }

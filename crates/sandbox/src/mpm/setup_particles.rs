@@ -9,7 +9,7 @@ use bevy_wgsparkl::resources::{AppState, PhysicsContext};
 use nalgebra::{point, RealField, Rotation3};
 use nalgebra::{vector, Similarity3, Vector3};
 use parry3d::bounding_volume::Aabb;
-use shared_map::map_def::{MapDef, MapDefHandle};
+use shared_map::map_def::{MapDef, MapDefHandle, MapLoaded};
 use wgebra::GpuSim3;
 use wgparry3d::parry::shape::{Cuboid, TriMesh};
 use wgrapier3d::dynamics::body::{BodyCoupling, BodyCouplingEntry};
@@ -18,12 +18,12 @@ use wgsparkl3d::models::DruckerPrager;
 use wgsparkl3d::rapier::dynamics::RigidBodySet;
 use wgsparkl3d::rapier::geometry::Ray;
 use wgsparkl3d::rapier::prelude::{ColliderBuilder, ColliderSet, RigidBodyBuilder};
+use wgsparkl3d::solver::ParticleDynamics;
 use wgsparkl3d::{
     models::ElasticCoefficients,
     pipeline::MpmData,
     solver::{Particle, ParticlePhase, SimulationParams},
 };
-use wgsparkl3d::solver::ParticleDynamics;
 
 pub fn setup_mpm_particles(
     mut commands: Commands,
@@ -31,7 +31,7 @@ pub fn setup_mpm_particles(
     mut app_state: ResMut<AppState>,
     rapier: ReadRapierContext,
     coupling: Query<&RapierColliderHandle, With<MpmCouplingEnabled>>,
-    map_defs_handles: Query<Ref<MapDefHandle>>,
+    map_defs_handles: Query<Ref<MapDefHandle>, With<MapLoaded>>,
     map_defs: Res<Assets<MapDef>>,
 ) {
     if rapier.rapier_context.get_single().is_err() {

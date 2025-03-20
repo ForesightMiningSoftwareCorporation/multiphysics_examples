@@ -38,7 +38,8 @@ pub struct LevelResources {
 
 pub fn load_level_resources(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(LevelResources {
-        map_def_handle: asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
+        //map_def_handle: asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron"),
+        map_def_handle: asset_server.load("mapdef/final.mapdef.ron"),
         excavator_def: asset_server.load("vehicledef/excavator.excavatordef.ron"),
         truck_def: asset_server.load("vehicledef/truck.truckdef.ron"),
         diffuse_map: asset_server.load("environment_maps/diffuse_rgb9e5_zstd.ktx2"),
@@ -54,6 +55,7 @@ pub fn spawn_level(
     resources: Res<LevelResources>,
     asset_server: Res<AssetServer>,
 ) {
+    let map_handle = resources.map_def_handle.clone();
     // Ground
     let mut map = commands.spawn(MapDefHandle(resources.map_def_handle.clone()));
 
@@ -64,7 +66,42 @@ pub fn spawn_level(
         ),
         CollisionGroups::new(Group::GROUP_2, Group::ALL),
     ));
+}
 
+pub fn setup_vehicles(
+    mut commands: Commands,
+    mut map_def_instances: Query<(Entity, &GlobalTransform, &Transform, &MapDefHandle)>,
+    resources: Res<LevelResources>,
+    asset_server: Res<AssetServer>,
+    map_defs: Res<Assets<MapDef>>,
+    mut initialized: Local<bool>,
+) {
+    for (e, t, tt, map_def_handle) in map_def_instances.iter_mut() {
+        let Some(map_def): Option<&MapDef> = map_defs.get(&map_def_handle.0) else {
+            continue;
+        };
+
+        if *initialized {
+            return;
+        }
+        spawn_vehicles(
+            commands.reborrow(),
+            &resources,
+            &asset_server,
+            dbg!(
+                map_def.spawn_point.unwrap_or(Vec3::new(0.0, 20.0, 24.0))
+                    + Vec3::new(map_def.scale.z / 2.0, map_def.scale.x / 2.0, 0.0)
+            ),
+        );
+        *initialized = true;
+    }
+}
+pub fn spawn_vehicles(
+    mut commands: Commands,
+    resources: &Res<LevelResources>,
+    asset_server: &Res<AssetServer>,
+    spawn_point: Vec3,
+) {
     // Vehicles
 
     let wheel_tuning = WheelTuning {
@@ -72,9 +109,6 @@ pub fn spawn_level(
         suspension_damping: 10.0,
         ..WheelTuning::default()
     };
-
-    // We'll spawn vehicles around this point.
-    let spawn_point = Vec3::new(170.0, 120.0, 24.0);
     // TODO: consider changing the engine speed (or mass of objects) depending on the chosen scale.
     //
     let scale = 2.5f32;

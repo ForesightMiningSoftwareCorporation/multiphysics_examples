@@ -51,7 +51,6 @@ pub fn init_rapier_configuration(
     let mut config = config.single_mut();
     *config = RapierConfiguration {
         gravity: -Vec3::Z * 9.81,
-        force_update_from_transform_changes: true,
         ..RapierConfiguration::new(1f32)
     };
 }

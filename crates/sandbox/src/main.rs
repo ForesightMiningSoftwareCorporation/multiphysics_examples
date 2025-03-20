@@ -105,6 +105,7 @@ fn main() {
     app.add_systems(
         Update,
         (
+            load_level::setup_vehicles,
             crate::mpm::setup_mpm_particles,
             bevy_wgsparkl::startup::setup_graphics,
         )
@@ -128,7 +129,6 @@ pub fn init_rapier_configuration(
     let mut config = config.single_mut();
     *config = RapierConfiguration {
         gravity: -Vec3::Z * 9.81,
-        force_update_from_transform_changes: true,
         ..RapierConfiguration::new(1f32)
     };
 }

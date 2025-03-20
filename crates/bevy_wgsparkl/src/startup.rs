@@ -83,6 +83,9 @@ fn setup_particles_graphics(
     physics: &PhysicsContext,
     meshes: &mut Assets<Mesh>,
 ) {
+    if physics.particles.is_empty() {
+        return;
+    }
     let device = device.wgpu_device();
     let colors = [
         Color::srgb_u8(234, 208, 168),
@@ -122,7 +125,8 @@ fn setup_particles_graphics(
     let num_instances = instances.len();
     commands.spawn((
         Mesh3d(cube),
-        SpatialBundle::INHERITED_IDENTITY,
+        Visibility::default(),
+        Transform::default(),
         InstanceMaterialData {
             data: instances,
             buffer: InstanceBuffer {

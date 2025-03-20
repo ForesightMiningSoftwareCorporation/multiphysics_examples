@@ -4,6 +4,8 @@ use bevy::{color::palettes, prelude::*};
 #[derive(Debug, Default, Clone, Resource, Reflect)]
 pub struct GlobalAssets {
     pub ground_material: Handle<StandardMaterial>,
+    pub spawn_material: Handle<StandardMaterial>,
+    pub spawn_mesh: Handle<Mesh>,
     pub rock_material: Handle<StandardMaterial>,
     pub rock_mesh: Handle<Mesh>,
     pub rock_half_size: f32,
@@ -19,6 +21,8 @@ pub fn init_global_assets(
     let rock_half_size = 0.6;
     let global_assets = GlobalAssets {
         ground_material: materials.add(Color::WHITE),
+        spawn_material: materials.add(Color::from(palettes::css::GREEN)),
+        spawn_mesh: meshes.add(Sphere::default().mesh().ico(5).unwrap()),
         rock_material: materials.add(Color::from(palettes::css::DARK_GRAY)),
         rock_mesh: meshes.add(Cuboid::new(
             rock_half_size * 2f32,

@@ -13,6 +13,8 @@ bevy = { version = "0.15", features = [
     # see https://bevyengine.org/learn/quick-start/getting-started/setup/#enable-fast-compiles-optional
     "dynamic_linking",
     "serialize",
+    # for wgsparkl
+    "shader_format_glsl",
 ] }
 bevy_egui = "0.32"
 bevy-inspector-egui = "0.29"

@@ -12,10 +12,13 @@ bevy = { version = "0.15", features = [
     # Optional for iteration times,
     # see https://bevyengine.org/learn/quick-start/getting-started/setup/#enable-fast-compiles-optional
     "dynamic_linking",
+    "shader_format_glsl",
 ] }
+wgpu = { version = "23", features = ["naga-ir"] }
 bevy_editor_cam = "0.5.0"
 bevy_rapier3d = "0.28"
 bevy_egui = "0.32"
+bevy-inspector-egui = "0.29"
 
 # inner crates
 

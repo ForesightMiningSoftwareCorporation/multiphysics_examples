@@ -1,7 +1,7 @@
 (
     vertices_width: 50,
     vertices_length: 50,
-    scale: (100.0, 10.0, 100.0),
+    scale: (200.0, 60.0, 200.0),
     height_map: [
         0.0,
         0.0,

@@ -8,6 +8,7 @@ use bevy::{
 };
 use bevy_editor_cam::prelude::*;
 use bevy_egui::EguiContexts;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier3d::prelude::*;
 use dotenvy::dotenv;
 use shared_map::{
@@ -27,6 +28,7 @@ fn main() {
         DefaultEditorCamPlugins,
         shared_map::MapDefPlugin,
         bevy_egui::EguiPlugin,
+        WorldInspectorPlugin::new(),
     ));
 
     app.add_systems(Startup, init_rapier_configuration);
@@ -35,7 +37,7 @@ fn main() {
         Update,
         update_rocks_and_export_map.run_if(input_just_pressed(KeyCode::KeyE)),
     );
-    app.add_systems(Update, ui_controls);
+    app.add_systems(Update, (on_map_def_handle_changed, ui_controls));
     app.run();
 }
 
@@ -45,7 +47,6 @@ pub fn init_rapier_configuration(
     let mut config = config.single_mut();
     *config = RapierConfiguration {
         gravity: -Vec3::Z * 9.81,
-        force_update_from_transform_changes: true,
         ..RapierConfiguration::new(1f32)
     };
 }
@@ -84,41 +85,75 @@ pub fn setup(
 
     // Ground
 
-    // /*
+    /*
     // Create a ground procedurally ; hot reloading doesn't work this way:
     // you'd have to remap the handle to reference the exported file, rather than the in-memory asset.
     let width = 50;
     let length = 50;
     let height = 10f32;
-    let mut map = commands.spawn(MapDefHandle(
-        _map_def.add(MapDef {
-            vertices_width: width,
-            vertices_length: length,
-            scale: Vec3::new(width as f32, height, length as f32),
-            height_map: (0..(width * length))
-                .map(|i| {
-                    let i = i as f32;
-                    let length = length as f32;
-                    let x = i % width as f32;
-                    let y = i / width as f32;
-                    let noise =
-                        ((x * x) / (length * 10f32)).sin() * ((y * y) / (length * 10f32)).cos();
-                    // make a step at half x
-                    let noise = noise / 2f32;
-                    let step = if x > (length / 2f32) { 0.5 } else { 0f32 };
-                    noise * step + step
-                })
-                .collect::<Vec<_>>(),
-            rocks: vec![],
-        }),
+    let mut map = commands.spawn((
+        Transform::from_rotation(Quat::from_axis_angle(Vec3::X, 90f32.to_radians())),
+        MapDefHandle(
+            _map_def.add(MapDef {
+                vertices_width: width,
+                vertices_length: length,
+                scale: Vec3::new(width as f32, height, length as f32),
+                height_map: (0..(width * length))
+                    .map(|i| {
+                        let i = i as f32;
+                        let length = length as f32;
+                        let x = i % width as f32;
+                        let y = i / width as f32;
+                        let noise =
+                            ((x * x) / (length * 10f32)).sin() * ((y * y) / (length * 10f32)).cos();
+                        // make a step at half x
+                        let noise = noise / 2f32;
+                        let step = if x > (length / 2f32) { 0.5 } else { 0f32 };
+                        noise * step + step
+                    })
+                    .collect::<Vec<_>>(),
+                rocks: vec![],
+                spawn_points: vec![],
+            }),
+        ),
     ));
     // */
-    /*
+    // /*
     // Alternatively, to load an existing map:
-    let mut map = commands.spawn(MapDefHandle(
-        asset_server.load("mapdef/final.mapdef.ron"),
+    let mut map = commands.spawn((
+        Transform::default().with_rotation(
+            Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)
+                * Quat::from_rotation_y(std::f32::consts::FRAC_PI_2),
+        ),
+        // Transform::from_rotation(
+        //     Quat::from_axis_angle(Vec3::X, 90f32.to_radians())
+        //         * Quat::from_axis_angle(Vec3::Y, 90f32.to_radians()),
+        // ),
+        MapDefHandle(asset_server.load("mapdef/final.mapdef.ron")),
+        //MapDefHandle(asset_server.load("private/Sim data/transformed/imported_cubes.mapdef.ron")),
     ));
     // */
+    map.observe(
+        |trigger: Trigger<Pointer<Move>>,
+
+         mut commands: Commands,
+
+         inputs: Res<ButtonInput<KeyCode>>| {
+            if !inputs.pressed(KeyCode::KeyC) {
+                return;
+            }
+
+            let Some(position) = trigger.hit.position else {
+                return;
+            };
+            let Some(normal) = trigger.hit.normal else {
+                return;
+            };
+            commands.queue(SpawnRockCommand {
+                isometry: Isometry3d::new(Vec3::from(position + normal * 3.0), Quat::default()),
+            });
+        },
+    );
 }
 
 /// Updates the rocks list then saves the [`MapDef`]s to a file.
@@ -179,4 +214,27 @@ pub fn ui_controls(mut ctx: EguiContexts) {
     bevy_egui::egui::Window::new("Control").show(ctx.ctx_mut(), |ui| {
         ui.label("Press 'E' to export the map");
     });
+}
+
+pub fn on_map_def_handle_changed(
+    mut commands: Commands,
+    mut map_def_instances: Query<(Entity, &MapDefHandle), Changed<MapDefHandle>>,
+    mut rocks: Query<Entity, With<Rock>>,
+    map_defs: Res<Assets<MapDef>>,
+) {
+    for (e, map_def_handle) in map_def_instances.iter_mut() {
+        let Some(map_def): Option<&MapDef> = map_defs.get(&map_def_handle.0) else {
+            continue;
+        };
+        // remove walls
+        commands.entity(e).despawn_descendants();
+        for e in rocks.iter() {
+            commands.entity(e).despawn();
+        }
+        for r in map_def.rocks.iter() {
+            commands.queue(SpawnRockCommand {
+                isometry: Isometry3d::new(r.translation, Quat::default()),
+            });
+        }
+    }
 }
